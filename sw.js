@@ -1,7 +1,7 @@
 // オフラインでも開けるように、アプリの部品だけをキャッシュする。
 // 書いた内容はここでは一切扱わない（端末の localStorage にのみ保存）。
-const VERSION = 'tane-v7';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+const VERSION = 'tane-v8';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
