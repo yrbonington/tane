@@ -487,6 +487,9 @@ body{background:var(--paper)}
 .copy-fallback-panel textarea{min-height:170px;background:var(--paper)}
 .copy-fallback-panel button{align-self:flex-end;min-width:94px}
 @media(max-width:380px){.seed-ai-shortcut .btn{width:100%}}
+.ai-provider-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%}
+.ai-provider-links .btn{display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;white-space:normal;text-align:center;border-radius:14px;padding:10px 8px}
+.seed-ai-shortcut .ai-provider-links{flex-basis:100%}
 </style>
 </head>
 <body>
@@ -643,10 +646,14 @@ function renderTree(m){
       <div class="welcome-panel choice-panel"><h4>どうやってタネ探しを始めますか？</h4>
         <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
         <div class="seed-ai-actions" id="themeAIActions" hidden>
-          <p class="muted">① プロンプトをコピー　② AIで対話　③「保存」と伝えて出たJSONをタネ帳に取り込む</p>
+          <p class="muted">① プロンプトをコピー　② ChatGPTまたはClaudeで対話　③「保存」と伝えて出たJSONを取り込む</p>
           <button class="btn pri big" id="themeCopyNew">新しいテーマ用プロンプトをコピー</button>
           ${S.nodes.size?'<button class="btn big" id="themeCopyData">今のタネ帳も一緒にコピー</button>':''}
-          <a class="btn big" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeで対話を始める ↗</a>
+          <p class="muted">コピーしたら、使いたいAIを開いて貼り付けてください。</p>
+          <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
+  <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+  <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+</div>
           <button class="btn" id="themeGoImport">AIの結果（JSON）を取り込む →</button>
         </div>
         <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
@@ -678,7 +685,10 @@ function renderTree(m){
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button data-zoom="">全体</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
   m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`)+
-    `<div class="seed-ai-shortcut"><div><strong>このテーマの続きをAIと考える</strong><p class="muted">今のタネ帳を含むプロンプトをコピーしてAIに貼り付けます。</p></div><button class="btn" id="treeAICopy">プロンプトをコピー</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a></div>`;
+    `<div class="seed-ai-shortcut"><div><strong>このテーマの続きをAIと考える</strong><p class="muted">今のタネ帳を含むプロンプトをコピーして、ChatGPTかClaudeに貼り付けます。</p></div><button class="btn" id="treeAICopy">プロンプトをコピー</button><div class="ai-provider-links" aria-label="対話するAIを選ぶ">
+  <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+  <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+</div></div>`;
   renderThemes();
   m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
@@ -793,7 +803,7 @@ function renderData(m){
     <div class="card"><h4>この端末のデータ</h4><div class="stat"><span><b>${themes}</b>テーマ</span><span><b>${S.nodes.size-themes}</b>行動</span><span><b>${S.ideas.size}</b>事業案</span><span><b>${d===null?'—':d+'日前'}</b>最後のバックアップ</span></div>
       <p class="muted" style="margin:0">書いた内容は、このiPhoneの中にだけ保存されます。インターネットには送られません。機種変更や故障、Safariのデータ削除で消えることがあるので、週に1回はバックアップを取ってください。</p></div>
     <div class="card"><h4>バックアップを取る</h4>
-      <p class="muted" style="margin:0">「ファイルに保存」では、共有メニューから「"ファイル"に保存」を選ぶと、iPhoneの中かiCloud Driveに残せます。Claudeに分析を頼むときは「コピー」して、チャットに貼ってください。</p>
+      <p class="muted" style="margin:0">「ファイルに保存」では、共有メニューから「"ファイル"に保存」を選ぶと、iPhoneの中かiCloud Driveに残せます。ChatGPTやClaudeに分析を頼むときは「コピー」して、チャットに貼ってください。</p>
       <div class="btnrow"><button class="btn pri" id="exShare">ファイルに保存</button><button class="btn" id="exCopy">コピー</button></div></div>
     <div class="card"><h4>取り込む</h4>
       <p class="muted" style="margin:0">バックアップのファイルや、AIが出したJSONを取り込みます。前後に説明文が付いていても大丈夫です。取り込む前に、新規・上書きの件数を確認できます。</p>
@@ -858,9 +868,13 @@ function renderIdeaEditor(m,x){const id=x.id;
   const tri=k=>FITV.map(([v,l])=>`<button data-fit="${k}" data-v="${v}" aria-pressed="${(x.fit||{})[k]===v}" aria-label="${l}">${l}</button>`).join('');
   m.innerHTML=`<div class="list">
     <div><button class="back" id="ideaBack">‹ 事業案の一覧</button></div>
-    <div class="card biz-ai-workflow"><h4>AIと事業案を詰める</h4><p class="muted" style="margin:0">プロンプトをコピーしてClaudeで対話。最後に「保存」と伝えて、返ってきたJSONを取り込みます。</p>
+    <div class="card biz-ai-workflow"><h4>AIと事業案を詰める</h4><p class="muted" style="margin:0">プロンプトをコピーしてChatGPTかClaudeで対話。最後に「保存」と伝えて、返ってきたJSONを取り込みます。</p>
       <button class="btn pri big" id="ideaAI">この事業案のプロンプトをコピー</button>
-      <div class="btnrow"><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a><button class="btn" id="ideaImport">AIの結果を取り込む →</button></div></div>
+      <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
+  <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+  <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+</div>
+      <button class="btn" id="ideaImport">AIの結果（JSON）を取り込む →</button></div>
     <div class="card">
       <input class="title-in" id="i-title" aria-label="事業案の名前" autocomplete="off">
       <div class="seg" id="i-st">${IDEA_ST.map(([k,l])=>`<button data-v="${k}" aria-pressed="${(x.status||'idea')===k}">${l}</button>`).join('')}</div>
@@ -930,7 +944,7 @@ async function copyText(text){
   try{
     if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error('clipboard unsupported');
     await navigator.clipboard.writeText(text);
-    toast('コピーしました。Claudeに貼り付けてください');
+    toast('コピーしました。ChatGPTかClaudeに貼り付けてください');
   }catch(e){
     const dialog=$('#copyFallback');
     const field=$('#copyFallbackText');
