@@ -43,7 +43,7 @@ button:disabled{opacity:.45}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 
 .bar{position:sticky;top:0;z-index:15;background:var(--paper);padding-top:calc(12px + env(safe-area-inset-top));border-bottom:1px solid var(--line)}
-.bar-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.bar-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 h1{font-weight:800;font-size:21px;letter-spacing:.06em;margin:0;line-height:1.2}
 .status{font-size:11px;color:var(--ink-2);white-space:nowrap}
 .status.alert{color:var(--warn);font-weight:700}
@@ -54,8 +54,9 @@ h1{font-weight:800;font-size:21px;letter-spacing:.06em;margin:0;line-height:1.2}
 .chip.ghost{background:transparent;border-style:dashed;color:var(--ink-2)}
 .newtheme{display:flex;gap:6px;margin-top:8px}
 .newtheme input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px}
-.tabs{display:grid;grid-template-columns:repeat(4,auto);justify-content:start;gap:2px;margin-top:8px}
-.tab{background:none;border:0;padding:10px 12px;font-weight:600;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs{display:flex;gap:2px;margin:8px -16px 0;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;background:none;border:0;padding:10px 11px;font-weight:600;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
 .tab .n{font-family:var(--f-mono);font-size:11px;margin-left:4px;color:var(--ink-2)}
 
@@ -169,18 +170,48 @@ textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-size:13px;z-index:40;max-width:calc(100% - 32px)}
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:25}
 @media (min-width:900px){ .scrim{display:none} }
+
+.topr{display:flex;align-items:center;gap:8px;min-width:0}
+.aibtn{border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.ideacard{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.st-idea{background:var(--accent-soft);color:var(--accent)}
+.st-testing{background:var(--seed);color:var(--seed-ink);font-weight:700}
+.st-hold{background:var(--line);color:var(--ink-2)}
+.st-dropped{background:var(--line);color:var(--ink-2);text-decoration:line-through}
+.fits{display:flex;flex-wrap:wrap;gap:4px}
+.fm{font-size:11px;border-radius:6px;padding:1px 6px;border:1px solid var(--line);color:var(--ink-2)}
+.fm-ok{background:var(--seed-soft);color:var(--ink);border-color:transparent}
+.fm-mid{border-color:var(--warn);color:var(--warn)}
+.fm-ng{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.nextline{font-size:13px;border-left:3px solid var(--accent);padding-left:8px}
+.back{border:0;background:none;color:var(--accent);padding:4px 0;font-size:15px}
+.fit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:14px}
+.tri{display:flex;gap:4px}
+.tri button{width:42px;height:36px;border:1px solid var(--line);background:none;border-radius:8px;font-size:15px}
+.tri button[aria-pressed="true"][data-v="ok"]{background:var(--seed);border-color:var(--seed);color:var(--seed-ink);font-weight:700}
+.tri button[aria-pressed="true"][data-v="mid"]{background:var(--warn-soft);border-color:var(--warn);color:var(--warn);font-weight:700}
+.tri button[aria-pressed="true"][data-v="ng"]{background:var(--ink);border-color:var(--ink);color:var(--paper);font-weight:700}
+label.f .q{font-size:14px;font-weight:700;color:var(--ink)}
+label.f small{font-size:12px}
+.srcchip{display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);border-radius:999px;padding:4px 4px 4px 12px;max-width:100%}
+.srcchip .linkbtn{overflow-wrap:anywhere}
+.srcx{border:0;background:none;color:var(--accent);font-size:12px;padding:2px 8px}
+.big{width:100%;padding:13px;font-size:16px;text-align:center;white-space:normal}
+a.btn{display:block;text-decoration:none;color:var(--ink)}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="bar">
-    <div class="bar-top"><h1>市場のタネ帳</h1><span class="status" id="status"></span></div>
+    <div class="bar-top"><h1>市場のタネ帳</h1><span class="topr"><span class="status" id="status"></span><button class="aibtn" id="aiOpen">AIと対話</button></span></div>
     <div class="themes" id="themes"></div>
     <form class="newtheme" id="themeForm" hidden><input id="themeInput" placeholder="新しいテーマ（例：家を借りる）" aria-label="新しいテーマ" autocomplete="off"><button class="btn pri" type="submit">作る</button><button class="btn icon" type="button" id="themeCancel" aria-label="やめる">✕</button></form>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="tree">ツリー</button>
       <button class="tab" role="tab" data-tab="same">つながり<span class="n" id="n-same"></span></button>
       <button class="tab" role="tab" data-tab="seed">タネ<span class="n" id="n-seed"></span></button>
+      <button class="tab" role="tab" data-tab="idea">事業案<span class="n" id="n-idea"></span></button>
       <button class="tab" role="tab" data-tab="data">データ</button>
     </div>
   </header>
@@ -191,119 +222,6 @@ textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
-<script type="text/plain" id="aiPromptText">あなたは「市場のタネ帳」の相棒です。わたしが日常や仕事で観察した人の行動を一緒に分解し、新しい市場のタネを探します。最後に、タネ帳アプリに読み込めるJSONを出力します。
-
-# あなたの役割
-- わたしの観察を引き出し、整理し、問いを投げる相棒です。答えを決めるのはわたしです。
-- わたしが見たこと（事実）と、あなたの推測（仮説）をはっきり分けてください。あなたの推測を書くときは、文頭に「仮説：」と付けます。
-- わたしが言っていない行動や事実を、勝手に足さないでください。候補を出すのは歓迎ですが、採用するかはわたしが決めます。
-
-# 話し方
-- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。
-- 質問は1回に1つだけにします。
-- 前置きや褒め言葉は省き、すぐ本題に入ります。
-
-# 進め方
-次の順に進めます。わたしが別の順を望んだら、それに合わせてください。
-
-1. 始める
-   最初に「新しいテーマを始めますか？それとも、タネ帳から書き出したJSONを貼りますか？」と聞いてください。
-   - JSONが貼られたら、中身を読み取り、テーマと行動のツリーを短くまとめて見せてから続けます。
-   - 新しいテーマなら、テーマ名（例：家を借りる）を聞きます。
-
-2. 行動を書き出す
-   そのテーマで人がやっている行動を、思いつくまま挙げてもらいます。違和感がなくても、普通にやっている行動で構いません。
-   書き出しが終わったら、番号付きの一覧にして見せます。
-
-3. 上下に動かす（抽象化・具体化）
-   気になる行動を1つ選んでもらい、次の2つの問いで上下に動かします。
-   - 抽象化：「それは何のためにやっている？」（答えを1段上に置く）
-   - 具体化：「具体的にはどうやっている？」（答えを1段下に置く）
-   複数の当事者が関わる、書類や情報を人が手で集めて渡す、お金が動く、といった行動は、具体化して掘る価値が高いと伝えてください。
-   深く掘りすぎて話が細かくなりすぎたら、一度上に戻ることを提案してください。
-
-4. 分解する
-   掘った行動について、次を1つずつ聞きます。
-   - 摩擦のサイン：複数の当事者／書類・情報の手渡し／お金が動く／待ち時間／手作業／毎回やり直し、のうちどれがあるか
-   - 背景：なぜ人はこのやり方をしているのか
-   - 制約：何がこのやり方を強いているのか（技術、規制、慣習、コスト、情報の偏りなど）
-   - その制約は今もあるか：まだある／薄れている／もう無い／未確認
-   「制約が消えた・薄れているのに、行動だけが残っている」ものが見つかったら、市場のタネの典型として強調してください。
-
-5. 本質を書く
-   それぞれの行動が「本質的には何をしているか」を短く言い表します（例：協定価額を決める → モノの価値を決める）。
-   場面の言葉（車の、家の、など）を外した言い方にして、他のテーマともつながるようにします。すでに使っている本質の言い方があれば、それを優先して使います。
-   同じ本質が別の行動や別のテーマにも出てきたら、そのつながりを指摘してください。
-
-6. タネとして評価する
-   わたしが「これはタネかも」と言った行動は、次の5つを0〜2点で一緒に採点します。点の理由も一言添えてください。
-   - alt：代わりの手段で無理やり済ませている
-   - now：「なぜ今」がある（技術・規制・コストの変化）
-   - money：お金がすでに別の名目で使われている
-   - repeat：繰り返し起こり、広がっている
-   - gap：大手がやりたがらない理由がある
-
-# わたしが使う合図
-- 「まとめ」：今のツリーを、字下げした一覧で見せてください（各行に、本質・摩擦・制約の状態・タネの点数があれば添える）。
-- 「保存」または「JSON」：下の形式でJSONを出力してください。
-- 「戻る」：1つ前の段階に戻ります。
-
-# JSONの出力ルール
-「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。
-
-- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。
-- nodes には、この会話で新しく作った行動と、内容を変えた行動だけを入れます。変えていない既存の行動は入れません。
-- 既存の行動（最初に貼られたJSONにあったもの）を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。
-- 新しい行動の id は、他と重ならないように「t」＋今日の日付8桁＋「-」＋3桁の連番にします（例：t20261010-001）。日付が分からなければ、最初にわたしに聞いてください。
-- parent には親の行動の id を入れます。テーマ（いちばん上）だけ null にします。既存の行動の下に足すときは、その既存の id を parent に入れます。
-- order は、同じ親の中での並び順です（0から）。
-- frictions は次の英語のキーだけを使います：parties（複数の当事者）、docs（書類・情報の手渡し）、money（お金が動く）、wait（待ち時間）、manual（手作業）、repeat（毎回やり直し）。
-- status は次のどれかです：still（まだある）、fading（薄れている）、gone（もう無い）、unknown（未確認）、""（未記入）。
-- tags には「本質」の言い方を文字列で入れます。
-- seed は、タネ候補なら true です。scores は alt, now, money, repeat, gap をそれぞれ 0〜2 の数字で入れます。
-- why（背景）、constraint（制約）は、わたしが同意した内容だけを入れます。あなたの仮説のままのものは、memo に「仮説：〜」として入れます。
-- 行動が多くて1回で出し切れないときは、「続く」と書いて分割し、わたしが「続き」と言ったら残りを出します。分割したそれぞれが、単独で正しいJSONになるようにします。
-
-形式の例：
-```json
-{
-  "app": "tane",
-  "version": 1,
-  "exportedAt": 0,
-  "nodes": [
-    {
-      "id": "t20261010-001",
-      "text": "家を借りる",
-      "parent": null,
-      "order": 0,
-      "frictions": [],
-      "why": "",
-      "constraint": "",
-      "status": "",
-      "tags": [],
-      "seed": false,
-      "scores": {},
-      "memo": ""
-    },
-    {
-      "id": "t20261010-002",
-      "text": "入居審査を受ける",
-      "parent": "t20261010-001",
-      "order": 0,
-      "frictions": ["parties", "docs", "wait"],
-      "why": "貸主が、家賃を払い続けられる人かを事前に確かめたい。",
-      "constraint": "借り手の支払い能力を示す共通の情報がなく、毎回書類で証明するしかない。",
-      "status": "fading",
-      "tags": ["支払い能力を証明する"],
-      "seed": true,
-      "scores": {"alt": 2, "now": 1, "money": 1, "repeat": 2, "gap": 1},
-      "memo": "仮説：保証会社ごとに審査をやり直している"
-    }
-  ]
-}
-```
-
-では、始めてください。</script>
 
 <script>
 'use strict';
@@ -311,7 +229,7 @@ const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
 const FRICTIONS=[['parties','複数の当事者'],['docs','書類・情報の手渡し'],['money','お金が動く'],['wait','待ち時間'],['manual','手作業'],['repeat','毎回やり直し']];
 const STATUS=[['still','まだある'],['fading','薄れている'],['gone','もう無い'],['unknown','未確認']];
 const ELEMENTS=[['alt','代わりの手段で無理やり済ませている'],['now','「なぜ今」がある（技術・規制・コストの変化）'],['money','お金がすでに別の名目で使われている'],['repeat','繰り返し起こり、広がっている'],['gap','大手がやりたがらない理由がある']];
-const S={nodes:new Map(),theme:null,sel:null,focus:null,tab:'tree',collapsed:new Set(),detailFor:null,sheetTab:'cut',adding:null,renaming:null,importText:null,confirmReplace:false};
+const S={ideas:new Map(),ideaSel:null,nodes:new Map(),theme:null,sel:null,focus:null,tab:'tree',collapsed:new Set(),detailFor:null,sheetTab:'cut',adding:null,renaming:null,importText:null,confirmReplace:false};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -321,9 +239,9 @@ const wide=()=>matchMedia('(min-width:900px)').matches;
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2400);}
 
 /* ---------- 端末内の保存 ---------- */
-function loadAll(){ try{ const o=JSON.parse(ls.get(KEY)||'null'); if(o&&Array.isArray(o.nodes)) S.nodes=new Map(o.nodes.filter(n=>n&&n.id).map(n=>[n.id,n])); }catch(e){} }
+function loadAll(){ try{ const o=JSON.parse(ls.get(KEY)||'null'); if(o&&Array.isArray(o.nodes)) S.nodes=new Map(o.nodes.filter(n=>n&&n.id).map(n=>[n.id,n])); if(o&&Array.isArray(o.ideas)) S.ideas=new Map(o.ideas.filter(n=>n&&n.id).map(n=>[n.id,n])); }catch(e){} }
 let saveTimer=null;
-function saveNow(){ const ok=ls.set(KEY,JSON.stringify({version:1,savedAt:Date.now(),nodes:[...S.nodes.values()]})); if(!ok) toast('保存できませんでした。端末の空き容量を確認してください。'); }
+function saveNow(){ const ok=ls.set(KEY,JSON.stringify({version:2,savedAt:Date.now(),nodes:[...S.nodes.values()],ideas:[...S.ideas.values()]})); if(!ok) toast('保存できませんでした。端末の空き容量を確認してください。'); }
 function saveSoon(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,300); }
 window.addEventListener('pagehide',saveNow);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') saveNow(); });
@@ -389,12 +307,14 @@ function renderThemes(){
   $('#themeNew').onclick=()=>{$('#themeForm').hidden=false;$('#themeInput').focus();};
 }
 $('#status').onclick=()=>{S.tab='data';render();};
+$('#aiOpen').onclick=()=>{S.tab='ai';openSheet(false);render();window.scrollTo({top:0});};
 $('#themeForm').onsubmit=e=>{e.preventDefault();const v=$('#themeInput').value;$('#themeInput').value='';$('#themeForm').hidden=true;addTheme(v);};
 $('#themeCancel').onclick=()=>{$('#themeForm').hidden=true;};
 function renderTabs(){
   document.querySelectorAll('.tab').forEach(t=>{t.setAttribute('aria-selected',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
   $('#n-same').textContent=[...tagIndex().values()].filter(a=>a.length>=2).length||'';
   $('#n-seed').textContent=[...S.nodes.values()].filter(n=>n.seed).length||'';
+  $('#n-idea').textContent=[...S.ideas.values()].filter(x=>x.status!=='dropped').length||'';
 }
 function badges(n){const o=[];const fr=(n.frictions||[]).length;
   if(n.status==='gone')o.push(`<span class="b b-gone">制約が消えた</span>`);else if(n.status==='fading')o.push(`<span class="b b-fade">制約が薄れている</span>`);
@@ -402,7 +322,7 @@ function badges(n){const o=[];const fr=(n.frictions||[]).length;
   for(const t of(n.tags||[]))o.push(`<span class="b b-tag">本質：${esc(t)}</span>`);
   if(n.seed)o.push(`<span class="b b-seed">タネ ${scoreOf(n)}点</span>`);
   return o.join('');}
-function renderMain(){const m=$('#main');if(S.tab==='tree')return renderTree(m);if(S.tab==='same')return renderSame(m);if(S.tab==='seed')return renderSeeds(m);return renderData(m);}
+function renderMain(){const m=$('#main');if(S.tab==='tree')return renderTree(m);if(S.tab==='same')return renderSame(m);if(S.tab==='seed')return renderSeeds(m);if(S.tab==='idea')return renderIdeas(m);if(S.tab==='ai')return renderAI(m);return renderData(m);}
 
 /* ---------- ツリー ---------- */
 function addHint(n,mode){
@@ -468,7 +388,7 @@ function bindGo(m){m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>sele
 function renderSame(m){
   const groups=[...tagIndex().entries()].map(([t,ns])=>({t,ns,themes:new Set(ns.map(n=>rootOf(n.id))).size})).sort((a,b)=>b.themes-a.themes||b.ns.length-a.ns.length);
   const cross=groups.filter(g=>g.themes>=2),within=groups.filter(g=>g.themes<2&&g.ns.length>=2),single=groups.filter(g=>g.ns.length<2);const cand=similarGroups();
-  const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}テーマ・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
+  const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}テーマ・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-mkidea-tag="${esc(g.t)}">事業案にする</button><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
     ${S.renaming===g.t?`<form class="inline" data-renform="${esc(g.t)}"><input value="${esc(g.t)}" aria-label="新しい名前"><button class="btn pri sm" type="submit">変更</button></form>`:''}${g.ns.map(hitBtn).join('')}</div>`;
   m.innerHTML=`<div class="list">
     <p class="muted" style="margin:0">行動ごとに「本質的には何をしているか」を書くと、同じ本質を持つ行動がここに集まります。「車の」など場面の言葉を外した書き方（例：モノの価値を決める）にすると、テーマをまたいでつながりやすくなります。</p>
@@ -478,7 +398,7 @@ function renderSame(m){
     ${cand.length?cand.map((ns,i)=>`<div class="card"><h4>${esc(ns[0].text)}<span class="b b-tag">${ns.length}か所</span></h4>${ns.map(hitBtn).join('')}<form class="inline" data-candform="${i}"><input placeholder="共通の本質（例：審査を受ける）" aria-label="共通の本質"><button class="btn sm" type="submit">この本質でまとめる</button></form></div>`).join(''):`<div class="muted">文言が似ている行動が見つかると、ここに候補として出ます。</div>`}
     ${single.length?`<p class="h2">1か所だけの本質</p><div class="card">${single.map(g=>`<div class="tags"><span class="b b-tag">${esc(g.t)}</span></div>${g.ns.map(hitBtn).join('')}`).join('')}</div>`:''}
   </div>`;
-  bindGo(m);
+  bindGo(m); bindMkIdea(m);
   m.querySelectorAll('[data-rename]').forEach(b=>b.onclick=()=>{S.renaming=S.renaming===b.dataset.rename?null:b.dataset.rename;renderMain();const i=m.querySelector('[data-renform] input');if(i)i.focus();});
   m.querySelectorAll('[data-renform]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const from=f.dataset.renform;const to=f.querySelector('input').value.trim();S.renaming=null;
     if(to&&to!==from){for(const n of S.nodes.values())if((n.tags||[]).includes(from))n.tags=[...new Set(n.tags.map(t=>t===from?to:t))];saveSoon();toast('名前を変えました');}render();});
@@ -489,31 +409,35 @@ function renderSeeds(m){const all=[...S.nodes.values()];
   const seeds=all.filter(n=>n.seed).sort((a,b)=>scoreOf(b)-scoreOf(a));
   const gone=all.filter(n=>!n.seed&&(n.status==='gone'||n.status==='fading'));
   const dig=all.filter(n=>!n.seed&&(n.frictions||[]).length>=2&&!n.why&&!n.constraint);
-  const seedCard=n=>`<div class="card"><h4>${esc(n.text)}<span class="b b-seed">${scoreOf(n)}/10</span></h4><div class="bars">${ELEMENTS.map(([k,l])=>{const v=Number(n.scores?.[k])||0;return `<span><i class="${v>=1?'on':''}"></i><i class="${v>=2?'on':''}"></i>${esc(l.slice(0,6))}</span>`;}).join('')}</div>${hitBtn(n)}</div>`;
+  const seedCard=n=>`<div class="card"><h4>${esc(n.text)}<span class="b b-seed">${scoreOf(n)}/10</span></h4><div class="bars">${ELEMENTS.map(([k,l])=>{const v=Number(n.scores?.[k])||0;return `<span><i class="${v>=1?'on':''}"></i><i class="${v>=2?'on':''}"></i>${esc(l.slice(0,6))}</span>`;}).join('')}</div>${hitBtn(n)}<div><button class="btn sm" data-mkidea="${esc(n.id)}">事業案にする</button></div></div>`;
   m.innerHTML=`<div class="list">
     <p class="h2">タネ候補</p>${seeds.length?seeds.map(seedCard).join(''):`<div class="empty">まだタネ候補はありません。行動を選んで「分析する」→「タネ」で候補にすると、5つの要素で採点してここに並びます。</div>`}
     <p class="h2">制約が消えた・薄れているのに、行動が残っている</p>${gone.length?`<div class="card">${gone.map(hitBtn).join('')}</div>`:`<div class="muted">「分解」で、制約が「もう無い」「薄れている」とした行動がここに出ます。</div>`}
     <p class="h2">摩擦が多いのに、まだ分解していない行動</p>${dig.length?`<div class="card">${dig.map(hitBtn).join('')}</div>`:`<div class="muted">摩擦のサインが2つ以上あり、背景と制約が空の行動がここに出ます。</div>`}
-  </div>`; bindGo(m);}
+  </div>`; bindGo(m); bindMkIdea(m);}
 
 /* ---------- データ（バックアップ） ---------- */
-function exportJSON(){return JSON.stringify({app:'tane',version:1,exportedAt:Date.now(),nodes:[...S.nodes.values()]},null,1);}
+function exportJSON(){return JSON.stringify({app:'tane',version:2,exportedAt:Date.now(),nodes:[...S.nodes.values()],ideas:[...S.ideas.values()]},null,1);}
 function stamp(){const d=new Date();const p=x=>String(x).padStart(2,'0');return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;}
 function markExported(){ls.set(KEY_EXPORT,String(Date.now()));render();}
-function parseBackup(text){let o;try{o=JSON.parse(text);}catch(e){throw new Error('ファイルの形式が読み取れませんでした。タネ帳から書き出したファイルを選んでください。');}
-  const arr=Array.isArray(o)?o:o&&Array.isArray(o.nodes)?o.nodes:null; if(!arr) throw new Error('タネ帳のバックアップではないようです。');
-  const out=arr.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string').map(n=>({...blank('',null,0),...n}));
-  if(!out.length) throw new Error('読み込める行動が入っていませんでした。'); return out;}
+function parseBackup(text){let o=null;const t=String(text||'').trim();
+  try{o=JSON.parse(t);}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a){try{o=JSON.parse(t.slice(a,b+1));}catch(e2){}}}
+  if(!o||typeof o!=='object') throw new Error('JSONとして読み取れませんでした。AIの出力やバックアップの中身を、最初の { から最後の } まで丸ごと貼ってください。');
+  const arr=Array.isArray(o)?o:Array.isArray(o.nodes)?o.nodes:[]; const iarr=Array.isArray(o.ideas)?o.ideas:[];
+  const nodes=arr.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string').map(n=>({...blank('',null,0),...n}));
+  const ideas=iarr.filter(x=>x&&typeof x.id==='string').map(x=>({...blankIdea('',[]),...x,title:String(x.title||'無題の事業案')}));
+  if(!nodes.length&&!ideas.length) throw new Error('読み込める行動や事業案が入っていませんでした。');
+  return {nodes,ideas};}
+function importData(d,outSel){let add=0,upd=0,ia=0,iu=0;
+  for(const n of d.nodes){if(S.nodes.has(n.id))upd++;else add++;S.nodes.set(n.id,n);}
+  for(const x of d.ideas){if(S.ideas.has(x.id))iu++;else ia++;S.ideas.set(x.id,x);}
+  saveNow();S.sel=null;S.detailFor=null;S.focus=null;S.theme=null;S.ideaSel=null;render();
+  const el=$(outSel);if(el)el.textContent=`取り込みました：行動 新規${add}件・更新${upd}件／事業案 新規${ia}件・更新${iu}件`;toast('取り込みました');}
 function renderData(m){
   const d=daysSinceExport(); const themes=roots().length;
   m.innerHTML=`<div class="list">
-    <div class="card"><h4>この端末のデータ</h4><div class="stat"><span><b>${themes}</b>テーマ</span><span><b>${S.nodes.size-themes}</b>行動</span><span><b>${d===null?'—':d+'日前'}</b>最後のバックアップ</span></div>
+    <div class="card"><h4>この端末のデータ</h4><div class="stat"><span><b>${themes}</b>テーマ</span><span><b>${S.nodes.size-themes}</b>行動</span><span><b>${S.ideas.size}</b>事業案</span><span><b>${d===null?'—':d+'日前'}</b>最後のバックアップ</span></div>
       <p class="muted" style="margin:0">書いた内容は、このiPhoneの中にだけ保存されます。インターネットには送られません。機種変更や故障、Safariのデータ削除で消えることがあるので、週に1回はバックアップを取ってください。</p></div>
-    <div class="card"><h4>AIと対話する</h4>
-      <p class="muted" style="margin:0">「プロンプトをコピー」を押して、ChatGPTやClaudeの新しい会話に貼り付けてください。今のツリーも渡したい場合は、下のバックアップの「コピー」でJSONを追加してください。</p>
-      <div class="btnrow"><button class="btn pri" type="button" id="aiCopyPrompt">AI対話用プロンプトをコピー</button></div>
-      <div id="aiPromptFallback" hidden><p class="muted">自動コピーができませんでした。下の欄を長押しして、すべて選択してコピーしてください。</p><textarea id="aiPromptFallbackText" rows="6" readonly aria-label="AI対話用プロンプト"></textarea></div>
-    </div>
     <div class="card"><h4>バックアップを取る</h4>
       <p class="muted" style="margin:0">「ファイルに保存」では、共有メニューから「"ファイル"に保存」を選ぶと、iPhoneの中かiCloud Driveに残せます。Claudeに分析を頼むときは「コピー」して、チャットに貼ってください。</p>
       <div class="btnrow"><button class="btn pri" id="exShare">ファイルに保存</button><button class="btn" id="exCopy">コピー</button></div></div>
@@ -524,28 +448,106 @@ function renderData(m){
       <div id="imResult" class="muted"></div></div>
     <div class="card"><h4>すべて消す</h4><p class="muted" style="margin:0">この端末のデータをすべて削除します。先にバックアップを取ってください。</p><div><button class="btn danger" id="wipe">すべて消す</button></div></div>
   </div>`;
-  $('#aiCopyPrompt').onclick=async()=>{
-    const text=$('#aiPromptText').textContent.trim();
-    let copied=false;
-    if(navigator.clipboard&&navigator.clipboard.writeText){try{await navigator.clipboard.writeText(text);copied=true;}catch(e){}}
-    if(!copied){
-      const t=document.createElement('textarea');t.value=text;t.setAttribute('readonly','');
-      t.style.cssText='position:fixed;left:0;top:0;opacity:0;pointer-events:none';
-      document.body.appendChild(t);t.focus();t.select();t.setSelectionRange(0,t.value.length);
-      try{copied=document.execCommand('copy');}catch(e){}t.remove();
-    }
-    if(copied){$('#aiPromptFallback').hidden=true;toast('プロンプトをコピーしました');}
-    else{const t=$('#aiPromptFallbackText');$('#aiPromptFallback').hidden=false;t.value=text;t.focus();t.select();toast('下の欄からコピーしてください');}
-  };
   $('#exShare').onclick=async()=>{const name=`tane-backup-${stamp()}.json`;const blob=new Blob([exportJSON()],{type:'application/json'});const file=new File([blob],name,{type:'application/json'});
     try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:name}); markExported(); toast('バックアップを渡しました'); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);markExported();};
   $('#exCopy').onclick=async()=>{try{await navigator.clipboard.writeText(exportJSON());markExported();toast('コピーしました');}catch(e){S.tab='data';renderMain();const t=$('#imText');$('#imPasteBox').hidden=false;t.value=exportJSON();t.select();toast('コピーできなかったので、下の欄から全選択してコピーしてください');}};
-  const importNodes=list=>{let add=0,upd=0;for(const n of list){if(S.nodes.has(n.id))upd++;else add++;S.nodes.set(n.id,n);}saveNow();S.sel=null;S.detailFor=null;S.focus=null;S.theme=null;render();$('#imResult').textContent=`読み込みました：新しく${add}件、上書き${upd}件`;toast('読み込みました');};
-  $('#imFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{importNodes(parseBackup(String(r.result)));}catch(err){$('#imResult').textContent=err.message;}};r.readAsText(f);e.target.value='';};
+  $('#imFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{importData(parseBackup(String(r.result)),'#imResult');}catch(err){$('#imResult').textContent=err.message;}};r.readAsText(f);e.target.value='';};
   $('#imPasteOpen').onclick=()=>{$('#imPasteBox').hidden=false;$('#imText').focus();};
-  $('#imPasteGo').onclick=()=>{try{importNodes(parseBackup($('#imText').value));}catch(err){$('#imResult').textContent=err.message;}};
-  const w=$('#wipe');let armed=false;w.onclick=()=>{if(!armed){armed=true;w.textContent='本当にすべて消す';setTimeout(()=>{armed=false;if(w.isConnected)w.textContent='すべて消す';},3500);return;}S.nodes.clear();saveNow();S.sel=null;S.theme=null;S.focus=null;render();toast('すべて消しました');};
+  $('#imPasteGo').onclick=()=>{try{importData(parseBackup($('#imText').value),'#imResult');}catch(err){$('#imResult').textContent=err.message;}};
+  const w=$('#wipe');let armed=false;w.onclick=()=>{if(!armed){armed=true;w.textContent='本当にすべて消す';setTimeout(()=>{armed=false;if(w.isConnected)w.textContent='すべて消す';},3500);return;}S.nodes.clear();S.ideas.clear();saveNow();S.sel=null;S.theme=null;S.focus=null;render();toast('すべて消しました');};
+}
+
+/* ---------- 事業案 ---------- */
+const IDEA_ST=[['idea','アイデア'],['testing','検証中'],['hold','保留'],['dropped','やめた']];
+const stLabel=v=>(IDEA_ST.find(([k])=>k===v)||IDEA_ST[0])[1];
+const FIT=[['margin','利益率','利益率30%以上を狙える'],['national','全国・海外','全国・海外に売れる'],['stage1','受託で検証','最初は受託で稼ぎながら検証できる'],['campus','拠点','将来の自社拠点（キャンパス）と噛み合う']];
+const FITV=[['ok','○'],['mid','△'],['ng','×']];
+const IDEA_FIELDS=[
+  ['customer','1　誰の困りごとか（顧客）','個人か会社か、どんな立場の人か'],
+  ['pain','どんな困りごとか',''],
+  ['alt','今はどうやって済ませているか','代わりの手段。ここが不格好なほどチャンスです'],
+  ['whyNow','2　なぜ今できるのか','何が変わったか（技術・規制・コスト）'],
+  ['solution','3　解決の仮説','何を提供するか'],
+  ['payer','4　誰がお金を払うか','すでにどの名目で払われているお金を取りにいくか'],
+  ['edge','5　自分が勝てる理由','経験・知識・人脈など']];
+function blankIdea(title,sources){return{title,status:'idea',sources,customer:'',pain:'',alt:'',whyNow:'',solution:'',payer:'',edge:'',fit:{},fitNote:'',next:'',dropReason:'',memo:'',created:Date.now()};}
+function mkIdea(sources,title){const id='i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  S.ideas.set(id,{id,...blankIdea(title||'新しい事業案',sources||[])});saveSoon();S.tab='idea';S.ideaSel=id;S.sel=null;render();window.scrollTo({top:0});toast('事業案を作りました');}
+function bindMkIdea(m){
+  m.querySelectorAll('[data-mkidea]').forEach(b=>b.onclick=()=>{const n=S.nodes.get(b.dataset.mkidea);if(n)mkIdea([{type:'node',id:n.id}],n.text);});
+  m.querySelectorAll('[data-mkidea-tag]').forEach(b=>b.onclick=()=>{const t=b.dataset.mkideaTag;mkIdea([{type:'tag',name:t}],t);});}
+function srcLabel(x){if(x.type==='tag')return `本質：${x.name}`;const n=S.nodes.get(x.id);return n?`${themeName(n.id)}／${n.text}`:'（削除された行動）';}
+function fitMarks(x){return FIT.map(([k,sh])=>{const v=(x.fit||{})[k]||'';const mk=v==='ok'?'○':v==='mid'?'△':v==='ng'?'×':'－';return `<span class="fm fm-${v||'none'}">${sh} ${mk}</span>`;}).join('');}
+function renderIdeas(m){
+  const cur=S.ideaSel&&S.ideas.get(S.ideaSel); if(cur) return renderIdeaEditor(m,cur); S.ideaSel=null;
+  const order={testing:0,idea:1,hold:2,dropped:3};
+  const all=[...S.ideas.values()].sort((a,b)=>(order[a.status]??1)-(order[b.status]??1)||(b.updated||b.created||0)-(a.updated||a.created||0));
+  const card=x=>`<button class="card ideacard" data-idea="${esc(x.id)}"><h4>${esc(x.title||'無題の事業案')}<span class="b st-${esc(x.status||'idea')}">${stLabel(x.status)}</span></h4>${x.customer||x.pain?`<span class="muted">${esc([x.customer,x.pain].filter(Boolean).join('：'))}</span>`:''}<span class="fits">${fitMarks(x)}</span>${x.next&&x.status!=='dropped'?`<span class="nextline">次の一手：${esc(x.next)}</span>`:''}</button>`;
+  m.innerHTML=`<div class="list"><div class="btnrow"><button class="btn pri" id="ideaNew">＋ 新しい事業案</button></div>
+    ${all.length?all.map(card).join(''):`<div class="empty"><b>まだ事業案はありません。</b><br>「タネ」タブのタネ候補や、「つながり」の本質で「事業案にする」を押すと、元のタネとつながった事業案ができます。ここから白紙で作ることもできます。</div>`}</div>`;
+  $('#ideaNew').onclick=()=>mkIdea([],'新しい事業案');
+  m.querySelectorAll('[data-idea]').forEach(b=>b.onclick=()=>{S.ideaSel=b.dataset.idea;renderMain();window.scrollTo({top:0});});
+}
+function renderIdeaEditor(m,x){const id=x.id;
+  const tri=k=>FITV.map(([v,l])=>`<button data-fit="${k}" data-v="${v}" aria-pressed="${(x.fit||{})[k]===v}" aria-label="${l}">${l}</button>`).join('');
+  m.innerHTML=`<div class="list">
+    <div><button class="back" id="ideaBack">‹ 事業案の一覧</button></div>
+    <div class="card">
+      <input class="title-in" id="i-title" aria-label="事業案の名前" autocomplete="off">
+      <div class="seg" id="i-st">${IDEA_ST.map(([k,l])=>`<button data-v="${k}" aria-pressed="${(x.status||'idea')===k}">${l}</button>`).join('')}</div>
+      <label class="f" id="i-dropwrap" ${x.status==='dropped'?'':'hidden'}>やめた理由（あとで学びになります）<textarea data-f="dropReason" rows="2"></textarea></label>
+      <div class="sec"><h3>元になったタネ</h3><div class="tags">${(x.sources||[]).map((sc,i)=>`<span class="srcchip"><button class="linkbtn" data-src="${i}">${esc(srcLabel(sc))}</button><button class="srcx" data-srcx="${i}" aria-label="外す">✕</button></span>`).join('')||'<span class="muted">なし</span>'}</div></div>
+    </div>
+    <div class="card"><h4>事業の中身</h4>${IDEA_FIELDS.map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}</div>
+    <div class="card"><h4>6　15年計画との相性</h4>${FIT.map(([k,sh,l])=>`<div class="fit"><span>${l}</span><div class="tri">${tri(k)}</div></div>`).join('')}
+      <label class="f">相性のメモ<textarea data-f="fitNote" rows="2"></textarea></label></div>
+    <div class="card"><h4>7　次の一手</h4><label class="f"><small>誰に何を聞いて確かめるか。1週間以内にできることにします</small><textarea data-f="next" rows="2"></textarea></label></div>
+    <div class="card"><label class="f">メモ<textarea data-f="memo" rows="3"></textarea></label><div><button class="btn sm danger" id="ideaDel">この事業案を削除</button></div></div>
+  </div>`;
+  const touch=()=>{x.updated=Date.now();saveSoon();};
+  $('#i-title').value=x.title||''; $('#i-title').oninput=e=>{x.title=e.target.value;touch();};
+  m.querySelectorAll('[data-f]').forEach(t=>{t.value=x[t.dataset.f]||'';t.oninput=()=>{x[t.dataset.f]=t.value;touch();};});
+  $('#ideaBack').onclick=()=>{S.ideaSel=null;render();window.scrollTo({top:0});};
+  $('#i-st').querySelectorAll('button').forEach(b=>b.onclick=()=>{x.status=b.dataset.v;touch();$('#i-st').querySelectorAll('button').forEach(c=>c.setAttribute('aria-pressed',String(c===b)));$('#i-dropwrap').hidden=x.status!=='dropped';renderTabs();});
+  m.querySelectorAll('[data-fit]').forEach(b=>b.onclick=()=>{const k=b.dataset.fit;x.fit={...(x.fit||{})};x.fit[k]=x.fit[k]===b.dataset.v?'':b.dataset.v;touch();m.querySelectorAll(`[data-fit="${k}"]`).forEach(c=>c.setAttribute('aria-pressed',String(x.fit[k]===c.dataset.v)));});
+  m.querySelectorAll('[data-src]').forEach(b=>b.onclick=()=>{const sc=x.sources[Number(b.dataset.src)];if(sc.type==='node'){if(S.nodes.has(sc.id))select(sc.id,true);}else{S.tab='same';render();window.scrollTo({top:0});}});
+  m.querySelectorAll('[data-srcx]').forEach(b=>b.onclick=()=>{x.sources=x.sources.filter((_,i)=>i!==Number(b.dataset.srcx));touch();renderMain();});
+  const del=$('#ideaDel');let armed=false;
+  del.onclick=()=>{if(!armed){armed=true;del.textContent='本当に削除する';setTimeout(()=>{armed=false;if(del.isConnected)del.textContent='この事業案を削除';},3500);return;}S.ideas.delete(id);S.ideaSel=null;saveSoon();render();toast('削除しました');};
+}
+
+/* ---------- AIと対話 ---------- */
+const PROMPT="あなたは「市場のタネ帳」の相棒です。わたしが日常や仕事で観察した人の行動を一緒に分解し、新しい市場のタネを探します。見つけたタネは事業案に育て、最後にタネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- わたしの観察を引き出し、整理し、問いを投げる相棒です。答えを決めるのはわたしです。\n- わたしが見たこと（事実）と、あなたの推測（仮説）をはっきり分けてください。あなたの推測を書くときは、文頭に「仮説：」と付けます。\n- わたしが言っていない行動や事実を、勝手に足さないでください。候補を出すのは歓迎ですが、採用するかはわたしが決めます。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n次の順に進めます。わたしが別の順を望んだら、それに合わせてください。\n\n1. 始める\n   最初に「新しいテーマを始めますか？それとも、タネ帳から書き出したJSONを貼りますか？」と聞いてください。\n   - JSONが貼られたら、中身を読み取り、テーマと行動のツリーを短くまとめて見せてから続けます。\n   - 新しいテーマなら、テーマ名（例：家を借りる）を聞きます。\n\n2. 行動を書き出す\n   そのテーマで人がやっている行動を、思いつくまま挙げてもらいます。違和感がなくても、普通にやっている行動で構いません。\n   書き出しが終わったら、番号付きの一覧にして見せます。\n\n3. 上下に動かす（抽象化・具体化）\n   気になる行動を1つ選んでもらい、次の2つの問いで上下に動かします。\n   - 抽象化：「それは何のためにやっている？」（答えを1段上に置く）\n   - 具体化：「具体的にはどうやっている？」（答えを1段下に置く）\n   複数の当事者が関わる、書類や情報を人が手で集めて渡す、お金が動く、といった行動は、具体化して掘る価値が高いと伝えてください。\n   深く掘りすぎて話が細かくなりすぎたら、一度上に戻ることを提案してください。\n\n4. 分解する\n   掘った行動について、次を1つずつ聞きます。\n   - 摩擦のサイン：複数の当事者／書類・情報の手渡し／お金が動く／待ち時間／手作業／毎回やり直し、のうちどれがあるか\n   - 背景：なぜ人はこのやり方をしているのか\n   - 制約：何がこのやり方を強いているのか（技術、規制、慣習、コスト、情報の偏りなど）\n   - その制約は今もあるか：まだある／薄れている／もう無い／未確認\n   「制約が消えた・薄れているのに、行動だけが残っている」ものが見つかったら、市場のタネの典型として強調してください。\n\n5. 本質を書く\n   それぞれの行動が「本質的には何をしているか」を短く言い表します（例：協定価額を決める → モノの価値を決める）。\n   場面の言葉（車の、家の、など）を外した言い方にして、他のテーマともつながるようにします。すでに使っている本質の言い方があれば、それを優先して使います。\n   同じ本質が別の行動や別のテーマにも出てきたら、そのつながりを指摘してください。\n\n6. タネとして評価する\n   わたしが「これはタネかも」と言った行動は、次の5つを0〜2点で一緒に採点します。点の理由も一言添えてください。\n   - alt：代わりの手段で無理やり済ませている\n   - now：「なぜ今」がある（技術・規制・コストの変化）\n   - money：お金がすでに別の名目で使われている\n   - repeat：繰り返し起こり、広がっている\n   - gap：大手がやりたがらない理由がある\n\n7. 事業案にする\n   わたしが「事業案にしたい」と言ったタネや本質について、次を1つずつ一緒に考えます。わたしの答えが薄いときは、問いを変えて深掘りしてください。\n   - 誰の困りごとか（顧客）：個人か会社か、どんな立場の人か\n   - どんな困りごとか\n   - 今はどうやって済ませているか（代わりの手段）\n   - なぜ今できるのか：何が変わったか（技術・規制・コスト）\n   - 解決の仮説：何を提供するか\n   - 誰がお金を払うか：すでにどの名目で払われているお金を取りにいくか\n   - 自分が勝てる理由：わたしの強みや経歴は「わたしについて」に書いてあれば、それを使います。書いていなければ、最初にこの段階に来たときに聞いてください。\n   - 15年計画との相性：次の4つを ○／△／× で判定し、理由を一言添えます\n     - margin：利益率30%以上を狙えるか\n     - national：全国・海外に売れるか\n     - stage1：最初は受託で稼ぎながら検証できるか\n     - campus：将来つくりたい自社拠点（「わたしについて」に書いた場所や構想）と噛み合うか\n   - 次の一手：誰に何を聞いて確かめるか（1週間以内にできる具体的な行動）\n   ×が多い事業案は、遠慮せずにそう伝えてください。やめる判断も前進です。やめる場合は、その理由を残します。\n\n# わたしが使う合図\n- 「まとめ」：今のツリーを、字下げした一覧で見せてください（各行に、本質・摩擦・制約の状態・タネの点数があれば添える）。\n- 「事業案にしたい」：選んだタネや本質から、7の手順で事業案を作ります。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n- 「戻る」：1つ前の段階に戻ります。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- nodes には、この会話で新しく作った行動と、内容を変えた行動だけを入れます。変えていない既存の行動は入れません。\n- 既存の行動（最初に貼られたJSONにあったもの）を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しい行動の id は、他と重ならないように「t」＋今日の日付8桁＋「-」＋3桁の連番にします（例：t20261010-001）。日付が分からなければ、最初にわたしに聞いてください。\n- parent には親の行動の id を入れます。テーマ（いちばん上）だけ null にします。既存の行動の下に足すときは、その既存の id を parent に入れます。\n- order は、同じ親の中での並び順です（0から）。\n- frictions は次の英語のキーだけを使います：parties（複数の当事者）、docs（書類・情報の手渡し）、money（お金が動く）、wait（待ち時間）、manual（手作業）、repeat（毎回やり直し）。\n- status は次のどれかです：still（まだある）、fading（薄れている）、gone（もう無い）、unknown（未確認）、\"\"（未記入）。\n- tags には「本質」の言い方を文字列で入れます。\n- seed は、タネ候補なら true です。scores は alt, now, money, repeat, gap をそれぞれ 0〜2 の数字で入れます。\n- why（背景）、constraint（制約）は、わたしが同意した内容だけを入れます。あなたの仮説のままのものは、memo に「仮説：〜」として入れます。\n- 事業案は ideas に入れます。新しい事業案の id は「i」＋今日の日付8桁＋「-」＋3桁の連番にします（例：i20261010-001）。既存の事業案を変えたときは、その id をそのまま使います。nodes と同じく、新しく作ったものと変えたものだけを入れます。\n- ideas の sources には、元になった行動や本質を入れます。行動は {\"type\": \"node\", \"id\": \"行動のid\"}、本質は {\"type\": \"tag\", \"name\": \"本質の言い方\"} の形です。\n- ideas の fit は margin, national, stage1, campus のそれぞれに \"ok\"（○）、\"mid\"（△）、\"ng\"（×）、\"\"（未判定）のどれかを入れます。fit の理由は fitNote にまとめます。\n- ideas の status は \"idea\"（アイデア）、\"testing\"（検証中）、\"hold\"（保留）、\"dropped\"（やめた）のどれかです。やめた場合は dropReason に理由を入れます。\n- 行動が多くて1回で出し切れないときは、「続く」と書いて分割し、わたしが「続き」と言ったら残りを出します。分割したそれぞれが、単独で正しいJSONになるようにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 1,\n  \"exportedAt\": 0,\n  \"nodes\": [\n    {\n      \"id\": \"t20261010-001\",\n      \"text\": \"家を借りる\",\n      \"parent\": null,\n      \"order\": 0,\n      \"frictions\": [],\n      \"why\": \"\",\n      \"constraint\": \"\",\n      \"status\": \"\",\n      \"tags\": [],\n      \"seed\": false,\n      \"scores\": {},\n      \"memo\": \"\"\n    },\n    {\n      \"id\": \"t20261010-002\",\n      \"text\": \"入居審査を受ける\",\n      \"parent\": \"t20261010-001\",\n      \"order\": 0,\n      \"frictions\": [\"parties\", \"docs\", \"wait\"],\n      \"why\": \"貸主が、家賃を払い続けられる人かを事前に確かめたい。\",\n      \"constraint\": \"借り手の支払い能力を示す共通の情報がなく、毎回書類で証明するしかない。\",\n      \"status\": \"fading\",\n      \"tags\": [\"支払い能力を証明する\"],\n      \"seed\": true,\n      \"scores\": {\"alt\": 2, \"now\": 1, \"money\": 1, \"repeat\": 2, \"gap\": 1},\n      \"memo\": \"仮説：保証会社ごとに審査をやり直している\"\n    }\n  ],\n  \"ideas\": [\n    {\n      \"id\": \"i20261010-001\",\n      \"title\": \"支払い能力をまとめて証明できる仕組み\",\n      \"status\": \"idea\",\n      \"sources\": [{\"type\": \"node\", \"id\": \"t20261010-002\"}, {\"type\": \"tag\", \"name\": \"支払い能力を証明する\"}],\n      \"customer\": \"賃貸物件を探す個人と、貸主・保証会社\",\n      \"pain\": \"物件ごと、保証会社ごとに同じ書類を出して審査をやり直している\",\n      \"alt\": \"源泉徴収票や在籍証明を毎回集めて提出している\",\n      \"whyNow\": \"仮説：給与や口座の情報を本人同意で連携できる仕組みが広がってきた\",\n      \"solution\": \"一度の確認で、複数の審査先に支払い能力を証明できるサービス\",\n      \"payer\": \"保証会社が今払っている審査コストの一部\",\n      \"edge\": \"会計の知識で、収入や支払い能力の見方を設計できる\",\n      \"fit\": {\"margin\": \"mid\", \"national\": \"ok\", \"stage1\": \"mid\", \"campus\": \"\"},\n      \"fitNote\": \"審査の受託から始めれば稼ぎながら検証できる可能性がある\",\n      \"next\": \"不動産仲介の担当者2人に、審査で一番手間がかかる所を聞く\",\n      \"dropReason\": \"\",\n      \"memo\": \"\"\n    }\n  ]\n}\n```\n\n# わたしについて\n（ここに自分の強みや経歴を書いておくと、事業案を考えるときに使われます）\n\nでは、始めてください。\n";
+const KEY_PROFILE='tane.profile';
+const PROFILE_SLOT='（ここに自分の強みや経歴を書いておくと、事業案を考えるときに使われます）';
+function buildPrompt(withData){let p=PROMPT;const prof=(ls.get(KEY_PROFILE)||'').trim();if(prof)p=p.replace(PROFILE_SLOT,prof);
+  if(withData)p+='\n\n---\n以下は、いまのタネ帳のJSONです。これを読み取ってから始めてください。\n```json\n'+exportJSON()+'\n```';return p;}
+function renderAI(m){
+  m.innerHTML=`<div class="list">
+    <div class="card"><h4>AIと対話する</h4>
+      <ol class="muted steps"><li>下のボタンでプロンプトをコピーする</li><li>「Claudeを開く」で新しいチャットを開き、貼り付けて送る</li><li>対話の最後に「保存」と送り、出てきたJSONをコピーする</li><li>この画面の「AIの結果を取り込む」に貼る</li></ol>
+      <button class="btn pri big" id="cpData">今のタネ帳と一緒にコピー</button>
+      <button class="btn big" id="cpNew">プロンプトだけコピー（新しいテーマから）</button>
+      <a class="btn big" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+      <textarea id="cpFallback" rows="4" readonly hidden aria-label="コピー用の文章"></textarea>
+    </div>
+    <div class="card"><h4>AIの結果を取り込む</h4>
+      <p class="muted" style="margin:0">AIが出したJSONを貼り付けてください。前後に説明文が付いていても大丈夫です。同じIDの行動や事業案は上書きし、新しいものは追加します。</p>
+      <textarea id="aiIn" rows="5" placeholder="ここに貼り付け" aria-label="AIの結果"></textarea>
+      <div class="btnrow"><button class="btn pri" id="aiGo">取り込む</button></div><div class="muted" id="aiRes"></div>
+    </div>
+    <div class="card"><h4>わたしについて</h4>
+      <p class="muted" style="margin:0">自分の強み、経歴、つくりたい拠点の構想などを書いておくと、コピーするプロンプトに入ります。この端末の中だけに保存されます。</p>
+      <textarea id="prof" rows="4" placeholder="例：持っている資格、仕事の経験、得意なこと、将来つくりたい拠点の構想" aria-label="わたしについて"></textarea>
+    </div>
+  </div>`;
+  const copy=async text=>{try{await navigator.clipboard.writeText(text);toast('コピーしました。Claudeに貼り付けてください');}
+    catch(e){const t=$('#cpFallback');t.hidden=false;t.value=text;t.focus();t.select();toast('自動でコピーできませんでした。下の欄を全選択してコピーしてください');}};
+  $('#cpData').onclick=()=>copy(buildPrompt(true));
+  $('#cpNew').onclick=()=>copy(buildPrompt(false));
+  const pf=$('#prof');pf.value=ls.get(KEY_PROFILE)||'';pf.oninput=e=>ls.set(KEY_PROFILE,e.target.value);
+  $('#aiGo').onclick=()=>{try{importData(parseBackup($('#aiIn').value),'#aiRes');}catch(err){$('#aiRes').textContent=err.message;}};
 }
 
 /* ---------- 分析シート ---------- */
@@ -579,6 +581,7 @@ function buildSheet(n){const id=n.id;const sh=$('#sheet');
   <div class="panel" data-panel="seed" hidden>
     <button class="tg seedtg" id="d-seed">タネ候補にする</button>
     <div class="score" id="d-score">${ELEMENTS.map(([k,l])=>`<div class="srow"><span>${l}</span><div class="dots">${[0,1,2].map(v=>`<button data-sk="${k}" data-sv="${v}" aria-label="${l} ${v}">${v}</button>`).join('')}</div></div>`).join('')}<div class="total" id="d-total"></div></div>
+    <button class="btn" id="d-mkidea">この行動から事業案を作る</button>
   </div>
   <div class="panel" data-panel="etc" hidden>
     <label class="f">メモ<textarea id="d-memo" rows="4"></textarea></label>
@@ -598,6 +601,7 @@ function buildSheet(n){const id=n.id;const sh=$('#sheet');
   $('#d-tagq').addEventListener('click',e=>{const b=e.target.closest('[data-qt]');if(b)addTag(b.dataset.qt);});
   $('#d-same').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)select(b.dataset.go,true);});
   $('#d-seed').onclick=()=>patch(id,{seed:!S.nodes.get(id).seed});
+  $('#d-mkidea').onclick=()=>{openSheet(false);mkIdea([{type:'node',id}],S.nodes.get(id).text);};
   $('#d-score').querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{const sc={...(S.nodes.get(id).scores||{})};sc[b.dataset.sk]=Number(b.dataset.sv);patch(id,{scores:sc});});
   $('#d-mu').onclick=()=>move(id,-1);$('#d-md').onclick=()=>move(id,1);
   const del=$('#d-del');let armed=false;
