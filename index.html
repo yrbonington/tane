@@ -58,11 +58,10 @@ h1{font-weight:800;font-size:21px;letter-spacing:.06em;margin:0;line-height:1.2}
 .subnav button{border:0;background:none;border-radius:8px;padding:8px 4px;font-size:14px;color:var(--ink-2);font-weight:600}
 .subnav button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .subnav .n{font-family:var(--f-mono);font-size:11px;margin-left:3px;opacity:.8}
-.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom)}
 .bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;color:var(--ink-2);font-size:11px}
 .bottom svg{width:24px;height:24px}
 .bottom button[aria-current="true"]{color:var(--ink);font-weight:700}
-.fab{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(72px + env(safe-area-inset-bottom));z-index:19;width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.24)}
 @media (min-width:900px){ .bottom{left:50%;right:auto;width:520px;transform:translateX(-50%);border:1px solid var(--line);border-radius:16px 16px 0 0} }
 .grid{display:grid;grid-template-columns:1fr;gap:20px;margin-top:14px}
 @media (min-width:900px){ .grid{grid-template-columns:minmax(0,1fr) 420px;align-items:start} }
@@ -203,6 +202,19 @@ label.f small{font-size:12px}
 .big{width:100%;padding:13px;font-size:16px;text-align:center;white-space:normal}
 a.btn{display:block;text-decoration:none;color:var(--ink)}
 .steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.entry-option{text-align:left;width:100%;white-space:normal;display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:14px}
+.entry-option strong{font-size:16px}.entry-option small{font-size:13px;color:var(--ink-2);white-space:normal}
+.entry-option.pri small{color:var(--on-accent)}
+.biz-section{display:block}
+.biz-section>summary{cursor:pointer;font-weight:700;font-size:15px;list-style:none}
+.biz-section>summary::-webkit-details-marker{display:none}
+.biz-section>summary:after{content:'⌄';float:right;color:var(--ink-2);font-size:17px}
+.biz-section[open]>summary:after{content:'⌃'}
+.biz-fields{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.import-review{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:9px;padding:12px;margin-top:10px;background:var(--surface)}
+.import-review ul{margin:0;padding-left:20px;font-size:13px}
+.origin{font-size:12px;color:var(--ink-2);line-height:1.5}
+
 </style>
 </head>
 <body>
@@ -223,9 +235,9 @@ a.btn{display:block;text-decoration:none;color:var(--ink)}
 <nav class="bottom" aria-label="メインメニュー">
   <button data-area="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-8"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6z"/><path d="M12 15c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/></svg><span>タネ探し</span></button>
   <button data-area="biz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/></svg><span>事業化</span></button>
+  <button data-area="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10h8M8 14h5"/><path d="M20 11.5a8 8 0 0 1-8 8c-1.4 0-2.9-.4-4.1-1.1L4 20l1.5-4A8 8 0 1 1 20 11.5Z"/></svg><span>AIと対話</span></button>
   <button data-area="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg><span>データ</span></button>
 </nav>
-<button class="fab" id="aiOpen" aria-label="AIと対話">AI</button>
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -235,7 +247,7 @@ const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
 const FRICTIONS=[['parties','複数の当事者'],['docs','書類・情報の手渡し'],['money','お金が動く'],['wait','待ち時間'],['manual','手作業'],['repeat','毎回やり直し']];
 const STATUS=[['still','まだある'],['fading','薄れている'],['gone','もう無い'],['unknown','未確認']];
 const ELEMENTS=[['alt','代わりの手段で無理やり済ませている'],['now','「なぜ今」がある（技術・規制・コストの変化）'],['money','お金がすでに別の名目で使われている'],['repeat','繰り返し起こり、広がっている'],['gap','大手がやりたがらない理由がある']];
-const S={ideas:new Map(),ideaSel:null,nodes:new Map(),theme:null,sel:null,focus:null,tab:'tree',collapsed:new Set(),detailFor:null,sheetTab:'cut',adding:null,renaming:null,importText:null,confirmReplace:false};
+const S={ideas:new Map(),ideaSel:null,nodes:new Map(),theme:null,sel:null,focus:null,tab:'tree',collapsed:new Set(),detailFor:null,sheetTab:'cut',adding:null,renaming:null,importText:null,confirmReplace:false,themeStart:false,pendingImport:null};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -310,15 +322,16 @@ const THEMES_HTML=`<div class="themes" id="themes"></div><form class="newtheme" 
 function renderThemes(){const el=$('#themes');if(!el)return;
   el.innerHTML=roots().map(r=>`<button class="chip" data-theme-id="${esc(r.id)}" aria-pressed="${r.id===S.theme}">${esc(r.text)}</button>`).join('')+`<button class="chip ghost" id="themeNew">＋ テーマ</button>`;
   el.querySelectorAll('[data-theme-id]').forEach(b=>b.onclick=()=>{S.theme=b.dataset.themeId;S.focus=null;ls.set(KEY_THEME,S.theme);S.sel=null;S.adding=null;S.tab='tree';render();openSheet(false);});
-  $('#themeNew').onclick=()=>{$('#themeForm').hidden=false;$('#themeInput').focus();};
+  $('#themeNew').onclick=()=>{S.themeStart=true;renderMain();window.scrollTo({top:0});};
   $('#themeForm').onsubmit=e=>{e.preventDefault();const v=$('#themeInput').value;$('#themeInput').value='';$('#themeForm').hidden=true;addTheme(v);};
   $('#themeCancel').onclick=()=>{$('#themeForm').hidden=true;};
 }
 $('#status').onclick=()=>{S.tab='data';render();};
-$('#aiOpen').onclick=()=>{if(S.tab!=='ai')S.aiFrom=S.tab;S.tab='ai';openSheet(false);render();window.scrollTo({top:0});};
 document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const a=b.dataset.area,cur=AREA_OF[S.tab];
+  S.themeStart=false;
   if(a==='seed')S.tab=cur==='seed'?'tree':(S.lastSeed||'tree');
   else if(a==='biz'){if(cur==='biz')S.ideaSel=null;S.tab='idea';}
+  else if(a==='ai'){if(S.tab!=='ai')S.aiFrom=S.tab;S.tab='ai';}
   else S.tab='data';
   openSheet(false);render();window.scrollTo({top:0});});
 const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data',ai:'ai'};
@@ -329,7 +342,6 @@ function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastS
   document.querySelectorAll('.bottom [data-area]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.area===area)));
   $('#n-same').textContent=[...tagIndex().values()].filter(a=>a.length>=2).length||'';
   $('#n-seed').textContent=[...S.nodes.values()].filter(n=>n.seed).length||'';
-  $('#aiOpen').hidden=area==='ai';
 }
 function badges(n){const o=[];const fr=(n.frictions||[]).length;
   if(n.status==='gone')o.push(`<span class="b b-gone">制約が消えた</span>`);else if(n.status==='fading')o.push(`<span class="b b-fade">制約が薄れている</span>`);
@@ -346,7 +358,20 @@ function addHint(n,mode){
   const p=n.parent&&S.nodes.get(n.parent);return p?`「${p.text}」のために、ほかにどんな行動をしている？　この行動と同じ段に入れます。`:'';
 }
 function renderTree(m){
-  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="empty"><b>まだテーマがありません。</b><br>「＋ テーマ」から、観察したい行動のまとまり（例：車を保有する）を作ってください。前のデータがある場合は、下の「データ」から取り込めます。</div>`;renderThemes();return;}
+  if(S.themeStart){
+    m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ タネ探しに戻る</button></div>
+      <div class="card"><h4>どうやってタネ探しを始めますか？</h4>
+        <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
+        <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
+        <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
+      </div><p class="muted">AIの対話で作ったJSONは「データ」から取り込めます。</p></div>`;
+    $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
+    $('#themeStartAI').onclick=()=>{S.themeStart=false;S.aiFrom='tree';S.tab='ai';openSheet(false);render();window.scrollTo({top:0});};
+    $('#themeStartManual').onclick=()=>{$('#startThemeForm').hidden=false;$('#startThemeInput').focus();};
+    $('#startThemeForm').onsubmit=e=>{e.preventDefault();const v=$('#startThemeInput').value.trim();if(!v)return;S.themeStart=false;addTheme(v);};
+    return;
+  }
+  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card"><h4>今日の観察から、タネを探そう。</h4><p class="muted" style="margin:0">違和感がなくても大丈夫。人が普段している行動から始めます。</p><button class="btn pri big" id="startNewTheme">＋ 最初のテーマを作る</button><p class="muted" style="margin:0">前のデータがある場合は「データ」から取り込めます。</p></div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
   const top=S.focus||S.theme;const d0=depth(top);const rows=[];
   const walk=id=>{const n=S.nodes.get(id);const d=depth(id);const rel=d-d0;const ks=kids(id);const shut=S.collapsed.has(id);const sel=S.sel===id;
     rows.push(`<div class="item ${sel?'sel':''}" data-item="${esc(id)}"><div class="row"><span class="indent">${'<i></i>'.repeat(Math.min(rel,6))}</span>
@@ -449,6 +474,21 @@ function importData(d,outSel){let add=0,upd=0,ia=0,iu=0;
   for(const x of d.ideas){if(S.ideas.has(x.id))iu++;else ia++;S.ideas.set(x.id,x);}
   saveNow();S.sel=null;S.detailFor=null;S.focus=null;S.theme=null;S.ideaSel=null;render();
   const el=$(outSel);if(el)el.textContent=`取り込みました：行動 新規${add}件・更新${upd}件／事業案 新規${ia}件・更新${iu}件`;toast('取り込みました');}
+function reviewImport(d){
+  S.pendingImport=d;
+  const nc=d.nodes.filter(n=>!S.nodes.has(n.id)).length,nu=d.nodes.length-nc;
+  const ic=d.ideas.filter(x=>!S.ideas.has(x.id)).length,iu=d.ideas.length-ic;
+  const examples=[...d.nodes.map(n=>({title:n.text,update:S.nodes.has(n.id)})),...d.ideas.map(x=>({title:x.title,update:S.ideas.has(x.id)}))].slice(0,7);
+  const el=$('#imResult');
+  el.innerHTML=`<div class="import-review"><strong>取り込む内容を確認</strong>
+    <span>行動：新規 ${nc}件・上書き ${nu}件<br>事業案：新規 ${ic}件・上書き ${iu}件</span>
+    <ul>${examples.map(x=>`<li>${esc(x.title)} <span class="muted">（${x.update?'上書き':'新規'}）</span></li>`).join('')}</ul>
+    ${d.nodes.length+d.ideas.length>7?'<span class="muted">ほかにも取り込むデータがあります。</span>':''}
+    ${nu+iu?'<span class="muted">同じIDの保存済みデータは上書きされます。必要なら先にバックアップしてください。</span>':''}
+    <div class="btnrow"><button class="btn pri" id="confirmImport">確認して取り込む</button><button class="btn" id="cancelImport">キャンセル</button></div></div>`;
+  $('#confirmImport').onclick=()=>{const pending=S.pendingImport;S.pendingImport=null;if(pending)importData(pending,'#imResult');};
+  $('#cancelImport').onclick=()=>{S.pendingImport=null;el.textContent='取り込みを中止しました';};
+}
 function renderData(m){
   const d=daysSinceExport(); const themes=roots().length;
   m.innerHTML=`<div class="list">
@@ -458,7 +498,7 @@ function renderData(m){
       <p class="muted" style="margin:0">「ファイルに保存」では、共有メニューから「"ファイル"に保存」を選ぶと、iPhoneの中かiCloud Driveに残せます。Claudeに分析を頼むときは「コピー」して、チャットに貼ってください。</p>
       <div class="btnrow"><button class="btn pri" id="exShare">ファイルに保存</button><button class="btn" id="exCopy">コピー</button></div></div>
     <div class="card"><h4>取り込む</h4>
-      <p class="muted" style="margin:0">バックアップのファイルや、AIが出したJSONを取り込みます。前後に説明文が付いていても大丈夫です。同じIDの行動や事業案は上書きし、新しいものは追加します。</p>
+      <p class="muted" style="margin:0">バックアップのファイルや、AIが出したJSONを取り込みます。前後に説明文が付いていても大丈夫です。取り込む前に、新規・上書きの件数を確認できます。</p>
       <div class="btnrow"><label class="btn" for="imFile">ファイルを選ぶ</label><input type="file" id="imFile" accept=".json,application/json,text/plain" hidden><button class="btn" id="imPasteOpen">貼り付けて取り込む</button></div>
       <div id="imPasteBox" hidden><textarea id="imText" rows="5" placeholder="バックアップやAIの結果を貼り付け"></textarea><div class="btnrow" style="margin-top:6px"><button class="btn pri" id="imPasteGo">取り込む</button></div></div>
       <div id="imResult" class="muted"></div></div>
@@ -468,9 +508,9 @@ function renderData(m){
     try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:name}); markExported(); toast('バックアップを渡しました'); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);markExported();};
   $('#exCopy').onclick=async()=>{try{await navigator.clipboard.writeText(exportJSON());markExported();toast('コピーしました');}catch(e){S.tab='data';renderMain();const t=$('#imText');$('#imPasteBox').hidden=false;t.value=exportJSON();t.select();toast('コピーできなかったので、下の欄から全選択してコピーしてください');}};
-  $('#imFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{importData(parseBackup(String(r.result)),'#imResult');}catch(err){$('#imResult').textContent=err.message;}};r.readAsText(f);e.target.value='';};
+  $('#imFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{reviewImport(parseBackup(String(r.result)));}catch(err){$('#imResult').textContent=err.message;}};r.readAsText(f);e.target.value='';};
   $('#imPasteOpen').onclick=()=>{$('#imPasteBox').hidden=false;$('#imText').focus();};
-  $('#imPasteGo').onclick=()=>{try{importData(parseBackup($('#imText').value),'#imResult');}catch(err){$('#imResult').textContent=err.message;}};
+  $('#imPasteGo').onclick=()=>{try{reviewImport(parseBackup($('#imText').value));}catch(err){$('#imResult').textContent=err.message;}};
   if(S.openPaste){S.openPaste=false;$('#imPasteBox').hidden=false;$('#imText').focus();$('#imText').scrollIntoView({block:'center'});}
   const w=$('#wipe');let armed=false;w.onclick=()=>{if(!armed){armed=true;w.textContent='本当にすべて消す';setTimeout(()=>{armed=false;if(w.isConnected)w.textContent='すべて消す';},3500);return;}S.nodes.clear();S.ideas.clear();saveNow();S.sel=null;S.theme=null;S.focus=null;render();toast('すべて消しました');};
 }
@@ -500,10 +540,20 @@ function renderIdeas(m){
   const cur=S.ideaSel&&S.ideas.get(S.ideaSel); if(cur) return renderIdeaEditor(m,cur); S.ideaSel=null;
   const order={testing:0,idea:1,hold:2,dropped:3};
   const all=[...S.ideas.values()].sort((a,b)=>(order[a.status]??1)-(order[b.status]??1)||(b.updated||b.created||0)-(a.updated||a.created||0));
-  const card=x=>`<button class="card ideacard" data-idea="${esc(x.id)}"><h4>${esc(x.title||'無題の事業案')}<span class="b st-${esc(x.status||'idea')}">${stLabel(x.status)}</span></h4>${x.customer||x.pain?`<span class="muted">${esc([x.customer,x.pain].filter(Boolean).join('：'))}</span>`:''}<span class="fits">${fitMarks(x)}</span>${x.next&&x.status!=='dropped'?`<span class="nextline">次の一手：${esc(x.next)}</span>`:''}</button>`;
-  m.innerHTML=`<div class="list"><div class="btnrow"><button class="btn pri" id="ideaNew">＋ 新しい事業案</button></div>
-    ${all.length?all.map(card).join(''):`<div class="empty"><b>まだ事業案はありません。</b><br>「タネ」タブのタネ候補や、「つながり」の本質で「事業案にする」を押すと、元のタネとつながった事業案ができます。ここから白紙で作ることもできます。</div>`}</div>`;
+  const card=x=>`<button class="card ideacard" data-idea="${esc(x.id)}"><h4>${esc(x.title||'無題の事業案')}<span class="b st-${esc(x.status||'idea')}">${stLabel(x.status)}</span></h4>${x.customer||x.pain?`<span class="muted">${esc([x.customer,x.pain].filter(Boolean).join('：'))}</span>`:''}<span class="fits">${fitMarks(x)}</span>${(x.sources||[]).length?`<span class="origin">元のタネ：${esc(x.sources.map(srcLabel).join('、'))}</span>`:''}${x.next&&x.status!=='dropped'?`<span class="nextline">次の一手：${esc(x.next)}</span>`:''}</button>`;
+  const seeds=[...S.nodes.values()].filter(n=>n.seed).sort((a,b)=>scoreOf(b)-scoreOf(a));
+  m.innerHTML=`<div class="list">
+    <div class="card"><h4>タネから事業案をつくる</h4>
+      <p class="muted" style="margin:0">タネ探しで見つけた行動を選んで事業案にします。1つのタネから複数の案を作れます。元になった行動とのつながりも残ります。</p>
+      ${seeds.length?seeds.slice(0,6).map(n=>`<button class="btn entry-option" data-mkidea="${esc(n.id)}"><strong>＋ ${esc(n.text)}</strong><small>${esc(themeName(n.id))}・タネ評価 ${scoreOf(n)}/10</small></button>`).join(''):`<p class="muted" style="margin:0">まだタネ候補がありません。「タネ探し」で行動を分析し、タネ候補にしてください。</p>`}
+      <button class="btn" id="ideaViewSeeds">タネ候補をすべて見る →</button></div>
+    <p class="h2">事業案一覧</p>
+    ${all.length?all.map(card).join(''):`<div class="empty">まだ事業案はありません。上のタネ候補から始めるのがおすすめです。</div>`}
+    <button class="btn" id="ideaNew">タネを選ばず、白紙から作る</button>
+  </div>`;
   $('#ideaNew').onclick=()=>mkIdea([],'新しい事業案');
+  $('#ideaViewSeeds').onclick=()=>{S.tab='seed';render();window.scrollTo({top:0});};
+  bindMkIdea(m);
   m.querySelectorAll('[data-idea]').forEach(b=>b.onclick=()=>{S.ideaSel=b.dataset.idea;renderMain();window.scrollTo({top:0});});
 }
 function renderIdeaEditor(m,x){const id=x.id;
@@ -517,11 +567,19 @@ function renderIdeaEditor(m,x){const id=x.id;
       <label class="f" id="i-dropwrap" ${x.status==='dropped'?'':'hidden'}>やめた理由（あとで学びになります）<textarea data-f="dropReason" rows="2"></textarea></label>
       <div class="sec"><h3>元になったタネ</h3><div class="tags">${(x.sources||[]).map((sc,i)=>`<span class="srcchip"><button class="linkbtn" data-src="${i}">${esc(srcLabel(sc))}</button><button class="srcx" data-srcx="${i}" aria-label="外す">✕</button></span>`).join('')||'<span class="muted">なし</span>'}</div></div>
     </div>
-    <div class="card"><h4>事業の中身</h4>${IDEA_FIELDS.map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}</div>
-    <div class="card"><h4>6　15年計画との相性</h4>${FIT.map(([k,sh,l])=>`<div class="fit"><span>${l}</span><div class="tri">${tri(k)}</div></div>`).join('')}
-      <label class="f">相性のメモ<textarea data-f="fitNote" rows="2"></textarea></label></div>
-    <div class="card"><h4>7　次の一手</h4><label class="f"><small>誰に何を聞いて確かめるか。1週間以内にできることにします</small><textarea data-f="next" rows="2"></textarea></label></div>
-    <div class="card"><label class="f">メモ<textarea data-f="memo" rows="3"></textarea></label><div><button class="btn sm danger" id="ideaDel">この事業案を削除</button></div></div>
+    <details class="card biz-section" open><summary>1. 誰の、どんな困りごとか</summary>
+      <div class="biz-fields">${IDEA_FIELDS.slice(0,3).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}</div></details>
+    <details class="card biz-section"><summary>2. どう事業にするか</summary>
+      <div class="biz-fields">${IDEA_FIELDS.slice(3,6).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}</div></details>
+    <details class="card biz-section"><summary>3. 進めるか判断する</summary>
+      <div class="biz-fields">
+        ${IDEA_FIELDS.slice(6).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}
+        <h4>15年計画との相性</h4>${FIT.map(([k,sh,l])=>`<div class="fit"><span>${l}</span><div class="tri">${tri(k)}</div></div>`).join('')}
+        <label class="f">相性のメモ<textarea data-f="fitNote" rows="2"></textarea></label>
+        <h4>次の一手</h4><label class="f"><small>誰に何を聞いて確かめるか。1週間以内にできることにします</small><textarea data-f="next" rows="2"></textarea></label>
+        <label class="f">メモ<textarea data-f="memo" rows="3"></textarea></label>
+      </div></details>
+    <div class="card"><div><button class="btn sm danger" id="ideaDel">この事業案を削除</button></div></div>
   </div>`;
   const touch=()=>{x.updated=Date.now();saveSoon();};
   $('#i-title').value=x.title||''; $('#i-title').oninput=e=>{x.title=e.target.value;touch();};
@@ -666,7 +724,7 @@ function syncSheet(n,first){
 $('#scrim').onclick=()=>openSheet(false);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.adding){S.adding=null;renderMain();}else openSheet(false);}});
 loadAll();
-if(!S.nodes.size) S.tab='data';
+if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
