@@ -490,6 +490,24 @@ body{background:var(--paper)}
 .ai-provider-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%}
 .ai-provider-links .btn{display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;white-space:normal;text-align:center;border-radius:14px;padding:10px 8px}
 .seed-ai-shortcut .ai-provider-links{flex-basis:100%}
+
+/* AI 3-step interaction: same quiet, neutral treatment for both providers. */
+[hidden]{display:none!important}
+.seed-ai-actions{display:flex;flex-direction:column;gap:13px;padding:4px 0 0;background:none;border:0;border-radius:0}
+.ai-flow{gap:15px}
+.ai-flow-step{display:flex;flex-direction:column;gap:10px;background:var(--panel);border:1px solid var(--panel-line);border-radius:17px;padding:17px}
+.ai-flow-step strong,.ai-flow-choice strong{font-size:15px;font-weight:720;line-height:1.5}
+.ai-flow-step p,.ai-flow-choice p{margin:0;line-height:1.65}
+.ai-flow-choice{display:flex;flex-direction:column;gap:10px;padding:3px 2px}
+.ai-flow .ai-provider-links,.seed-ai-actions .ai-provider-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%}
+.ai-provider-links .btn.ai-provider{display:flex;align-items:center;justify-content:center;min-height:48px;border:1px solid var(--line);background:var(--frame);color:var(--ink);font-weight:650;text-align:center;border-radius:14px;white-space:normal;padding:10px 8px}
+.ai-provider-links .btn.ai-provider:hover{background:var(--panel)}
+.ai-flow-step .btn.ai-secondary,.seed-ai-actions .btn.ai-secondary{background:var(--frame);color:var(--ink);border-color:var(--line);border-radius:13px;white-space:normal}
+.seed-ai-shortcut{margin-top:18px;display:flex;flex-direction:column;align-items:stretch;background:var(--frame);border-color:var(--line);gap:15px}
+.seed-ai-shortcut .ai-provider-links{flex-basis:auto}
+.seed-ai-shortcut > div{width:auto}
+.biz-ai-workflow{display:flex;flex-direction:column;gap:15px}
+@media(max-width:380px){.ai-provider-links .btn.ai-provider{font-size:12px}}
 </style>
 </head>
 <body>
@@ -646,15 +664,25 @@ function renderTree(m){
       <div class="welcome-panel choice-panel"><h4>どうやってタネ探しを始めますか？</h4>
         <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
         <div class="seed-ai-actions" id="themeAIActions" hidden>
-          <p class="muted">① プロンプトをコピー　② ChatGPTまたはClaudeで対話　③「保存」と伝えて出たJSONを取り込む</p>
-          <button class="btn pri big" id="themeCopyNew">新しいテーマ用プロンプトをコピー</button>
-          ${S.nodes.size?'<button class="btn big" id="themeCopyData">今のタネ帳も一緒にコピー</button>':''}
-          <p class="muted">コピーしたら、使いたいAIを開いて貼り付けてください。</p>
-          <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-  <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
-  <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
-</div>
-          <button class="btn" id="themeGoImport">AIの結果（JSON）を取り込む →</button>
+          <div class="ai-flow-step">
+            <strong>① プロンプトをコピー</strong>
+            <p class="muted">タネ探しのための質問とJSONの保存ルールをまとめてコピーします。</p>
+            <button class="btn pri big" id="themeCopyNew">新しいテーマ用プロンプトをコピー</button>
+            ${S.nodes.size?'<button class="btn ai-secondary" id="themeCopyData">今のタネ帳も一緒にコピー</button>':''}
+          </div>
+          <div class="ai-flow-choice">
+            <strong>② 使いたいAIを開く</strong>
+            <p class="muted">コピーした文章をChatGPTかClaudeに貼り付けます。</p>
+            <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+  </div>
+          </div>
+          <div class="ai-flow-step">
+            <strong>③ 結果を取り込む</strong>
+            <p class="muted">AIとの対話の最後に「保存」と伝え、出力されたJSONを貼り付けます。</p>
+            <button class="btn ai-secondary" id="themeGoImport">JSONを取り込む →</button>
+          </div>
         </div>
         <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
@@ -685,16 +713,34 @@ function renderTree(m){
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button data-zoom="">全体</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
   m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`)+
-    `<div class="seed-ai-shortcut"><div><strong>このテーマの続きをAIと考える</strong><p class="muted">今のタネ帳を含むプロンプトをコピーして、ChatGPTかClaudeに貼り付けます。</p></div><button class="btn" id="treeAICopy">プロンプトをコピー</button><div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-  <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
-  <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
-</div></div>`;
+    `<div class="card ai-flow seed-ai-shortcut">
+      <h4>このテーマの続きをAIと考える</h4>
+      <div class="ai-flow-step">
+        <strong>① プロンプトをコピー</strong>
+        <p class="muted">今のタネ帳のJSONも含めてコピーし、続きから考えられます。</p>
+        <button class="btn pri big" id="treeAICopy">プロンプトをコピー</button>
+      </div>
+      <div class="ai-flow-choice">
+        <strong>② 使いたいAIを開く</strong>
+        <p class="muted">コピーした文章を貼り付けて対話を始めます。</p>
+        <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+  </div>
+      </div>
+      <div class="ai-flow-step">
+        <strong>③ 結果を取り込む</strong>
+        <p class="muted">最後に「保存」と伝え、返ってきたJSONを取り込みます。</p>
+        <button class="btn ai-secondary" id="treeGoImport">JSONを取り込む →</button>
+      </div>
+    </div>`;
   renderThemes();
   m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
   m.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{S.focus=b.dataset.zoom||null;render();});
   const q=$('#quickAdd');if(q)q.onclick=()=>{select(top,false);startAdd(top,'down');};
   $('#treeAICopy').onclick=()=>copyText(buildSeedPrompt(true));
+  $('#treeGoImport').onclick=()=>openImport();
   bindActionBar();
 }
 function actionBar(n,rel){const isRoot=!n.parent;const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;const pad=Math.min(rel,6)*16+32;
@@ -868,14 +914,28 @@ function renderIdeaEditor(m,x){const id=x.id;
   const tri=k=>FITV.map(([v,l])=>`<button data-fit="${k}" data-v="${v}" aria-pressed="${(x.fit||{})[k]===v}" aria-label="${l}">${l}</button>`).join('');
   m.innerHTML=`<div class="list">
     <div><button class="back" id="ideaBack">‹ 事業案の一覧</button></div>
-    <div class="card biz-ai-workflow"><h4>AIと事業案を詰める</h4><p class="muted" style="margin:0">プロンプトをコピーしてChatGPTかClaudeで対話。最後に「保存」と伝えて、返ってきたJSONを取り込みます。</p>
-      <button class="btn pri big" id="ideaAI">この事業案のプロンプトをコピー</button>
-      <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-  <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
-  <a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
-</div>
-      <button class="btn" id="ideaImport">AIの結果（JSON）を取り込む →</button></div>
-    <div class="card">
+    <div class="card ai-flow biz-ai-workflow">
+      <h4>AIと事業案を詰める</h4>
+      <div class="ai-flow-step">
+        <strong>① プロンプトをコピー</strong>
+        <p class="muted">この事業案と元のタネを含めてコピーします。</p>
+        <button class="btn pri big" id="ideaAI">この事業案のプロンプトをコピー</button>
+      </div>
+      <div class="ai-flow-choice">
+        <strong>② 使いたいAIを開く</strong>
+        <p class="muted">ChatGPTかClaudeに貼り付け、事業案を検証します。</p>
+        <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+  </div>
+      </div>
+      <div class="ai-flow-step">
+        <strong>③ 結果を取り込む</strong>
+        <p class="muted">AIに「保存」と伝え、返ってきたJSONを取り込みます。</p>
+        <button class="btn ai-secondary" id="ideaImport">JSONを取り込む →</button>
+      </div>
+    </div>
+        <div class="card">
       <input class="title-in" id="i-title" aria-label="事業案の名前" autocomplete="off">
       <div class="seg" id="i-st">${IDEA_ST.map(([k,l])=>`<button data-v="${k}" aria-pressed="${(x.status||'idea')===k}">${l}</button>`).join('')}</div>
       <label class="f" id="i-dropwrap" ${x.status==='dropped'?'':'hidden'}>やめた理由（あとで学びになります）<textarea data-f="dropReason" rows="2"></textarea></label>
@@ -1041,7 +1101,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=11',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
