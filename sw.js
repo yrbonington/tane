@@ -1,6 +1,6 @@
 // オフラインでも開けるように、アプリの部品だけをキャッシュする。
 // 書いた内容はここでは一切扱わない（端末の localStorage にのみ保存）。
-const VERSION = 'tane-v1';
+const VERSION = 'tane-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
