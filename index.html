@@ -9,8 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="タネ帳">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#EEF2F1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111518" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#202020" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <title>市場のタネ帳</title>
@@ -215,12 +215,186 @@ a.btn{display:block;text-decoration:none;color:var(--ink)}
 .import-review ul{margin:0;padding-left:20px;font-size:13px}
 .origin{font-size:12px;color:var(--ink-2);line-height:1.5}
 
+
+/* =========================================================
+   タネ帳 UI v2 — ChatGPT-inspired minimal design language
+   Independent product identity; no OpenAI trademarks/assets.
+   ========================================================= */
+:root{
+  --paper:#FFFFFF;
+  --surface:#F7F7F8;
+  --ink:#202123;
+  --ink-2:#696B70;
+  --line:#E7E7EA;
+  --accent:#202123;
+  --accent-soft:#EBECEF;
+  --on-accent:#FFFFFF;
+  --seed:#E4F3E8;
+  --seed-soft:#EFF8F1;
+  --seed-ink:#22623F;
+  --warn:#A45B11;
+  --warn-soft:#FFF1DD;
+  --r:20px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#202020;
+    --surface:#2B2B2B;
+    --ink:#F3F3F3;
+    --ink-2:#B8B8BC;
+    --line:#434343;
+    --accent:#F3F3F3;
+    --accent-soft:#393939;
+    --on-accent:#171717;
+    --seed:#244734;
+    --seed-soft:#213A2D;
+    --seed-ink:#D1F1DE;
+    --warn:#E8AD72;
+    --warn-soft:#493522;
+    color-scheme:dark;
+  }
+}
+body{font-size:15px;line-height:1.63;letter-spacing:.005em}
+.wrap{max-width:1100px;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));padding-bottom:calc(132px + env(safe-area-inset-bottom))}
+.bar{padding-top:calc(16px + env(safe-area-inset-top));padding-bottom:8px;border-bottom:1px solid var(--line)}
+.bar-top{gap:14px;min-height:54px;padding-bottom:12px}
+.heading{display:flex;flex-direction:column;gap:0;min-width:0}
+.eyebrow{display:block;font-size:11px;line-height:1.6;color:var(--ink-2);font-weight:650;letter-spacing:.055em}
+h1{font-size:23px;line-height:1.25;letter-spacing:-.027em;font-weight:750}
+.status{font-size:11px;line-height:1.3;border-radius:999px;background:var(--surface);color:var(--ink-2);padding:7px 9px;max-width:45%;text-align:center;white-space:normal}
+.status.alert{color:var(--warn);background:var(--warn-soft)}
+.subnav{border:0;background:var(--surface);border-radius:999px;padding:5px;gap:4px;margin:2px 0 7px}
+.subnav button{min-width:0;padding:10px 5px;border-radius:999px;font-size:13px;line-height:1.3;font-weight:600;transition:background .16s ease,color .16s ease}
+.subnav button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.09)}
+.grid{margin-top:18px;gap:22px}
+.list{gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:19px;gap:13px}
+.card h4{font-size:17px;line-height:1.4;font-weight:700;letter-spacing:-.015em}
+.card p{line-height:1.65}
+.h2{color:var(--ink-2);font-size:12px;font-weight:750;letter-spacing:.06em;margin:10px 0 0}
+.muted{color:var(--ink-2);font-size:13px;line-height:1.6}
+.empty{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;line-height:1.7}
+.empty b{font-size:17px}
+.btn{min-height:44px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:10px 16px;font-size:14px;font-weight:650;line-height:1.35;transition:background .15s ease,transform .15s ease}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.sm{min-height:36px;padding:7px 13px;font-size:12px}
+.btn.icon{min-height:44px;width:44px;border-radius:999px;padding:8px 0}
+.btn.big{min-height:52px;padding:14px 16px;font-size:15px;border-radius:15px}
+.btn.danger{color:var(--warn)}
+.entry-option{padding:16px;border-radius:16px;gap:8px}
+.entry-option strong{font-size:16px;letter-spacing:-.01em}
+.entry-option small{font-size:13px;line-height:1.55}
+.welcome{padding:24px 20px;gap:16px}
+.welcome h4{font-size:23px;font-weight:750;line-height:1.38;letter-spacing:-.035em}
+.welcome .btn.big{margin-top:4px}
+.welcome small{line-height:1.6}
+.intro-choice h4{font-size:21px;letter-spacing:-.028em}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 15px;font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip.ghost{background:transparent;border:1px dashed var(--line)}
+.themes{margin:0 -18px 14px;padding:0 18px 4px;gap:8px}
+.newtheme input,.inline input{min-height:44px;border:1px solid var(--line);background:var(--paper);border-radius:13px;padding:10px 13px}
+.newtheme input:focus,.inline input:focus{outline:2px solid var(--ink);outline-offset:1px;border-color:transparent}
+.tapnote{font-size:13px;margin-bottom:13px;line-height:1.6}
+.rows{gap:3px}
+.node{min-height:49px;padding:10px 12px;border-radius:14px}
+.node.root .t{font-size:17px;font-weight:700}
+.item.sel .node{background:var(--surface);border-color:var(--line);box-shadow:0 0 0 2px var(--accent-soft)}
+.caret{width:33px;border-radius:10px}
+.lv{border-radius:6px;background:var(--surface);border-color:var(--line);font-size:10px}
+.actions{gap:8px;padding-top:12px;padding-bottom:13px}
+.act{border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:13px;gap:5px}
+.act b{font-size:14px}
+.act b i{color:var(--ink)}
+.act small{font-size:12px;color:var(--ink-2);line-height:1.5}
+.act.main{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.act.main b i,.act.main small{color:var(--paper)}
+.addbox{gap:10px;padding-bottom:16px}
+.hint{font-size:13px}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:20px;gap:18px}
+.sheet-h{align-items:center}
+.close{border:1px solid var(--line);background:var(--surface);width:40px;height:40px}
+.title-in{font-size:21px;border:1px solid var(--line);border-radius:13px;background:var(--paper);padding:10px 12px}
+.title-in:focus{outline:2px solid var(--ink);border-color:transparent}
+.stabs{background:var(--surface);border-radius:13px;padding:5px}
+.stabs button{border-radius:10px;padding:10px 4px}
+.stabs button[aria-selected="true"]{background:var(--paper);box-shadow:0 1px 4px rgba(0,0,0,.09)}
+.sec{gap:10px}
+.sec h3{font-size:12px;letter-spacing:.045em}
+.tg{min-height:40px;border-radius:999px;padding:9px 13px;background:var(--surface);border:1px solid var(--line)}
+.tg[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tg.seedtg[aria-pressed="true"]{background:var(--seed);border-color:var(--seed);color:var(--seed-ink)}
+.seg{border:0;background:var(--surface);border-radius:13px;padding:4px;gap:3px}
+.seg button{border:0;border-radius:10px;min-height:41px;padding:9px 4px;font-size:12px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button[data-v="gone"][aria-pressed="true"]{background:var(--seed);color:var(--seed-ink)}
+textarea{min-height:78px;border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:12px 14px;line-height:1.6}
+textarea:focus{outline:2px solid var(--ink);outline-offset:0;border-color:transparent}
+label.f{gap:7px;color:var(--ink-2)}
+label.f .q{font-size:14px}
+label.f small{font-size:12px}
+.tagx{background:var(--accent-soft);color:var(--ink);padding:7px 11px;border-radius:999px}
+.b{font-size:11px;border-radius:999px;padding:3px 9px}
+.b-tag{background:var(--accent-soft);color:var(--ink)}
+.b-seed{background:var(--seed);color:var(--seed-ink)}
+.b-fr{background:var(--warn-soft)}
+.st-idea{background:var(--accent-soft);color:var(--ink)}
+.st-testing{background:var(--seed);color:var(--seed-ink)}
+.st-hold,.st-dropped{background:var(--line);color:var(--ink-2)}
+.srcchip{background:var(--accent-soft);border-radius:999px}
+.srcx,.srcchip .linkbtn{color:var(--ink)}
+.linkbtn,.back{color:var(--ink);font-weight:650}
+.hit{min-height:52px;padding:9px 2px}
+.hit:first-of-type{border-top:0}
+.hit small{font-size:12px}
+.thm{background:var(--paper);border-radius:999px;padding:4px 8px}
+.ideacard{gap:13px;white-space:normal;border-radius:20px;padding:18px}
+.ideacard h4{font-size:17px}
+.biz-section{padding:19px}
+.biz-section>summary{font-size:16px;line-height:1.5}
+.biz-section>summary:after{font-size:20px}
+.biz-fields{gap:18px;margin-top:20px}
+.fit{gap:10px;font-size:13px}
+.tri button{border-radius:12px;min-height:41px}
+.import-review{background:var(--paper);border-radius:15px;padding:16px;gap:12px}
+.stat{gap:14px 20px}
+.stat b{font-size:20px;font-weight:750}
+.steps{gap:11px;padding-left:23px}
+.steps li{padding-left:3px}
+.bottom{background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(0,0,0,.035);gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+.bottom button{min-height:56px;padding:9px 2px 7px;border-radius:15px;font-size:11px;gap:4px;font-weight:550}
+.bottom svg{width:23px;height:23px}
+.bottom button[aria-current="true"]{background:var(--surface);color:var(--ink);font-weight:750}
+.toast{bottom:calc(91px + env(safe-area-inset-bottom));padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--paper);font-weight:600}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+@media(hover:hover){
+ .btn:not(:disabled):hover,.act:hover,.chip:hover,.ideacard:hover{filter:brightness(.97)}
+ .bottom button:hover{background:var(--surface)}
+ .subnav button:not([aria-pressed="true"]):hover{background:var(--line)}
+}
+@media(max-width:899px){
+ .sheet{max-height:87%;border-radius:26px 26px 0 0;padding-bottom:calc(23px + env(safe-area-inset-bottom))}
+}
+@media(min-width:900px){
+ .grid{grid-template-columns:minmax(0,1fr) 400px}
+ .sheet{top:136px}
+ .bottom{width:580px;border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0}
+}
+@media(max-width:380px){
+ .bar-top{gap:7px}
+ h1{font-size:21px}
+ .status{font-size:10px;padding:6px 7px}
+ .bottom button{font-size:10px}
+ .card{padding:16px}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="bar">
-    <div class="bar-top"><h1 id="areaTitle">タネ探し</h1><span class="status" id="status"></span></div>
+    <div class="bar-top"><div class="heading"><span class="eyebrow">市場のタネ帳</span><h1 id="areaTitle">タネ探し</h1></div><span class="status" id="status"></span></div>
     <div class="subnav" id="subnav" role="tablist">
       <button data-tab="tree">ツリー</button>
       <button data-tab="same">つながり<span class="n" id="n-same"></span></button>
@@ -360,7 +534,7 @@ function addHint(n,mode){
 function renderTree(m){
   if(S.themeStart){
     m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ タネ探しに戻る</button></div>
-      <div class="card"><h4>どうやってタネ探しを始めますか？</h4>
+      <div class="card intro-choice"><span class="eyebrow">新しいテーマ</span><h4>どうやってタネ探しを始めますか？</h4>
         <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
         <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
@@ -371,7 +545,7 @@ function renderTree(m){
     $('#startThemeForm').onsubmit=e=>{e.preventDefault();const v=$('#startThemeInput').value.trim();if(!v)return;S.themeStart=false;addTheme(v);};
     return;
   }
-  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card"><h4>今日の観察から、タネを探そう。</h4><p class="muted" style="margin:0">違和感がなくても大丈夫。人が普段している行動から始めます。</p><button class="btn pri big" id="startNewTheme">＋ 最初のテーマを作る</button><p class="muted" style="margin:0">前のデータがある場合は「データ」から取り込めます。</p></div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
+  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card welcome"><span class="eyebrow">はじめの一歩</span><h4>今日の観察から、<br>タネを探そう。</h4><p class="muted" style="margin:0">違和感がなくても大丈夫。人が普段している行動から始めます。</p><button class="btn pri big" id="startNewTheme">＋ 最初のテーマを作る</button><p class="muted" style="margin:0">前のデータがある場合は「データ」から取り込めます。</p></div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
   const top=S.focus||S.theme;const d0=depth(top);const rows=[];
   const walk=id=>{const n=S.nodes.get(id);const d=depth(id);const rel=d-d0;const ks=kids(id);const shut=S.collapsed.has(id);const sel=S.sel===id;
     rows.push(`<div class="item ${sel?'sel':''}" data-item="${esc(id)}"><div class="row"><span class="indent">${'<i></i>'.repeat(Math.min(rel,6))}</span>
