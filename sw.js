@@ -1,23 +1,43 @@
-// オフラインでも開けるように、アプリの部品だけをキャッシュする。
-// 書いた内容はここでは一切扱わない（端末の localStorage にのみ保存）。
-const VERSION = 'tane-v10';
+// アプリの画面はオンライン時に最新を優先。オフライン時だけ保存済み画面を表示します。
+// 書いた内容はここでは一切扱わず、端末の localStorage にのみ保存します。
+const VERSION = 'tane-v11';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg'];
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
 });
-
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('tane-') && key !== VERSION).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
-
-// 自分のサイトのファイルだけを扱う。まずキャッシュから返し、裏で新しい版を取りに行く。
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
-  e.respondWith(caches.open(VERSION).then(async cache => {
-    const hit = await cache.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then(res => { if (res.ok) cache.put(e.request, res.clone()); return res; }).catch(() => null);
-    return hit || (await net) || cache.match('./index.html');
-  }));
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  const isPage = event.request.mode === 'navigate' || /\/index\.html$/.test(url.pathname);
+  if (isPage) {
+    event.respondWith((async () => {
+      const cache = await caches.open(VERSION);
+      try {
+        const fresh = await fetch(event.request, { cache: 'no-store' });
+        if (fresh.ok) {
+          await cache.put('./index.html', fresh.clone());
+          return fresh;
+        }
+        if (fresh.status >= 400) return fresh;
+      } catch (error) {}
+      return (await cache.match('./index.html')) || Response.error();
+    })());
+    return;
+  }
+  event.respondWith((async () => {
+    const cache = await caches.open(VERSION);
+    const cached = await cache.match(event.request, { ignoreSearch: true });
+    if (cached) return cached;
+    try {
+      const fresh = await fetch(event.request);
+      if (fresh.ok) await cache.put(event.request, fresh.clone());
+      return fresh;
+    } catch (error) {
+      return Response.error();
+    }
+  })());
 });
