@@ -389,6 +389,90 @@ label.f small{font-size:12px}
  .card{padding:16px}
 }
 
+
+/* ---- Reference-matched Tane design v3: blue CTA and nested cards ---- */
+:root{
+  --paper:#FFFFFF;
+  --surface:#F3F4F6;
+  --ink:#202123;
+  --ink-2:#747680;
+  --line:#E3E4E8;
+  --accent:#3151CB;
+  --accent-soft:#E7EBFC;
+  --on-accent:#FFFFFF;
+  --frame:#FFFFFF;
+  --panel:#F3F4F6;
+  --panel-line:#EDEEF1;
+  --blue-button:#304CC9;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --paper:#0B0B0D;
+    --surface:#242426;
+    --ink:#F8F8FA;
+    --ink-2:#B3B4BC;
+    --line:#323236;
+    --accent:#5976EB;
+    --accent-soft:#252B41;
+    --on-accent:#FFFFFF;
+    --frame:#0B0B0D;
+    --panel:#242426;
+    --panel-line:#333336;
+    --blue-button:#304CC9;
+  }
+}
+body{background:var(--paper)}
+.bar{background:var(--paper)}
+.card{background:var(--frame);border:1px solid var(--line);border-radius:22px;padding:18px}
+.welcome-frame,.intro-frame{padding:18px 14px 14px;gap:18px}
+.welcome-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 6px}
+.welcome-heading h3{font-size:18px;font-weight:750;line-height:1.4;letter-spacing:-.018em;margin:0}
+.welcome-heading svg{width:23px;height:23px;flex:none;stroke:var(--ink-2);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.welcome-panel{display:flex;flex-direction:column;gap:16px;background:var(--panel);border:1px solid var(--panel-line);border-radius:22px;padding:23px 19px}
+.welcome-panel h4{margin:0;font-size:clamp(20px,5.7vw,27px);line-height:1.42;letter-spacing:-.025em;font-weight:760}
+.welcome-panel p{font-size:15px;line-height:1.75;margin:0;color:var(--ink)}
+.welcome-panel .welcome-help{font-size:12px;color:var(--ink-2);text-align:center}
+.welcome-panel .btn.pri.big{width:100%;border-radius:15px;min-height:53px;font-size:16px;font-weight:720}
+.frame-step{font-size:12px;color:var(--ink-2)}
+.intro-frame .welcome-panel{gap:12px}
+.intro-frame .welcome-panel h4{margin-bottom:6px;font-size:20px}
+.choice-panel .entry-option{border-radius:16px;min-height:85px}
+.choice-panel .entry-option:not(.pri){background:var(--frame)}
+.btn.pri,.btn.pri.big,.act.main,.entry-option.pri{background:var(--blue-button);border-color:var(--blue-button);color:#FFFFFF}
+.act.main b i,.act.main small{color:#FFFFFF}
+.btn.pri:focus-visible,.act.main:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.entry-option.pri small{color:#EDEEFF}
+.biz-frame{padding:18px 14px 14px;gap:16px}
+.biz-frame-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:0 6px}
+.biz-frame-head h4{margin:0;font-size:18px;letter-spacing:-.02em}
+.biz-frame-head span{font-size:12px;color:var(--ink-2);white-space:nowrap}
+.biz-progress{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:0 6px}
+.biz-progress span{height:5px;border-radius:999px;background:var(--line)}
+.biz-progress span.active{background:var(--blue-button)}
+.biz-stage-list{display:flex;flex-direction:column;gap:10px}
+.biz-stage-list .biz-section{background:var(--panel);border:1px solid var(--panel-line);border-radius:18px;padding:17px}
+.biz-stage-list .biz-section[open]{padding-bottom:19px}
+.biz-section>summary{font-size:15px;line-height:1.55;font-weight:730}
+.biz-stage-list textarea{background:var(--frame)}
+.biz-stage-list .biz-fields{gap:14px;margin-top:18px}
+.ideacard{background:var(--frame)}
+.card:not(.welcome-frame):not(.intro-frame):not(.biz-frame){border-color:var(--line)}
+.empty,.act{background:var(--panel);border-color:var(--panel-line)}
+.bottom{background:var(--paper)}
+.bottom button[aria-current="true"]{background:var(--panel)}
+.subnav{background:var(--panel)}
+@media (prefers-color-scheme:dark){
+  .subnav button[aria-pressed="true"]{background:#3A3A3D}
+  .stabs button[aria-selected="true"]{background:#37373A}
+  .btn:not(.pri):not(.danger),.chip,.thm{background:var(--panel)}
+  .choice-panel .entry-option:not(.pri){background:var(--frame)}
+  .btn.pri,.btn.pri.big,.act.main,.entry-option.pri{background:var(--blue-button);border-color:var(--blue-button)}
+}
+@media(max-width:380px){
+  .welcome-panel{padding:19px 15px}
+  .welcome-frame,.intro-frame,.biz-frame{padding:14px 11px 12px}
+}
+
 </style>
 </head>
 <body>
@@ -534,18 +618,26 @@ function addHint(n,mode){
 function renderTree(m){
   if(S.themeStart){
     m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ タネ探しに戻る</button></div>
-      <div class="card intro-choice"><span class="eyebrow">新しいテーマ</span><h4>どうやってタネ探しを始めますか？</h4>
+      <div class="card intro-choice intro-frame">
+      <div class="welcome-heading"><h3>新しいテーマ</h3><span class="frame-step">タネ探しを始める</span></div>
+      <div class="welcome-panel choice-panel"><h4>どうやってタネ探しを始めますか？</h4>
         <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
         <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
-      </div><p class="muted">AIの対話で作ったJSONは「データ」から取り込めます。</p></div>`;
+      </div></div><p class="muted">AIの対話で作ったJSONは「データ」から取り込めます。</p></div>`;
     $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
     $('#themeStartAI').onclick=()=>{S.themeStart=false;S.aiFrom='tree';S.tab='ai';openSheet(false);render();window.scrollTo({top:0});};
     $('#themeStartManual').onclick=()=>{$('#startThemeForm').hidden=false;$('#startThemeInput').focus();};
     $('#startThemeForm').onsubmit=e=>{e.preventDefault();const v=$('#startThemeInput').value.trim();if(!v)return;S.themeStart=false;addTheme(v);};
     return;
   }
-  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card welcome"><span class="eyebrow">はじめの一歩</span><h4>今日の観察から、<br>タネを探そう。</h4><p class="muted" style="margin:0">違和感がなくても大丈夫。人が普段している行動から始めます。</p><button class="btn pri big" id="startNewTheme">＋ 最初のテーマを作る</button><p class="muted" style="margin:0">前のデータがある場合は「データ」から取り込めます。</p></div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
+  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card welcome-frame">
+    <div class="welcome-heading"><h3>市場のタネ帳</h3><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-8M12 13c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/></svg></div>
+    <div class="welcome-panel"><h4>今日の観察から、<br>タネを探そう。</h4>
+    <p>違和感がなくても大丈夫。人が普段している行動から始めます。</p>
+    <button class="btn pri big" id="startNewTheme">＋ 最初のテーマを作る</button>
+    <p class="welcome-help">前のデータがある場合は「データ」から復元</p></div>
+  </div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
   const top=S.focus||S.theme;const d0=depth(top);const rows=[];
   const walk=id=>{const n=S.nodes.get(id);const d=depth(id);const rel=d-d0;const ks=kids(id);const shut=S.collapsed.has(id);const sel=S.sel===id;
     rows.push(`<div class="item ${sel?'sel':''}" data-item="${esc(id)}"><div class="row"><span class="indent">${'<i></i>'.repeat(Math.min(rel,6))}</span>
@@ -741,18 +833,21 @@ function renderIdeaEditor(m,x){const id=x.id;
       <label class="f" id="i-dropwrap" ${x.status==='dropped'?'':'hidden'}>やめた理由（あとで学びになります）<textarea data-f="dropReason" rows="2"></textarea></label>
       <div class="sec"><h3>元になったタネ</h3><div class="tags">${(x.sources||[]).map((sc,i)=>`<span class="srcchip"><button class="linkbtn" data-src="${i}">${esc(srcLabel(sc))}</button><button class="srcx" data-srcx="${i}" aria-label="外す">✕</button></span>`).join('')||'<span class="muted">なし</span>'}</div></div>
     </div>
-    <details class="card biz-section" open><summary>1. 誰の、どんな困りごとか</summary>
+    <div class="card biz-frame"><div class="biz-frame-head"><h4>事業案を詰める</h4><span id="bizStageLabel">ステップ 1 / 3</span></div>
+      <div class="biz-progress" aria-hidden="true"><span class="active"></span><span></span><span></span></div>
+      <div class="biz-stage-list">
+    <details class="biz-section" open><summary>1. 誰の、どんな困りごとか</summary>
       <div class="biz-fields">${IDEA_FIELDS.slice(0,3).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}</div></details>
-    <details class="card biz-section"><summary>2. どう事業にするか</summary>
+    <details class="biz-section"><summary>2. どう事業にするか</summary>
       <div class="biz-fields">${IDEA_FIELDS.slice(3,6).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}</div></details>
-    <details class="card biz-section"><summary>3. 進めるか判断する</summary>
+    <details class="biz-section"><summary>3. 進めるか判断する</summary>
       <div class="biz-fields">
         ${IDEA_FIELDS.slice(6).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}
         <h4>15年計画との相性</h4>${FIT.map(([k,sh,l])=>`<div class="fit"><span>${l}</span><div class="tri">${tri(k)}</div></div>`).join('')}
         <label class="f">相性のメモ<textarea data-f="fitNote" rows="2"></textarea></label>
         <h4>次の一手</h4><label class="f"><small>誰に何を聞いて確かめるか。1週間以内にできることにします</small><textarea data-f="next" rows="2"></textarea></label>
         <label class="f">メモ<textarea data-f="memo" rows="3"></textarea></label>
-      </div></details>
+      </div></details></div></div>
     <div class="card"><div><button class="btn sm danger" id="ideaDel">この事業案を削除</button></div></div>
   </div>`;
   const touch=()=>{x.updated=Date.now();saveSoon();};
@@ -764,6 +859,22 @@ function renderIdeaEditor(m,x){const id=x.id;
   m.querySelectorAll('[data-fit]').forEach(b=>b.onclick=()=>{const k=b.dataset.fit;x.fit={...(x.fit||{})};x.fit[k]=x.fit[k]===b.dataset.v?'':b.dataset.v;touch();m.querySelectorAll(`[data-fit="${k}"]`).forEach(c=>c.setAttribute('aria-pressed',String(x.fit[k]===c.dataset.v)));});
   m.querySelectorAll('[data-src]').forEach(b=>b.onclick=()=>{const sc=x.sources[Number(b.dataset.src)];if(sc.type==='node'){if(S.nodes.has(sc.id))select(sc.id,true);}else{S.tab='same';render();window.scrollTo({top:0});}});
   m.querySelectorAll('[data-srcx]').forEach(b=>b.onclick=()=>{x.sources=x.sources.filter((_,i)=>i!==Number(b.dataset.srcx));touch();renderMain();});
+  const stages=[...m.querySelectorAll('.biz-stage-list > .biz-section')];
+  const stageLabel=m.querySelector('#bizStageLabel');
+  const stageBars=[...m.querySelectorAll('.biz-progress span')];
+  let stageSyncing=false;
+  function updateStage(){
+    const active=stages.findIndex(d=>d.open);
+    const at=active<0?0:active;
+    if(stageLabel)stageLabel.textContent='ステップ '+(at+1)+' / 3';
+    stageBars.forEach((bar,i)=>bar.classList.toggle('active',i<=at));
+  }
+  stages.forEach((part,i)=>part.addEventListener('toggle',()=>{
+    if(stageSyncing)return;
+    if(part.open){stageSyncing=true;stages.forEach((s,j)=>{if(i!==j)s.open=false;});stageSyncing=false;}
+    updateStage();
+  }));
+  updateStage();
   const del=$('#ideaDel');let armed=false;
   del.onclick=()=>{if(!armed){armed=true;del.textContent='本当に削除する';setTimeout(()=>{armed=false;if(del.isConnected)del.textContent='この事業案を削除';},3500);return;}S.ideas.delete(id);S.ideaSel=null;saveSoon();render();toast('削除しました');};
 }
