@@ -59,7 +59,7 @@ h1{font-weight:800;font-size:21px;letter-spacing:.06em;margin:0;line-height:1.2}
 .subnav button{border:0;background:none;border-radius:8px;padding:8px 4px;font-size:14px;color:var(--ink-2);font-weight:600}
 .subnav button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .subnav .n{font-family:var(--f-mono);font-size:11px;margin-left:3px;opacity:.8}
-.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom)}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom)}
 .bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;color:var(--ink-2);font-size:11px}
 .bottom svg{width:24px;height:24px}
 .bottom button[aria-current="true"]{color:var(--ink);font-weight:700}
@@ -474,6 +474,19 @@ body{background:var(--paper)}
   .welcome-frame,.intro-frame,.biz-frame{padding:14px 11px 12px}
 }
 
+.seed-ai-actions{display:flex;flex-direction:column;gap:9px;padding:14px;border:1px solid var(--line);border-radius:17px;background:var(--frame)}
+.seed-ai-actions p{margin:0 0 4px;line-height:1.7}
+.seed-ai-shortcut{display:flex;flex-wrap:wrap;gap:9px;background:var(--panel);border:1px solid var(--panel-line);border-radius:18px;padding:16px;margin-top:18px;align-items:center}
+.seed-ai-shortcut > div{width:100%}
+.seed-ai-shortcut p{margin:3px 0 0}
+.biz-ai-workflow{gap:11px}
+.copy-fallback{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:60;padding:16px;display:flex;align-items:center;justify-content:center}
+.copy-fallback-panel{width:min(100%,560px);max-height:85vh;overflow:auto;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:23px;padding:20px}
+.copy-fallback-panel h3{font-size:18px;margin:0}
+.copy-fallback-panel p{margin:0}
+.copy-fallback-panel textarea{min-height:170px;background:var(--paper)}
+.copy-fallback-panel button{align-self:flex-end;min-width:94px}
+@media(max-width:380px){.seed-ai-shortcut .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -494,11 +507,18 @@ body{background:var(--paper)}
 <nav class="bottom" aria-label="メインメニュー">
   <button data-area="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-8"/><path d="M12 13c0-4 3-6 7-6 0 4-3 6-7 6z"/><path d="M12 15c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/></svg><span>タネ探し</span></button>
   <button data-area="biz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M6 15l4-4 3 3 5-6"/><path d="M15 8h3v3"/></svg><span>事業化</span></button>
-  <button data-area="ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10h8M8 14h5"/><path d="M20 11.5a8 8 0 0 1-8 8c-1.4 0-2.9-.4-4.1-1.1L4 20l1.5-4A8 8 0 1 1 20 11.5Z"/></svg><span>AIと対話</span></button>
   <button data-area="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg><span>データ</span></button>
 </nav>
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="copy-fallback" id="copyFallback" hidden role="dialog" aria-modal="true" aria-labelledby="copyFallbackTitle">
+  <div class="copy-fallback-panel">
+    <h3 id="copyFallbackTitle">プロンプトを手動でコピー</h3>
+    <p class="muted">自動コピーができませんでした。下の文章を長押しして、すべて選択・コピーしてください。</p>
+    <textarea readonly id="copyFallbackText" rows="8" aria-label="コピーするプロンプト"></textarea>
+    <button class="btn" id="copyFallbackClose" type="button">閉じる</button>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -590,11 +610,10 @@ document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const
   S.themeStart=false;
   if(a==='seed')S.tab=cur==='seed'?'tree':(S.lastSeed||'tree');
   else if(a==='biz'){if(cur==='biz')S.ideaSel=null;S.tab='idea';}
-  else if(a==='ai'){if(S.tab!=='ai')S.aiFrom=S.tab;S.tab='ai';}
   else S.tab='data';
   openSheet(false);render();window.scrollTo({top:0});});
-const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data',ai:'ai'};
-const AREA_TITLE={seed:'タネ探し',biz:'事業化',data:'データ',ai:'AIと対話'};
+const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data'};
+const AREA_TITLE={seed:'タネ探し',biz:'事業化',data:'データ'};
 function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
   $('#areaTitle').textContent=AREA_TITLE[area];$('#subnav').hidden=area!=='seed';
   document.querySelectorAll('#subnav [data-tab]').forEach(t=>{t.setAttribute('aria-pressed',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
@@ -608,7 +627,7 @@ function badges(n){const o=[];const fr=(n.frictions||[]).length;
   for(const t of(n.tags||[]))o.push(`<span class="b b-tag">本質：${esc(t)}</span>`);
   if(n.seed)o.push(`<span class="b b-seed">タネ ${scoreOf(n)}点</span>`);
   return o.join('');}
-function renderMain(){const m=$('#main');if(S.tab==='tree')return renderTree(m);if(S.tab==='same')return renderSame(m);if(S.tab==='seed')return renderSeeds(m);if(S.tab==='idea')return renderIdeas(m);if(S.tab==='ai')return renderAI(m);return renderData(m);}
+function renderMain(){const m=$('#main');if(S.tab==='tree')return renderTree(m);if(S.tab==='same')return renderSame(m);if(S.tab==='seed')return renderSeeds(m);if(S.tab==='idea')return renderIdeas(m);return renderData(m);}
 
 /* ---------- ツリー ---------- */
 function addHint(n,mode){
@@ -623,12 +642,22 @@ function renderTree(m){
       <div class="welcome-heading"><h3>新しいテーマ</h3><span class="frame-step">タネ探しを始める</span></div>
       <div class="welcome-panel choice-panel"><h4>どうやってタネ探しを始めますか？</h4>
         <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
+        <div class="seed-ai-actions" id="themeAIActions" hidden>
+          <p class="muted">① プロンプトをコピー　② AIで対話　③「保存」と伝えて出たJSONをタネ帳に取り込む</p>
+          <button class="btn pri big" id="themeCopyNew">新しいテーマ用プロンプトをコピー</button>
+          ${S.nodes.size?'<button class="btn big" id="themeCopyData">今のタネ帳も一緒にコピー</button>':''}
+          <a class="btn big" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeで対話を始める ↗</a>
+          <button class="btn" id="themeGoImport">AIの結果（JSON）を取り込む →</button>
+        </div>
         <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
       </div></div><p class="muted">AIの対話で作ったJSONは「データ」から取り込めます。</p></div>`;
     $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
-    $('#themeStartAI').onclick=()=>{S.themeStart=false;S.aiFrom='tree';S.tab='ai';openSheet(false);render();window.scrollTo({top:0});};
-    $('#themeStartManual').onclick=()=>{$('#startThemeForm').hidden=false;$('#startThemeInput').focus();};
+    $('#themeStartAI').onclick=()=>{$('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;$('#themeCopyNew').focus();};
+    $('#themeStartManual').onclick=()=>{$('#themeAIActions').hidden=true;$('#startThemeForm').hidden=false;$('#startThemeInput').focus();};
+    $('#themeCopyNew').onclick=()=>copyText(buildSeedPrompt(false));
+    const themeCopyData=$('#themeCopyData');if(themeCopyData)themeCopyData.onclick=()=>copyText(buildSeedPrompt(true));
+    $('#themeGoImport').onclick=()=>openImport();
     $('#startThemeForm').onsubmit=e=>{e.preventDefault();const v=$('#startThemeInput').value.trim();if(!v)return;S.themeStart=false;addTheme(v);};
     return;
   }
@@ -648,12 +677,14 @@ function renderTree(m){
     if(!shut)for(const k of ks)walk(k.id);};
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button data-zoom="">全体</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
-  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
+  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`)+
+    `<div class="seed-ai-shortcut"><div><strong>このテーマの続きをAIと考える</strong><p class="muted">今のタネ帳を含むプロンプトをコピーしてAIに貼り付けます。</p></div><button class="btn" id="treeAICopy">プロンプトをコピー</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a></div>`;
   renderThemes();
   m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
   m.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{S.focus=b.dataset.zoom||null;render();});
   const q=$('#quickAdd');if(q)q.onclick=()=>{select(top,false);startAdd(top,'down');};
+  $('#treeAICopy').onclick=()=>copyText(buildSeedPrompt(true));
   bindActionBar();
 }
 function actionBar(n,rel){const isRoot=!n.parent;const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;const pad=Math.min(rel,6)*16+32;
@@ -827,7 +858,9 @@ function renderIdeaEditor(m,x){const id=x.id;
   const tri=k=>FITV.map(([v,l])=>`<button data-fit="${k}" data-v="${v}" aria-pressed="${(x.fit||{})[k]===v}" aria-label="${l}">${l}</button>`).join('');
   m.innerHTML=`<div class="list">
     <div><button class="back" id="ideaBack">‹ 事業案の一覧</button></div>
-    <div class="btnrow"><button class="btn pri" id="ideaAI">この事業案をAIと詰める</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a></div>
+    <div class="card biz-ai-workflow"><h4>AIと事業案を詰める</h4><p class="muted" style="margin:0">プロンプトをコピーしてClaudeで対話。最後に「保存」と伝えて、返ってきたJSONを取り込みます。</p>
+      <button class="btn pri big" id="ideaAI">この事業案のプロンプトをコピー</button>
+      <div class="btnrow"><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a><button class="btn" id="ideaImport">AIの結果を取り込む →</button></div></div>
     <div class="card">
       <input class="title-in" id="i-title" aria-label="事業案の名前" autocomplete="off">
       <div class="seg" id="i-st">${IDEA_ST.map(([k,l])=>`<button data-v="${k}" aria-pressed="${(x.status||'idea')===k}">${l}</button>`).join('')}</div>
@@ -856,6 +889,7 @@ function renderIdeaEditor(m,x){const id=x.id;
   m.querySelectorAll('[data-f]').forEach(t=>{t.value=x[t.dataset.f]||'';t.oninput=()=>{x[t.dataset.f]=t.value;touch();};});
   $('#ideaBack').onclick=()=>{S.ideaSel=null;render();window.scrollTo({top:0});};
   $('#ideaAI').onclick=()=>copyText(buildBizPrompt(x));
+  $('#ideaImport').onclick=()=>{saveNow();openImport();};
   $('#i-st').querySelectorAll('button').forEach(b=>b.onclick=()=>{x.status=b.dataset.v;touch();$('#i-st').querySelectorAll('button').forEach(c=>c.setAttribute('aria-pressed',String(c===b)));$('#i-dropwrap').hidden=x.status!=='dropped';renderTabs();});
   m.querySelectorAll('[data-fit]').forEach(b=>b.onclick=()=>{const k=b.dataset.fit;x.fit={...(x.fit||{})};x.fit[k]=x.fit[k]===b.dataset.v?'':b.dataset.v;touch();m.querySelectorAll(`[data-fit="${k}"]`).forEach(c=>c.setAttribute('aria-pressed',String(x.fit[k]===c.dataset.v)));});
   m.querySelectorAll('[data-src]').forEach(b=>b.onclick=()=>{const sc=x.sources[Number(b.dataset.src)];if(sc.type==='node'){if(S.nodes.has(sc.id))select(sc.id,true);}else{S.tab='same';render();window.scrollTo({top:0});}});
@@ -882,50 +916,29 @@ function renderIdeaEditor(m,x){const id=x.id;
 
 /* ---------- AIと対話 ---------- */
 const PROMPT_SEED="あなたは「市場のタネ帳」の相棒です。わたしが日常や仕事で観察した人の行動を一緒に分解し、新しい市場のタネを探します。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「広げる」段階です。判断を急がず、小さな違和感や、当たり前すぎて誰も気にしていない行動も拾います。事業として成り立つかの厳しい評価はしません（それは事業化の段階でやります）。\n- わたしの観察を引き出し、整理し、問いを投げる相棒です。答えを決めるのはわたしです。\n- わたしが見たこと（事実）と、あなたの推測（仮説）をはっきり分けてください。あなたの推測を書くときは、文頭に「仮説：」と付けます。\n- わたしが言っていない行動や事実を、勝手に足さないでください。候補を出すのは歓迎ですが、採用するかはわたしが決めます。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n次の順に進めます。わたしが別の順を望んだら、それに合わせてください。\n\n1. 始める\n   最初に「新しいテーマを始めますか？それとも、タネ帳から書き出したJSONを貼りますか？」と聞いてください。\n   - JSONが貼られたら、中身を読み取り、テーマと行動のツリーを短くまとめて見せてから続けます。\n   - 新しいテーマなら、テーマ名（例：家を借りる）を聞きます。\n\n2. 行動を書き出す\n   そのテーマで人がやっている行動を、思いつくまま挙げてもらいます。違和感がなくても、普通にやっている行動で構いません。\n   書き出しが終わったら、番号付きの一覧にして見せます。\n\n3. 上下に動かす（抽象化・具体化）\n   気になる行動を1つ選んでもらい、次の2つの問いで上下に動かします。\n   - 抽象化：「それは何のためにやっている？」（答えを1段上に置く）\n   - 具体化：「具体的にはどうやっている？」（答えを1段下に置く）\n   複数の当事者が関わる、書類や情報を人が手で集めて渡す、お金が動く、といった行動は、具体化して掘る価値が高いと伝えてください。\n   深く掘りすぎて話が細かくなりすぎたら、一度上に戻ることを提案してください。\n\n4. 分解する\n   掘った行動について、次を1つずつ聞きます。\n   - 摩擦のサイン：複数の当事者／書類・情報の手渡し／お金が動く／待ち時間／手作業／毎回やり直し、のうちどれがあるか\n   - 背景：なぜ人はこのやり方をしているのか\n   - 制約：何がこのやり方を強いているのか（技術、規制、慣習、コスト、情報の偏りなど）\n   - その制約は今もあるか：まだある／薄れている／もう無い／未確認\n   「制約が消えた・薄れているのに、行動だけが残っている」ものが見つかったら、市場のタネの典型として強調してください。\n\n5. 本質を書く\n   それぞれの行動が「本質的には何をしているか」を短く言い表します（例：協定価額を決める → モノの価値を決める）。\n   場面の言葉（車の、家の、など）を外した言い方にして、他のテーマともつながるようにします。すでに使っている本質の言い方があれば、それを優先して使います。\n   同じ本質が別の行動や別のテーマにも出てきたら、そのつながりを指摘してください。\n\n6. タネとして評価する\n   わたしが「これはタネかも」と言った行動は、次の5つを0〜2点で一緒に採点します。点の理由も一言添えてください。\n   - alt：代わりの手段で無理やり済ませている\n   - now：「なぜ今」がある（技術・規制・コストの変化）\n   - money：お金がすでに別の名目で使われている\n   - repeat：繰り返し起こり、広がっている\n   - gap：大手がやりたがらない理由がある\n   有望なタネが出てきたら、「アプリのタネ候補で『事業案にする』を押し、事業化用のプロンプトで詰めましょう」と伝えてください。\n\n# わたしが使う合図\n- 「まとめ」：今のツリーを、字下げした一覧で見せてください（各行に、本質・摩擦・制約の状態・タネの点数があれば添える）。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n- 「戻る」：1つ前の段階に戻ります。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- nodes には、この会話で新しく作った行動と、内容を変えた行動だけを入れます。変えていない既存の行動は入れません。\n- 既存の行動（最初に貼られたJSONにあったもの）を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しい行動の id は、他と重ならないように「t」＋今日の日付8桁＋「-」＋3桁の連番にします（例：t20261010-001）。日付が分からなければ、最初にわたしに聞いてください。\n- parent には親の行動の id を入れます。テーマ（いちばん上）だけ null にします。既存の行動の下に足すときは、その既存の id を parent に入れます。\n- order は、同じ親の中での並び順です（0から）。\n- frictions は次の英語のキーだけを使います：parties（複数の当事者）、docs（書類・情報の手渡し）、money（お金が動く）、wait（待ち時間）、manual（手作業）、repeat（毎回やり直し）。\n- status は次のどれかです：still（まだある）、fading（薄れている）、gone（もう無い）、unknown（未確認）、\"\"（未記入）。\n- tags には「本質」の言い方を文字列で入れます。\n- seed は、タネ候補なら true です。scores は alt, now, money, repeat, gap をそれぞれ 0〜2 の数字で入れます。\n- why（背景）、constraint（制約）は、わたしが同意した内容だけを入れます。あなたの仮説のままのものは、memo に「仮説：〜」として入れます。\n- 行動が多くて1回で出し切れないときは、「続く」と書いて分割し、わたしが「続き」と言ったら残りを出します。分割したそれぞれが、単独で正しいJSONになるようにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 1,\n  \"exportedAt\": 0,\n  \"nodes\": [\n    {\n      \"id\": \"t20261010-001\",\n      \"text\": \"家を借りる\",\n      \"parent\": null,\n      \"order\": 0,\n      \"frictions\": [],\n      \"why\": \"\",\n      \"constraint\": \"\",\n      \"status\": \"\",\n      \"tags\": [],\n      \"seed\": false,\n      \"scores\": {},\n      \"memo\": \"\"\n    },\n    {\n      \"id\": \"t20261010-002\",\n      \"text\": \"入居審査を受ける\",\n      \"parent\": \"t20261010-001\",\n      \"order\": 0,\n      \"frictions\": [\"parties\", \"docs\", \"wait\"],\n      \"why\": \"貸主が、家賃を払い続けられる人かを事前に確かめたい。\",\n      \"constraint\": \"借り手の支払い能力を示す共通の情報がなく、毎回書類で証明するしかない。\",\n      \"status\": \"fading\",\n      \"tags\": [\"支払い能力を証明する\"],\n      \"seed\": true,\n      \"scores\": {\"alt\": 2, \"now\": 1, \"money\": 1, \"repeat\": 2, \"gap\": 1},\n      \"memo\": \"仮説：保証会社ごとに審査をやり直している\"\n    }\n  ]\n}\n```\n\nでは、始めてください。\n";
-const PROMPT_BIZ="あなたは、わたしの事業案を一緒に詰める相棒であり、厳しめの審査役です。わたしは「市場のタネ帳」というノートで、人の行動を観察・分解して市場のタネを探しています。この会話では、そのタネから生まれた事業案を、「進める／形を変える／保留／やめる」のどれかを判断できるところまで詰めます。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「絞る」段階です。甘い評価はしません。根拠のない楽観には「その根拠は？」と聞き返してください。\n- 弱い点は、遠慮せずに具体的に指摘してください。×なら×と言います。やめる判断も前進です。\n- ただし、否定だけで終わらせず、「どう変えれば成り立つか」も一緒に考えてください。\n- わたしが言ったこと（事実）と、あなたの推測をはっきり分けます。推測には文頭に「仮説：」を付けます。\n- 数字は、粗くても桁が合っていることを重視します。分からない数字は、わたしに聞くか、置いた前提を明示して概算します。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n1. 最初に、「今回の事業案」にある事業案と元になったタネを3行で要約し、この事業案の一番弱い点を3つ挙げてください。そのうえで、どこから詰めるかをわたしに選んでもらいます。\n2. 次の項目を1つずつ詰めます。わたしの答えが薄いときは、問いを変えて深掘りします。\n   - 顧客：具体的な1人（1社）を思い描けるか。話を聞ける知り合いはいるか\n   - 困りごと：どのくらいの頻度で、どのくらい痛いか。今いくら、何時間を使っているか\n   - 代わりの手段：今はどう済ませているか。それで困っていない人は誰か\n   - なぜ今：何が変わったからできるのか。5年前にできなかった理由は何か\n   - 解決の仮説：何を提供するか。いちばん小さく試すなら何か\n   - 誰がお金を払うか：どの予算名目のお金か。1件あたりいくらか\n   - 市場の大きさ：顧客数×単価で桁を出す。国内と海外の両方\n   - 競合と代替：同じことをしている会社、似たことをしている会社、「何もしない」という選択\n   - 勝てる理由：「わたしについて」に書いた強みとどうつながるか。真似されにくいか\n   - 15年計画との相性：次の4つを ○／△／× で判定し、理由を一言添えます\n     - margin：利益率30%以上を狙えるか\n     - national：全国・海外に売れるか\n     - stage1：最初は受託で稼ぎながら検証できるか\n     - campus：将来つくりたい自社拠点（「わたしについて」に書いた構想）と噛み合うか\n   - 次の一手：1週間以内にできる具体的な行動。誰に何を聞くか。どんな答えなら進め、どんな答えならやめるか\n3. 一通り詰めたら、「進める／形を変える／保留／やめる」のどれがよいか、理由を添えて提案してください。決めるのはわたしです。\n   形を変える場合は、新しい事業案として分けるか、今の事業案を書き換えるかをわたしに聞いてください。\n\n# わたしが使う合図\n- 「まとめ」：今の事業案を、項目ごとに短く一覧で見せてください。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- 出力するのは ideas だけです。この会話で変えた事業案と、新しく分けた事業案を入れます。\n- 渡された事業案を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しく分けた事業案の id は「i」＋今日の日付8桁＋「-」＋3桁の連番にします（例：i20261010-001）。日付が分からなければ、わたしに聞いてください。sources は元の事業案のものを引き継ぎます。\n- 各項目の入れ先は次のとおりです：customer（顧客）、pain（困りごと）、alt（代わりの手段）、whyNow（なぜ今）、solution（解決の仮説）、payer（誰がお金を払うか。1件あたりの金額も）、edge（勝てる理由）、next（次の一手。進める・やめる基準も）。\n- 市場の大きさと競合は、memo に「市場：〜」「競合：〜」の形で入れます。元の memo にあった内容は消さずに残します。\n- fit は margin, national, stage1, campus のそれぞれに \"ok\"（○）、\"mid\"（△）、\"ng\"（×）、\"\"（未判定）のどれかを入れます。理由は fitNote にまとめます。\n- status は \"idea\"（アイデア）、\"testing\"（検証中）、\"hold\"（保留）、\"dropped\"（やめた）のどれかです。やめた場合は dropReason に理由を入れます。\n- わたしが同意していない推測をどこかの項目に入れるときは、文頭の「仮説：」を付けたままにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 2,\n  \"ideas\": [\n    {\n      \"id\": \"i20261010-001\",\n      \"title\": \"支払い能力をまとめて証明できる仕組み\",\n      \"status\": \"testing\",\n      \"sources\": [\n        {\n          \"type\": \"node\",\n          \"id\": \"t20261010-002\"\n        },\n        {\n          \"type\": \"tag\",\n          \"name\": \"支払い能力を証明する\"\n        }\n      ],\n      \"customer\": \"都市部で賃貸物件を探す20〜30代の会社員と、その審査をする保証会社\",\n      \"pain\": \"物件ごと、保証会社ごとに同じ書類を出して審査をやり直している。引っ越しのたびに数日かかる\",\n      \"alt\": \"源泉徴収票や在籍証明を毎回集めて、紙や画像で提出している\",\n      \"whyNow\": \"仮説：給与や口座の情報を本人同意で連携できる仕組みが広がってきた\",\n      \"solution\": \"一度の確認で、複数の審査先に支払い能力を証明できるサービス。まずは保証会社1社の審査書類チェックを受託する\",\n      \"payer\": \"保証会社。審査1件あたりの人件費の一部（仮説：1件数百円〜千円台）\",\n      \"edge\": \"会計の知識で、収入や支払い能力の見方を設計できる\",\n      \"fit\": {\n        \"margin\": \"mid\",\n        \"national\": \"ok\",\n        \"stage1\": \"ok\",\n        \"campus\": \"\"\n      },\n      \"fitNote\": \"審査書類チェックの受託から始めれば、稼ぎながら検証できる\",\n      \"next\": \"保証会社の審査担当2人に、1件あたりの審査時間と、一番手間がかかる書類を聞く。半分以上が書類集めと答えたら進める\",\n      \"dropReason\": \"\",\n      \"memo\": \"市場：仮説：国内の賃貸契約は年間数百万件。競合：大手保証会社の自社システム、何もしない\"\n    }\n  ]\n}\n```\n\n# わたしについて\n（ここに自分の強みや経歴を書いておくと、事業案を考えるときに使われます）\n\n# 今回の事業案\n（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）\n\nでは、始めてください。\n";
-const KEY_PROFILE='tane.profile';
-const PROFILE_SLOT='（ここに自分の強みや経歴を書いておくと、事業案を考えるときに使われます）';
+const PROMPT_BIZ="あなたは、わたしの事業案を一緒に詰める相棒であり、厳しめの審査役です。わたしは「市場のタネ帳」というノートで、人の行動を観察・分解して市場のタネを探しています。この会話では、そのタネから生まれた事業案を、「進める／形を変える／保留／やめる」のどれかを判断できるところまで詰めます。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「絞る」段階です。甘い評価はしません。根拠のない楽観には「その根拠は？」と聞き返してください。\n- 弱い点は、遠慮せずに具体的に指摘してください。×なら×と言います。やめる判断も前進です。\n- ただし、否定だけで終わらせず、「どう変えれば成り立つか」も一緒に考えてください。\n- わたしが言ったこと（事実）と、あなたの推測をはっきり分けます。推測には文頭に「仮説：」を付けます。\n- 数字は、粗くても桁が合っていることを重視します。分からない数字は、わたしに聞くか、置いた前提を明示して概算します。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n1. 最初に、「今回の事業案」にある事業案と元になったタネを3行で要約し、この事業案の一番弱い点を3つ挙げてください。そのうえで、どこから詰めるかをわたしに選んでもらいます。\n2. 次の項目を1つずつ詰めます。わたしの答えが薄いときは、問いを変えて深掘りします。\n   - 顧客：具体的な1人（1社）を思い描けるか。話を聞ける知り合いはいるか\n   - 困りごと：どのくらいの頻度で、どのくらい痛いか。今いくら、何時間を使っているか\n   - 代わりの手段：今はどう済ませているか。それで困っていない人は誰か\n   - なぜ今：何が変わったからできるのか。5年前にできなかった理由は何か\n   - 解決の仮説：何を提供するか。いちばん小さく試すなら何か\n   - 誰がお金を払うか：どの予算名目のお金か。1件あたりいくらか\n   - 市場の大きさ：顧客数×単価で桁を出す。国内と海外の両方\n   - 競合と代替：同じことをしている会社、似たことをしている会社、「何もしない」という選択\n   - 勝てる理由：わたしの実際の経験や強みとどうつながるか。真似されにくいか\n   - 15年計画との相性：次の4つを ○／△／× で判定し、理由を一言添えます\n     - margin：利益率30%以上を狙えるか\n     - national：全国・海外に売れるか\n     - stage1：最初は受託で稼ぎながら検証できるか\n     - campus：将来の自社拠点構想と噛み合うか。構想が未定なら未判定にする\n   - 次の一手：1週間以内にできる具体的な行動。誰に何を聞くか。どんな答えなら進め、どんな答えならやめるか\n3. 一通り詰めたら、「進める／形を変える／保留／やめる」のどれがよいか、理由を添えて提案してください。決めるのはわたしです。\n   形を変える場合は、新しい事業案として分けるか、今の事業案を書き換えるかをわたしに聞いてください。\n\n# わたしが使う合図\n- 「まとめ」：今の事業案を、項目ごとに短く一覧で見せてください。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- 出力するのは ideas だけです。この会話で変えた事業案と、新しく分けた事業案を入れます。\n- 渡された事業案を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しく分けた事業案の id は「i」＋今日の日付8桁＋「-」＋3桁の連番にします（例：i20261010-001）。日付が分からなければ、わたしに聞いてください。sources は元の事業案のものを引き継ぎます。\n- 各項目の入れ先は次のとおりです：customer（顧客）、pain（困りごと）、alt（代わりの手段）、whyNow（なぜ今）、solution（解決の仮説）、payer（誰がお金を払うか。1件あたりの金額も）、edge（勝てる理由）、next（次の一手。進める・やめる基準も）。\n- 市場の大きさと競合は、memo に「市場：〜」「競合：〜」の形で入れます。元の memo にあった内容は消さずに残します。\n- fit は margin, national, stage1, campus のそれぞれに \"ok\"（○）、\"mid\"（△）、\"ng\"（×）、\"\"（未判定）のどれかを入れます。理由は fitNote にまとめます。\n- status は \"idea\"（アイデア）、\"testing\"（検証中）、\"hold\"（保留）、\"dropped\"（やめた）のどれかです。やめた場合は dropReason に理由を入れます。\n- わたしが同意していない推測をどこかの項目に入れるときは、文頭の「仮説：」を付けたままにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 2,\n  \"ideas\": [\n    {\n      \"id\": \"i20261010-001\",\n      \"title\": \"支払い能力をまとめて証明できる仕組み\",\n      \"status\": \"testing\",\n      \"sources\": [\n        {\n          \"type\": \"node\",\n          \"id\": \"t20261010-002\"\n        },\n        {\n          \"type\": \"tag\",\n          \"name\": \"支払い能力を証明する\"\n        }\n      ],\n      \"customer\": \"都市部で賃貸物件を探す20〜30代の会社員と、その審査をする保証会社\",\n      \"pain\": \"物件ごと、保証会社ごとに同じ書類を出して審査をやり直している。引っ越しのたびに数日かかる\",\n      \"alt\": \"源泉徴収票や在籍証明を毎回集めて、紙や画像で提出している\",\n      \"whyNow\": \"仮説：給与や口座の情報を本人同意で連携できる仕組みが広がってきた\",\n      \"solution\": \"一度の確認で、複数の審査先に支払い能力を証明できるサービス。まずは保証会社1社の審査書類チェックを受託する\",\n      \"payer\": \"保証会社。審査1件あたりの人件費の一部（仮説：1件数百円〜千円台）\",\n      \"edge\": \"会計の知識で、収入や支払い能力の見方を設計できる\",\n      \"fit\": {\n        \"margin\": \"mid\",\n        \"national\": \"ok\",\n        \"stage1\": \"ok\",\n        \"campus\": \"\"\n      },\n      \"fitNote\": \"審査書類チェックの受託から始めれば、稼ぎながら検証できる\",\n      \"next\": \"保証会社の審査担当2人に、1件あたりの審査時間と、一番手間がかかる書類を聞く。半分以上が書類集めと答えたら進める\",\n      \"dropReason\": \"\",\n      \"memo\": \"市場：仮説：国内の賃貸契約は年間数百万件。競合：大手保証会社の自社システム、何もしない\"\n    }\n  ]\n}\n```\n\n# 今回の事業案\n（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）\n\nでは、始めてください。\n";
 const BIZ_SLOT='（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）';
 function buildSeedPrompt(withData){let p=PROMPT_SEED;
   if(withData)p+='\n\n---\n以下は、いまのタネ帳のJSONです。これを読み取ってから始めてください。\n```json\n'+exportJSON()+'\n```';return p;}
 function relatedNodes(x){const out=new Map();const add=n=>{for(const q of pathOf(n.id))out.set(q.id,q);};
   for(const sc of(x.sources||[])){if(sc.type==='node'){const n=S.nodes.get(sc.id);if(n)add(n);}else if(sc.type==='tag'){for(const n of S.nodes.values())if((n.tags||[]).includes(sc.name))add(n);}}
   return [...out.values()];}
-function buildBizPrompt(x){let p=PROMPT_BIZ;const prof=(ls.get(KEY_PROFILE)||'').trim();if(prof)p=p.replace(PROFILE_SLOT,prof);
+function buildBizPrompt(x){let p=PROMPT_BIZ;
   if(x)p=p.replace(BIZ_SLOT,'次のJSONの ideas が今回詰める事業案、nodes が元になったタネと、その上の階層の行動です。\n```json\n'+JSON.stringify({ideas:[x],nodes:relatedNodes(x)},null,1)+'\n```');
   return p;}
 async function copyText(text){
-  try{await navigator.clipboard.writeText(text);toast('コピーしました。Claudeに貼り付けてください');}
-  catch(e){if(S.tab!=='ai')S.aiFrom=S.tab;S.tab='ai';S.fallbackText=text;openSheet(false);render();window.scrollTo({top:0});}}
-function renderAI(m){
-  const fromArea=AREA_OF[S.aiFrom||'tree']||'seed';
-  const cur=fromArea==='biz'&&S.ideaSel?S.ideas.get(S.ideaSel):null;
-  const live=[...S.ideas.values()].filter(x=>x.status!=='dropped').sort((a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0));
-  const list=cur?[cur,...live.filter(x=>x.id!==cur.id)]:live;
-  const seedCard=`<div class="card"><h4>タネを探す</h4><p class="muted" style="margin:0">観察した行動を、AIと一緒に上下に動かして分解し、タネを探します。判断を急がず、広げる段階です。</p>
-    <button class="btn ${fromArea==='seed'?'pri':''} big" id="cpData">今のタネ帳と一緒にコピー</button>
-    <button class="btn big" id="cpNew">プロンプトだけコピー（新しいテーマから）</button></div>`;
-  const bizCard=`<div class="card"><h4>事業案を詰める</h4><p class="muted" style="margin:0">詰めたい事業案を選ぶと、その事業案と元になったタネを添えて、厳しめの相棒用のプロンプトをコピーします。</p>
-    ${list.length?list.map((x,i)=>`<button class="btn big ${fromArea==='biz'&&i===0?'pri':''}" data-cpidea="${esc(x.id)}">「${esc(x.title||'無題の事業案')}」を詰める</button>`).join(''):`<span class="muted">まだ事業案がありません。タネ探しの「タネ候補」から「事業案にする」で作れます。</span>`}</div>`;
-  m.innerHTML=`<div class="list">
-    <div><button class="back" id="aiBack">‹ 戻る</button></div>
-    <div class="card"><ol class="muted steps"><li>下のボタンでプロンプトをコピーする</li><li>「Claudeを開く」で新しいチャットに貼って送る</li><li>対話の最後に「保存」と送り、出てきたJSONをコピーする</li><li>「データ」の「取り込む」に貼る</li></ol>
-      <a class="btn big" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
-      <button class="btn big" id="goImport">AIの結果を取り込む（データへ）</button></div>
-    <textarea id="cpFallback" rows="5" readonly hidden aria-label="コピー用の文章"></textarea>
-    ${fromArea==='biz'?bizCard+seedCard:seedCard+bizCard}
-    <div class="card"><h4>わたしについて</h4>
-      <p class="muted" style="margin:0">自分の強み、経歴、つくりたい拠点の構想などを書いておくと、事業案を詰めるプロンプトに入ります。この端末の中だけに保存されます。</p>
-      <textarea id="prof" rows="4" placeholder="例：持っている資格、仕事の経験、得意なこと、将来つくりたい拠点の構想" aria-label="わたしについて"></textarea></div>
-  </div>`;
-  if(S.fallbackText){const t=$('#cpFallback');t.hidden=false;t.value=S.fallbackText;S.fallbackText=null;t.focus();t.select();toast('自動でコピーできませんでした。この欄を全選択してコピーしてください');}
-  $('#cpData').onclick=()=>copyText(buildSeedPrompt(true));
-  $('#cpNew').onclick=()=>copyText(buildSeedPrompt(false));
-  m.querySelectorAll('[data-cpidea]').forEach(b=>b.onclick=()=>{const x=S.ideas.get(b.dataset.cpidea);if(x)copyText(buildBizPrompt(x));});
-  $('#goImport').onclick=()=>{S.tab='data';S.openPaste=true;render();window.scrollTo({top:0});};
-  $('#aiBack').onclick=()=>{S.tab=S.aiFrom&&S.aiFrom!=='ai'?S.aiFrom:'tree';render();window.scrollTo({top:0});};
-  const pf=$('#prof');pf.value=ls.get(KEY_PROFILE)||'';pf.oninput=e=>ls.set(KEY_PROFILE,e.target.value);
+  try{
+    if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error('clipboard unsupported');
+    await navigator.clipboard.writeText(text);
+    toast('コピーしました。Claudeに貼り付けてください');
+  }catch(e){
+    const dialog=$('#copyFallback');
+    const field=$('#copyFallbackText');
+    field.value=text;dialog.hidden=false;field.focus();field.select();
+    toast('下の欄を長押ししてコピーしてください');
+  }
 }
+function openImport(){S.themeStart=false;S.tab='data';S.openPaste=true;openSheet(false);render();window.scrollTo({top:0});}
 
 /* ---------- 分析シート ---------- */
 function renderSheet(){const sh=$('#sheet');const n=S.sel&&S.nodes.get(S.sel);
@@ -1008,6 +1021,7 @@ function syncSheet(n,first){
 
 /* ---------- 起動 ---------- */
 $('#scrim').onclick=()=>openSheet(false);
+$('#copyFallbackClose').onclick=()=>{$('#copyFallback').hidden=true;};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.adding){S.adding=null;renderMain();}else openSheet(false);}});
 loadAll();
 if(!S.nodes.size) S.tab='tree';
