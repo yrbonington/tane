@@ -662,8 +662,8 @@ function renderTree(m){
       <div class="card intro-choice intro-frame">
       <div class="welcome-heading"><h3>新しいテーマ</h3><span class="frame-step">タネ探しを始める</span></div>
       <div class="welcome-panel choice-panel"><h4>どうやってタネ探しを始めますか？</h4>
-        <button class="btn pri entry-option" id="themeStartAI"><strong>AIと一緒に考える →</strong><small>タネ探し用プロンプトをコピーして、ClaudeやChatGPTで話し始めます。</small></button>
-        <div class="seed-ai-actions" id="themeAIActions" hidden>
+        <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>プロンプトをコピーして、ChatGPTかClaudeでタネ探しを始めます。</small></button>
+        <div class="seed-ai-actions" id="themeAIActions">
           <div class="ai-flow-step">
             <strong>① プロンプトをコピー</strong>
             <p class="muted">タネ探しのための質問とJSONの保存ルールをまとめてコピーします。</p>
@@ -688,8 +688,16 @@ function renderTree(m){
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
       </div></div><p class="muted">AIの対話で作ったJSONは「データ」から取り込めます。</p></div>`;
     $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
-    $('#themeStartAI').onclick=()=>{$('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;$('#themeCopyNew').focus();};
-    $('#themeStartManual').onclick=()=>{$('#themeAIActions').hidden=true;$('#startThemeForm').hidden=false;$('#startThemeInput').focus();};
+    $('#themeStartAI').onclick=()=>{
+      $('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;
+      $('#themeStartAI').setAttribute('aria-expanded','true');
+      $('#themeCopyNew').focus();
+    };
+    $('#themeStartManual').onclick=()=>{
+      $('#themeAIActions').hidden=true;$('#startThemeForm').hidden=false;
+      $('#themeStartAI').setAttribute('aria-expanded','false');
+      $('#startThemeInput').focus();
+    };
     $('#themeCopyNew').onclick=()=>copyText(buildSeedPrompt(false));
     const themeCopyData=$('#themeCopyData');if(themeCopyData)themeCopyData.onclick=()=>copyText(buildSeedPrompt(true));
     $('#themeGoImport').onclick=()=>openImport();
@@ -712,35 +720,12 @@ function renderTree(m){
     if(!shut)for(const k of ks)walk(k.id);};
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button data-zoom="">全体</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
-  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`)+
-    `<div class="card ai-flow seed-ai-shortcut">
-      <h4>このテーマの続きをAIと考える</h4>
-      <div class="ai-flow-step">
-        <strong>① プロンプトをコピー</strong>
-        <p class="muted">今のタネ帳のJSONも含めてコピーし、続きから考えられます。</p>
-        <button class="btn pri big" id="treeAICopy">プロンプトをコピー</button>
-      </div>
-      <div class="ai-flow-choice">
-        <strong>② 使いたいAIを開く</strong>
-        <p class="muted">コピーした文章を貼り付けて対話を始めます。</p>
-        <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
-    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
-  </div>
-      </div>
-      <div class="ai-flow-step">
-        <strong>③ 結果を取り込む</strong>
-        <p class="muted">最後に「保存」と伝え、返ってきたJSONを取り込みます。</p>
-        <button class="btn ai-secondary" id="treeGoImport">JSONを取り込む →</button>
-      </div>
-    </div>`;
+  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
   renderThemes();
   m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
   m.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{S.focus=b.dataset.zoom||null;render();});
   const q=$('#quickAdd');if(q)q.onclick=()=>{select(top,false);startAdd(top,'down');};
-  $('#treeAICopy').onclick=()=>copyText(buildSeedPrompt(true));
-  $('#treeGoImport').onclick=()=>openImport();
   bindActionBar();
 }
 function actionBar(n,rel){const isRoot=!n.parent;const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;const pad=Math.min(rel,6)*16+32;
@@ -1101,7 +1086,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=11',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=12',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
