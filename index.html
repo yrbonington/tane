@@ -619,6 +619,30 @@ body{background:var(--paper)}
   .item.sel .node-stack > .actions > .act b{font-size:12px}
   .item.sel .node-stack > .actions > .act small{font-size:10px}
 }
+
+/* 事業案：長押し（または…）で開く静かなアクションシート */
+.idea-card-wrap{position:relative;min-width:0}
+.idea-card-wrap .ideacard{width:100%}
+.idea-card-wrap .ideacard h4{padding-right:35px}
+.idea-more{position:absolute;right:10px;top:10px;width:38px;height:38px;
+  border:0;border-radius:50%;background:transparent;color:var(--ink-2);
+  font-size:24px;line-height:1;display:flex;justify-content:center;align-items:center}
+.idea-more:active{background:var(--panel)}
+.ideacard{touch-action:pan-y; -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.idea-menu-overlay{position:fixed;inset:0;z-index:65;display:flex;align-items:flex-end;
+  justify-content:center;background:rgba(0,0,0,.6);
+  padding:16px 16px calc(22px + env(safe-area-inset-bottom))}
+.idea-menu{width:min(100%,480px);padding:18px;background:var(--panel);
+  border:1px solid var(--line);border-radius:22px;
+  display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 45px rgba(0,0,0,.26)}
+.idea-menu h3{margin:0 0 2px;font-size:16px;line-height:1.45;overflow-wrap:anywhere}
+.idea-menu-actions,.idea-menu-confirm{display:flex;flex-direction:column;gap:8px}
+.idea-menu-option,.idea-menu-dismiss{width:100%;min-height:48px;padding:12px 15px;border:1px solid var(--line);
+  border-radius:14px;background:var(--frame);color:var(--ink);font-size:14px;font-weight:650;text-align:left}
+.idea-menu-option.danger{color:var(--warn)}
+.idea-menu-dismiss{text-align:center;background:transparent}
+.idea-menu-confirm p{margin:0 0 4px;color:var(--ink-2);font-size:13px}
+@media(hover:hover){.idea-more:hover{background:var(--surface)}}
 </style>
 </head>
 <body>
@@ -643,6 +667,20 @@ body{background:var(--paper)}
 </nav>
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="idea-menu-overlay" id="ideaMenu" hidden>
+  <div class="idea-menu" role="dialog" aria-modal="true" aria-labelledby="ideaMenuTitle">
+    <h3 id="ideaMenuTitle"></h3>
+    <div id="ideaMenuActions" class="idea-menu-actions">
+      <button class="idea-menu-option" id="ideaMenuCopy" type="button">プロンプトをコピー</button>
+      <button class="idea-menu-option danger" id="ideaMenuDelete" type="button">削除</button>
+    </div>
+    <div id="ideaMenuConfirm" class="idea-menu-confirm" hidden>
+      <p>この事業案を削除しますか？</p>
+      <button class="idea-menu-option danger" id="ideaMenuDeleteConfirm" type="button">削除する</button>
+    </div>
+    <button class="idea-menu-dismiss" id="ideaMenuClose" type="button">キャンセル</button>
+  </div>
+</div>
 <div class="copy-fallback" id="copyFallback" hidden role="dialog" aria-modal="true" aria-labelledby="copyFallbackTitle">
   <div class="copy-fallback-panel">
     <h3 id="copyFallbackTitle">プロンプトを手動でコピー</h3>
@@ -1023,11 +1061,52 @@ function bindMkIdea(m){
   m.querySelectorAll('[data-mkidea-tag]').forEach(b=>b.onclick=()=>{const t=b.dataset.mkideaTag;mkIdea([{type:'tag',name:t}],t);});}
 function srcLabel(x){if(x.type==='tag')return `本質：${x.name}`;const n=S.nodes.get(x.id);return n?`${themeName(n.id)}／${n.text}`:'（削除された行動）';}
 function fitMarks(x){return FIT.map(([k,sh])=>{const v=(x.fit||{})[k]||'';const mk=v==='ok'?'○':v==='mid'?'△':v==='ng'?'×':'－';return `<span class="fm fm-${v||'none'}">${sh} ${mk}</span>`;}).join('');}
+/* 長押しメニュー。スクロール時はタイマー解除、誤削除防止は二段階確認。 */
+let ideaMenuOpener=null;
+function openIdeaMenu(id,opener){
+  const idea=S.ideas.get(id);if(!idea)return;
+  const menu=$('#ideaMenu');
+  ideaMenuOpener=opener;
+  menu.dataset.idea=id;
+  $('#ideaMenuTitle').textContent=idea.title||'無題の事業案';
+  $('#ideaMenuActions').hidden=false;
+  $('#ideaMenuConfirm').hidden=true;
+  menu.hidden=false;
+  $('#ideaMenuCopy').focus({preventScroll:true});
+}
+function closeIdeaMenu(){
+  const menu=$('#ideaMenu');
+  menu.hidden=true;delete menu.dataset.idea;
+  if(ideaMenuOpener?.isConnected)ideaMenuOpener.focus({preventScroll:true});
+  ideaMenuOpener=null;
+}
+$('#ideaMenu').onclick=e=>{if(e.target===$('#ideaMenu'))closeIdeaMenu();};
+$('#ideaMenuClose').onclick=closeIdeaMenu;
+$('#ideaMenuCopy').onclick=()=>{
+  const idea=S.ideas.get($('#ideaMenu').dataset.idea);
+  closeIdeaMenu();
+  if(idea)copyText(buildBizPrompt(idea));
+};
+$('#ideaMenuDelete').onclick=()=>{
+  $('#ideaMenuActions').hidden=true;
+  $('#ideaMenuConfirm').hidden=false;
+  $('#ideaMenuDeleteConfirm').focus({preventScroll:true});
+};
+$('#ideaMenuDeleteConfirm').onclick=()=>{
+  const id=$('#ideaMenu').dataset.idea;
+  closeIdeaMenu();
+  if(!id||!S.ideas.has(id))return;
+  S.ideas.delete(id);
+  saveNow();render();toast('削除しました');
+};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('#ideaMenu').hidden){e.preventDefault();closeIdeaMenu();}
+});
 function renderIdeas(m){
   const cur=S.ideaSel&&S.ideas.get(S.ideaSel); if(cur) return renderIdeaEditor(m,cur); S.ideaSel=null;
   const order={testing:0,idea:1,hold:2,dropped:3};
   const all=[...S.ideas.values()].sort((a,b)=>(order[a.status]??1)-(order[b.status]??1)||(b.updated||b.created||0)-(a.updated||a.created||0));
-  const card=x=>`<button class="card ideacard" data-idea="${esc(x.id)}"><h4>${esc(x.title||'無題の事業案')}<span class="b st-${esc(x.status||'idea')}">${stLabel(x.status)}</span></h4>${x.customer||x.pain?`<span class="muted">${esc([x.customer,x.pain].filter(Boolean).join('：'))}</span>`:''}<span class="fits">${fitMarks(x)}</span>${(x.sources||[]).length?`<span class="origin">元のタネ：${esc(x.sources.map(srcLabel).join('、'))}</span>`:''}${x.next&&x.status!=='dropped'?`<span class="nextline">次の一手：${esc(x.next)}</span>`:''}</button>`;
+  const card=x=>`<div class="idea-card-wrap"><button class="card ideacard" data-idea="${esc(x.id)}" aria-label="${esc(x.title||'無題の事業案')}を開く。長押しで操作"><h4>${esc(x.title||'無題の事業案')}<span class="b st-${esc(x.status||'idea')}">${stLabel(x.status)}</span></h4>${x.customer||x.pain?`<span class="muted">${esc([x.customer,x.pain].filter(Boolean).join('：'))}</span>`:''}<span class="fits">${fitMarks(x)}</span>${(x.sources||[]).length?`<span class="origin">元のタネ：${esc(x.sources.map(srcLabel).join('、'))}</span>`:''}${x.next&&x.status!=='dropped'?`<span class="nextline">次の一手：${esc(x.next)}</span>`:''}</button><button class="idea-more" type="button" data-idea-menu="${esc(x.id)}" aria-label="${esc(x.title||'無題の事業案')}の操作メニュー">···</button></div>`;
   const seeds=[...S.nodes.values()].filter(n=>n.seed).sort((a,b)=>scoreOf(b)-scoreOf(a));
   m.innerHTML=`<div class="list">
     <div class="card"><h4>タネから事業案をつくる</h4>
@@ -1041,7 +1120,32 @@ function renderIdeas(m){
   $('#ideaNew').onclick=()=>mkIdea([],'新しい事業案');
   $('#ideaViewSeeds').onclick=()=>{S.tab='seed';render();window.scrollTo({top:0});};
   bindMkIdea(m);
-  m.querySelectorAll('[data-idea]').forEach(b=>b.onclick=()=>{S.ideaSel=b.dataset.idea;renderMain();window.scrollTo({top:0});});
+  m.querySelectorAll('[data-idea]').forEach(b=>{
+    let pressTimer=null,pressed=false,ignoreClick=false,startX=0,startY=0;
+    const cancel=()=>{clearTimeout(pressTimer);pressTimer=null;};
+    b.onpointerdown=e=>{
+      if(e.button!==0)return;
+      cancel();pressed=true;ignoreClick=false;startX=e.clientX;startY=e.clientY;
+      pressTimer=setTimeout(()=>{
+        if(!pressed)return;
+        pressTimer=null;ignoreClick=true;
+        openIdeaMenu(b.dataset.idea,b);
+      },550);
+    };
+    b.onpointermove=e=>{
+      if(pressed&&(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12)){pressed=false;cancel();}
+    };
+    b.onpointerup=()=>{pressed=false;cancel();};
+    b.onpointercancel=()=>{pressed=false;cancel();};
+    b.onpointerleave=()=>{pressed=false;cancel();};
+    b.oncontextmenu=e=>{e.preventDefault();pressed=false;cancel();ignoreClick=true;openIdeaMenu(b.dataset.idea,b);};
+    b.onclick=e=>{
+      if(ignoreClick){e.preventDefault();ignoreClick=false;return;}
+      if(!$('#ideaMenu').hidden)return;
+      S.ideaSel=b.dataset.idea;renderMain();window.scrollTo({top:0});
+    };
+  });
+  m.querySelectorAll('[data-idea-menu]').forEach(b=>b.onclick=()=>openIdeaMenu(b.dataset.ideaMenu,b));
 }
 function renderIdeaEditor(m,x){const id=x.id;
   const tri=k=>FITV.map(([v,l])=>`<button data-fit="${k}" data-v="${v}" aria-pressed="${(x.fit||{})[k]===v}" aria-label="${l}">${l}</button>`).join('');
@@ -1302,7 +1406,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=21',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=22',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
