@@ -948,6 +948,19 @@ body.idea-menu-open{overflow:hidden}
 .net-symbol.tag{background:var(--ink-2)}
 .net-graph.has-detail .net-legend{bottom:calc(46% + 10px)}
 @media (max-width:380px){.net-filters{gap:5px}.net-filters select{font-size:13px;padding-left:6px}.net-filters #netFilterClear{padding:7px}}
+
+/* 凡例は初期状態で折りたたみ、必要なときだけ開く。iPhoneでもタップしやすく。 */
+.net-legend{display:block;width:max-content;max-width:calc(100% - 24px);padding:0;pointer-events:auto;z-index:2}
+.net-legend[open]{width:min(340px,calc(100% - 24px))}
+.net-legend-toggle{display:flex;align-items:center;justify-content:space-between;gap:13px;
+  min-height:44px;padding:9px 13px;list-style:none;cursor:pointer;
+  color:var(--ink);font-size:12px;font-weight:700}
+.net-legend-toggle::-webkit-details-marker{display:none}
+.net-legend-toggle span{font-size:18px;color:var(--ink-2);transition:transform .15s ease}
+.net-legend[open] .net-legend-toggle span{transform:rotate(180deg)}
+.net-legend-body{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;padding:0 13px 12px}
+.net-legend-body small{width:100%;line-height:1.5}
+@media(prefers-reduced-motion:reduce){.net-legend-toggle span{transition:none}}
 </style>
 </head>
 <body>
@@ -1458,12 +1471,15 @@ function netRender(m){
  </div>
  <button type="button" id="netLocalDismiss" class="net-local-dismiss" ${g.focus?'':'hidden'}>「${esc(g.nodes.get(g.focus)?.label||'')}」の周り ✕</button>
  ${!tags.length?'<div class="net-no-tags">本質がまだありません。行動の「分析する」→「本質」で追加すると絞り込めます。</div>':''}
- <div class="net-legend">
-   <span><i class="net-symbol theme"></i>L0（輪）</span><span><i class="net-symbol tag"></i>行動（階層順の大きさ）</span>
-   <span><i class="net-symbol root-match"></i>L0一致</span><span><i class="net-symbol hub"></i>本質一致</span>
-   <span><i class="net-symbol overlap"></i>両方一致</span><span><i class="net-symbol reason"></i>共通の理由</span>
-   <small>点をタップして詳細／ドラッグで動かす／2本指で拡大／ダブルタップで全体</small>
- </div>
+ <details class="net-legend" aria-label="ネットワークの見方と凡例">
+   <summary class="net-legend-toggle">見方・凡例 <span aria-hidden="true">⌄</span></summary>
+   <div class="net-legend-body">
+     <span><i class="net-symbol theme"></i>L0（輪）</span><span><i class="net-symbol tag"></i>行動（階層順の大きさ）</span>
+     <span><i class="net-symbol root-match"></i>L0一致</span><span><i class="net-symbol hub"></i>本質一致</span>
+     <span><i class="net-symbol overlap"></i>両方一致</span><span><i class="net-symbol reason"></i>共通の理由</span>
+     <small>点をタップして詳細／ドラッグで動かす／2本指で拡大／ダブルタップで全体</small>
+   </div>
+ </details>
  <div class="net-detail" id="netDetail" hidden></div></div>`;
  const shell=$('#netShell'),canvas=$('#netCanvas'),ctx=canvas.getContext('2d');if(!ctx)return;
  const media=matchMedia('(prefers-reduced-motion: reduce)'),dark=matchMedia('(prefers-color-scheme: dark)');
@@ -2557,7 +2573,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=45',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=46',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
