@@ -1,6 +1,6 @@
 // アプリの画面はオンライン時に最新を優先。オフライン時だけ保存済み画面を表示します。
 // 書いた内容はここでは一切扱わず、端末の localStorage にのみ保存します。
-const VERSION = 'tane-v12';
+const VERSION = 'tane-v13';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg'];
 
 self.addEventListener('install', event => {
