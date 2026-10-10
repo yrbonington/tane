@@ -936,6 +936,18 @@ body.idea-menu-open{overflow:hidden}
 .net-badges{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}
 @media(prefers-color-scheme:dark){.same-rank-num.is-hub{background:#277c5e}.same-theme-meter>i.on,.same-theme-meter>.same-meter-fill{background:#55bb88}}
 @media(prefers-reduced-motion:reduce){.same-rank-arrow{transition:none}.net-detail:not([hidden]){animation:none}}
+
+/* ネットワークは行動の親子関係。L0と本質は点を増やさず絞り込む。 */
+.net-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end;margin:0 0 4px}
+.net-filters label{display:flex;flex-direction:column;gap:4px;min-width:0;color:var(--ink-2);font-size:11px;font-weight:650}
+.net-filters select{width:100%;min-width:0;min-height:42px;border-radius:11px;padding:7px 24px 7px 9px;background:var(--panel);border:1px solid var(--line);color:var(--ink);font:inherit;font-size:14px;text-overflow:ellipsis}
+.net-filters #netFilterClear{min-height:42px;border-radius:11px;padding:8px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:12px}
+.net-filter-status{min-height:19px;margin:3px 0 8px;color:var(--ink-2);font-size:11px;line-height:1.4}
+.net-symbol.root-match{background:var(--accent)}
+.net-symbol.overlap{background:#2eaa79;border:2px solid #d8a443;width:12px;height:12px;box-shadow:0 0 0 2px rgba(216,164,67,.17)}
+.net-symbol.tag{background:var(--ink-2)}
+.net-graph.has-detail .net-legend{bottom:calc(46% + 10px)}
+@media (max-width:380px){.net-filters{gap:5px}.net-filters select{font-size:13px;padding-left:6px}.net-filters #netFilterClear{padding:7px}}
 </style>
 </head>
 <body>
@@ -1270,6 +1282,46 @@ function similarGroups(){const ns=[...S.nodes.values()].filter(n=>n.parent&&(n.t
 function hitBtn(n){return `<button class="hit" data-go="${esc(n.id)}"><span class="ht"><b>${esc(n.text)}</b><small>${esc(pathOf(n.id).slice(1,-1).map(p=>p.text).join(' › '))}</small></span><span class="thm">${esc(themeName(n.id))}・L${depth(n.id)}</span></button>`;}
 function bindGo(m){m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>select(b.dataset.go,true));}
 let netGraph=null,netLive=null,netJump=null;
+let netFilters={root:null,tag:null};
+function netMatchKind(n){
+ if(!n||n.type!=='action')return '';
+ const original=S.nodes.get(n.source);if(!original)return '';
+ const a=!!netFilters.root&&rootOf(n.source)===netFilters.root;
+ const b=!!netFilters.tag&&(original.tags||[]).includes(netFilters.tag);
+ return a&&b?'both':a?'root':b?'tag':'';
+}
+
+function netMatchOpacity(n){
+ if(!netFilters.root&&!netFilters.tag)return 1;
+ if(n.type==='reason'){
+   const group=reasonIndex().get(n.source);
+   if(!group)return .12;
+   return Math.max(.12,...group.items.map(({n:item})=>graphMatchOpacity({type:'action',source:item.id})));
+ }
+ const kind=netMatchKind(n);
+ if(netFilters.root&&netFilters.tag)return kind==='both'?1:kind?.23:.10;
+ return kind?1:.13;
+}
+
+function netSetFilters(root,tag){
+ netFilters.root=root&&S.nodes.has(root)?root:null;
+ netFilters.tag=tag&&tagIndex().has(tag)?tag:null;
+ const r=$('#netRootFilter'),t=$('#netTagFilter');
+ if(r)r.value=netFilters.root||'';
+ if(t)t.value=netFilters.tag||'';
+ const status=$('#netFilterStatus');
+ if(status){
+   const has=!!netFilters.root||!!netFilters.tag;
+   const count=[...S.nodes.values()].filter(n=>{
+     const a=!netFilters.root||rootOf(n.id)===netFilters.root;
+     const b=!netFilters.tag||(n.tags||[]).includes(netFilters.tag);
+     return a&&b;
+   }).length;
+   status.textContent=has?`${count}行動が一致${netFilters.root&&netFilters.tag?' · 金色の輪は両方に一致':''}`:'すべての行動を表示';
+ }
+ const clear=$('#netFilterClear');if(clear)clear.disabled=!netFilters.root&&!netFilters.tag;
+ netSchedule();
+}
 function sameViewNow(){const s=ls.get('tane.sameView');return ['network','ranking','list'].includes(s)?s:'network';}
 
 function netOptions(){try{const x=JSON.parse(ls.get('tane.net')||'{}');return {actions:!!x.actions,reasons:!!x.reasons};}catch(e){return {actions:false,reasons:false};}}
@@ -1296,13 +1348,13 @@ function renderSame(m){
 function sameRanking(m){
   const stats=sameStats(), total=roots().length;let last=null, rank=0;
   const items=stats.map((g,i)=>{if(!last||last.themes.length!==g.themes.length||last.count!==g.count)rank=i+1;last=g;return {...g,rank};});
-  const intro=!stats.length?'本質がまだありません。ツリーで行動を選び、「分析する」→「本質」で付けると、ここに並びます。':total<=1?'テーマが1つだけなので、今は行動の数で並んでいます。別のテーマで同じ本質が出てくると、上に上がります。':'多くのテーマに出てくる本質ほど上に来ます。業界をまたいで同じことが起きている、市場のタネの候補です。';
+  const intro=!stats.length?'本質がまだありません。ツリーで行動を選び、「分析する」→「本質」で付けると、ここに並びます。':total<=1?'L0が1つだけなので、今は行動の数で並んでいます。別のL0で同じ本質が出てくると、上に上がります。':'多くのL0に出てくる本質ほど上に来ます。業界をまたいで同じことが起きている、市場のタネの候補です。';
   m.innerHTML=`<div class="same-ranking"><p class="muted same-rank-intro">${esc(intro)}</p><div class="same-rank-list">${items.map(g=>`<section class="same-rank-item">
     <button class="same-rank-row" type="button" data-rank-open="${esc(g.name)}" aria-expanded="false">
       <span class="same-rank-num ${g.themes.length>=2?'is-hub':''}">${g.rank}</span>
       <span class="same-rank-main"><strong>${esc(g.name)}</strong>
       <span class="same-theme-meter">${total<=12?Array.from({length:total},(_,i)=>`<i class="${i<g.themes.length?'on':''}"></i>`).join(''):`<i class="same-meter-fill" style="width:${100*g.themes.length/Math.max(1,total)}%"></i>`}</span>
-      <span class="same-rank-metrics"><span>${g.themes.length}テーマ・${g.count}行動</span>${g.aged?`<span>理由が薄れた・消えた ${g.aged}</span>`:''}${g.seeds?`<span>タネ ${g.seeds}</span>`:''}</span></span><span class="same-rank-arrow">⌄</span>
+      <span class="same-rank-metrics"><span>${g.themes.length}L0・${g.count}行動</span>${g.aged?`<span>理由が薄れた・消えた ${g.aged}</span>`:''}${g.seeds?`<span>タネ ${g.seeds}</span>`:''}</span></span><span class="same-rank-arrow">⌄</span>
     </button><div class="same-rank-detail" hidden data-rank-detail="${esc(g.name)}">
       <div class="same-theme-names">${g.themes.map(id=>`<span>${esc(S.nodes.get(id)?.text||'')}</span>`).join('')}</div>
       <div class="same-rank-actions"><button class="btn sm" type="button" data-rank-network="${esc(g.name)}">ネットワークで見る</button>
@@ -1315,9 +1367,9 @@ function sameRanking(m){
     m.querySelectorAll('[data-rank-detail]').forEach(p=>{if(p.dataset.rankDetail===key)p.hidden=!show;});
   });
   m.querySelectorAll('[data-rank-network]').forEach(b=>b.onclick=()=>{
-    netJump='tag:'+b.dataset.rankNetwork;ls.set('tane.sameView','network');renderMain();
-    if(netGraph?.nodes.has(netJump))netSelect(netJump,true);
-    netJump=null;
+    netFilters.tag=b.dataset.rankNetwork;netFilters.root=null;
+    ls.set('tane.sameView','network');renderMain();
+    netFit(true);
   });
   bindGo(m);bindMkIdea(m);
 }
@@ -1334,60 +1386,38 @@ function netStop(){
 function netHash(s){let n=2166136261;for(let i=0;i<s.length;i++)n=Math.imul(n^s.charCodeAt(i),16777619);return n>>>0;}
 
 function netBuild(){
-  const previous=netGraph;const opts=netOptions();const nodes=new Map(),edges=[],old=previous?.nodes||new Map();
-  function put(id,type,label,count,themes,source){
-    const prior=old.get(id);const h=netHash(id),angle=(h%6283)/1000,dist=7+(h%29);
-    nodes.set(id,{id,type,label,count:count||0,themes:themes||0,source,
-      x:prior?.x??Math.cos(angle)*dist,y:prior?.y??Math.sin(angle)*dist,
-      vx:prior?.vx||0,vy:prior?.vy||0,fade:prior?.fade??1,labelFade:prior?.labelFade??0});
-  }
-  function edge(a,b,type,weight=1){if(a!==b&&nodes.has(a)&&nodes.has(b))edges.push({a,b,type,weight,fade:1});}
-  const allRoots=roots(),stats=sameStats();
-  for(const r of allRoots){put('theme:'+r.id,'theme',r.text,0,1,r.id);}
-  for(const g of stats)put('tag:'+g.name,'tag',g.name,g.count,g.themes.length,g.name);
-  const counter=new Map();
-  for(const g of stats){
-    for(const n of g.ns){const root=rootOf(n.id);if(!root)continue;const k=root+'\u0000'+g.name;counter.set(k,(counter.get(k)||0)+1);}
-  }
-  for(const [k,n] of counter){const [root,tag]=k.split('\u0000');edge('theme:'+root,'tag:'+tag,'theme-tag',n);}
-  if(opts.actions){
-    for(const n of S.nodes.values())if(n.parent!==null){put('action:'+n.id,'action',n.text,0,1,n.id);}
-    for(const n of S.nodes.values())if(n.parent!==null){
-      const p=S.nodes.get(n.parent);
-      if(p)edge('action:'+n.id,(p.parent===null?'theme:':'action:')+p.id,'action-parent');
-      for(const tag of n.tags||[])edge('action:'+n.id,'tag:'+tag,'action-tag');
-    }
-  }
-  if(opts.reasons){
-    for(const [k,g] of reasonIndex()){
-      if(g.items.length<2)continue;
-      const rootsSet=new Set(g.items.map(x=>rootOf(x.n.id)).filter(Boolean));
-      put('reason:'+k,'reason',g.text,g.items.length,rootsSet.size,k);
-      const destinations=new Set();
-      for(const x of g.items){const id=opts.actions&&x.n.parent!==null?'action:'+x.n.id:'theme:'+rootOf(x.n.id);if(nodes.has(id))destinations.add(id);}
-      for(const id of destinations)edge('reason:'+k,id,'reason-link');
-    }
-  }
-  const degrees=new Map();
-  for(const e of edges){degrees.set(e.a,(degrees.get(e.a)||0)+1);degrees.set(e.b,(degrees.get(e.b)||0)+1);}
-  for(const n of nodes.values()){
-    const deg=degrees.get(n.id)||0;
-    n.r=n.type==='theme'?Math.min(17,9+2.2*Math.sqrt(deg)):n.type==='tag'?Math.min(18,6+1.3*Math.sqrt(n.count)+1.6*n.themes):n.type==='reason'?6:4.2;
-    n.mass=n.type==='theme'?3:n.type==='tag'?1.7:n.type==='reason'?1.2:.55;
-  }
-  const newNodes=[...nodes.values()].filter(n=>!old.has(n.id));
-  if(previous)for(const n of newNodes){const linked=edges.find(e=>e.a===n.id&&old.has(e.b)||e.b===n.id&&old.has(e.a));if(linked){
-    const neighbor=old.get(linked.a===n.id?linked.b:linked.a);const h=netHash(n.id);n.x=neighbor.x+Math.cos(h)*18;n.y=neighbor.y+Math.sin(h)*18;
-  }}
-  netGraph={nodes,edges,opts,alpha:previous?(newNodes.length?.9:Math.min(.12,previous.alpha||0)):1,
-    selected:previous?.selected||null,focus:previous?.focus||null,cam:previous?.cam||{x:0,y:0,z:1},
-    camTarget:null,fitOnSettle:!previous||newNodes.length>0,hover:null,hasCamera:!!previous?.hasCamera,
-    lastView:previous?.lastView||null};
-  if(!nodes.has(netGraph.selected))netGraph.selected=null;
-  if(!nodes.has(netGraph.focus))netGraph.focus=null;
-  netActive();
+ const prev=netGraph,options=netOptions(),old=prev?.nodes||new Map(),nodes=new Map(),edges=[];
+ function add(n,id,type){
+   const before=old.get(id),hash=netHash(id),angle=(hash%6283)/1000,range=15+(hash%25);
+   const d=type==='action'?depth(n.id):3;
+   nodes.set(id,{id,type,label:type==='action'?n.text:n.text,source:type==='action'?n.id:n.key,
+     depth:d,r:type==='reason'?6:Math.max(4.5,11-1.5*d),mass:type==='reason'?1:Math.max(.6,2.0-.24*d),
+     x:before?.x??Math.cos(angle)*range,y:before?.y??Math.sin(angle)*range,
+     vx:before?.vx||0,vy:before?.vy||0,fade:before?.fade??1,labelFade:before?.labelFade??0});
+ }
+ for(const n of S.nodes.values())add(n,'action:'+n.id,'action');
+ for(const n of S.nodes.values())if(n.parent&&nodes.has('action:'+n.parent))edges.push({a:'action:'+n.parent,b:'action:'+n.id,type:'action-parent',fade:1});
+ if(options.reasons)for(const [key,g] of reasonIndex()){
+   if(g.items.length<2)continue;
+   add({key,text:g.text},'reason:'+key,'reason');
+   for(const n of g.items){if(nodes.has('action:'+n.n.id))edges.push({a:'reason:'+key,b:'action:'+n.n.id,type:'reason-link',fade:1});}
+ }
+ // Newly added actions grow next to their parent, preserving all old positions.
+ if(prev)for(const n of nodes.values())if(!old.has(n.id)){
+   const edge=edges.find(e=>(e.a===n.id&&old.has(e.b))||(e.b===n.id&&old.has(e.a)));
+   if(edge){const p=old.get(edge.a===n.id?edge.b:edge.a),angle=netHash(n.id)*.001;
+     n.x=p.x+Math.cos(angle)*27;n.y=p.y+Math.sin(angle)*27;}
+ }
+ if(netFilters.root&&!S.nodes.has(netFilters.root))netFilters.root=null;
+ if(netFilters.tag&&!tagIndex().has(netFilters.tag))netFilters.tag=null;
+ netGraph={nodes,edges,opts:options,alpha:prev?([...nodes.keys()].some(id=>!old.has(id))?.85:Math.min(.08,prev.alpha||0)):1,
+   selected:prev?.selected||null,focus:prev?.focus||null,cam:prev?.cam||{x:0,y:0,z:1},
+   camTarget:null,fitOnSettle:!prev||[...nodes.keys()].some(id=>!old.has(id)),
+   hover:null,hasCamera:!!prev?.hasCamera,lastView:prev?.lastView||null,dragged:null};
+ if(!nodes.has(netGraph.selected))netGraph.selected=null;
+ if(!nodes.has(netGraph.focus))netGraph.focus=null;
+ netActive();
 }
-
 function netActive(){
   if(!netGraph)return;
   const g=netGraph;
@@ -1408,96 +1438,93 @@ function netThemeMetrics(root){
 }
 
 function netRender(m){
-  netStop();if(netJump&&netGraph)netGraph.focus=null;
-  netBuild();
-  const g=netGraph;const tagCount=sameStats().length;const total=roots().length;
-  if(!total){
-    m.innerHTML='<div class="empty">まだ何もありません。<p class="muted">行動一覧から最初の行動を追加すると、ここにつながりが現れます。</p></div>';
-    return;
-  }
-  m.innerHTML=`<div class="net-graph" id="netShell">
-    <canvas id="netCanvas" role="img" aria-label="テーマと本質のネットワーク。ドラッグで移動、2本指で拡大。内容を文字で確認するにはランキングか一覧をお使いください。"></canvas>
-    <div class="net-toolbar">
-      <div class="net-switches">
-        <button type="button" data-net-option="actions" aria-pressed="${g.opts.actions}">行動</button>
-        <button type="button" data-net-option="reasons" aria-pressed="${g.opts.reasons}">共通の理由</button>
-      </div>
-      <button type="button" id="netFit" class="net-fit" aria-label="全体が収まるように表示">⤢</button>
-    </div>
-    <button type="button" class="net-local-dismiss" id="netLocalDismiss" ${g.focus?'':'hidden'}>「${esc(g.nodes.get(g.focus)?.label||'')}」の周り ✕</button>
-    ${!tagCount?'<div class="net-no-tags">本質がまだありません。行動の「分析する」→「本質」で付けると、テーマ同士が本質でつながります。<button type="button" id="netEnableActions">行動も表示する</button></div>':''}
-    <div class="net-legend"><span><i class="net-symbol theme"></i>テーマ</span><span><i class="net-symbol tag"></i>本質</span><span><i class="net-symbol hub"></i>2テーマ以上</span><span><i class="net-symbol reason"></i>理由</span>
-      <small>ドラッグで動かす・2本指で拡大・ダブルタップで全体</small></div>
-    <div class="net-detail" id="netDetail" hidden></div>
-  </div>`;
-  const shell=$('#netShell'),canvas=$('#netCanvas'),ctx=canvas.getContext('2d');
-  if(!ctx)return;
-  const media=matchMedia('(prefers-reduced-motion: reduce)');
-  const dark=matchMedia('(prefers-color-scheme: dark)');
-  const live={shell,canvas,ctx,raf:0,points:new Map(),drag:null,view:null,needs:true,resize:null,cleanup:null,media,colors:null,fitPending:!g.hasCamera};
-  netLive=live;
-  live.colors=netColors();
-  function resize(){
-    if(!canvas.isConnected)return;
-    const b=document.querySelector('.bottom')?.getBoundingClientRect(),top=$('#topBar')?.getBoundingClientRect();
-    const target=Math.max(380,Math.round(innerHeight-(top?.bottom||0)-(b?.height||72)-22));
-    if(Math.abs(shell.getBoundingClientRect().height-target)>1)shell.style.height=target+'px';
-    const rect=shell.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height);
-    const old=live.view;live.view={w,h,dpr:Math.min(3,devicePixelRatio||1)};
-    canvas.width=Math.round(w*live.view.dpr);canvas.height=Math.round(h*live.view.dpr);
-    if(!g.hasCamera){g.cam={x:w/2,y:h/2,z:1};g.hasCamera=true;live.fitPending=true;}
-    else if(old||g.lastView){
-      const was=old||g.lastView;g.cam.x+=(w-was.w)/2;g.cam.y+=(h-was.h)/2;
-    }
-    g.lastView={w,h};
-    netSchedule();
-  }
-  live.resize=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>resize()):null;
-  if(live.resize)live.resize.observe(shell);
-  window.addEventListener('resize',resize);
-  const recolor=()=>{if(netLive!==live)return;live.colors=netColors();netSchedule();};
-  dark.addEventListener?.('change',recolor);
-  const visible=()=>{if(document.hidden){if(live.raf)cancelAnimationFrame(live.raf);live.raf=0;}else netSchedule();};
-  document.addEventListener('visibilitychange',visible);
-  const preventGesture=e=>e.preventDefault();
-  shell.addEventListener('gesturestart',preventGesture,{passive:false});
-  shell.addEventListener('gesturechange',preventGesture,{passive:false});
-  live.cleanup=()=>{
-    window.removeEventListener('resize',resize);
-    dark.removeEventListener?.('change',recolor);
-    document.removeEventListener('visibilitychange',visible);
-    shell.removeEventListener('gesturestart',preventGesture);
-    shell.removeEventListener('gesturechange',preventGesture);
-  };
-  canvas.addEventListener('pointerdown',netPointerDown);
-  canvas.addEventListener('pointermove',netPointerMove);
-  canvas.addEventListener('pointerup',netPointerUp);
-  canvas.addEventListener('pointercancel',netPointerUp);
-  canvas.addEventListener('wheel',netWheel,{passive:false});
-  canvas.addEventListener('dblclick',e=>{e.preventDefault();if(!netHit(e.offsetX,e.offsetY))netFit(true);});
-  shell.querySelectorAll('[data-net-option]').forEach(b=>b.onclick=()=>{
-    const opts=netOptions();opts[b.dataset.netOption]=!opts[b.dataset.netOption];ls.set('tane.net',JSON.stringify(opts));renderMain();
-  });
-  const en=$('#netEnableActions');if(en)en.onclick=()=>{const opts=netOptions();opts.actions=true;ls.set('tane.net',JSON.stringify(opts));renderMain();};
-  $('#netFit').onclick=()=>netFit(true);
-  $('#netLocalDismiss').onclick=()=>netLocal(false);
-  resize();
-  if(media.matches){
-    for(let i=0;i<240&&g.alpha>0;i++)netPhysics();
-    g.alpha=0;g.fitOnSettle=false;netFit(false);
-    if(live.raf){cancelAnimationFrame(live.raf);live.raf=0;}
-    netPaint();
-  }
-  if(g.selected&&g.nodes.has(g.selected))netPanel();
-  if(netJump&&g.nodes.has(netJump))netSelect(netJump,true);
-  else if(live.fitPending)netSchedule();
+ netStop();netBuild();const g=netGraph;
+ const rootsList=roots(),tags=[...tagIndex().keys()].sort((a,b)=>a.localeCompare(b,'ja'));
+ if(!rootsList.length){m.innerHTML='<div class="empty">まだ何もありません。行動一覧で最初の行動を追加すると、ネットワークが表示されます。</div>';return;}
+ m.innerHTML=`<div class="net-filters">
+   <label><span>L0（起点の行動）</span><select id="netRootFilter" aria-label="L0で絞り込む">
+     <option value="">すべてのL0</option>${rootsList.map(r=>`<option value="${esc(r.id)}" ${r.id===netFilters.root?'selected':''}>${esc(r.text)}</option>`).join('')}
+   </select></label>
+   <label><span>本質</span><select id="netTagFilter" aria-label="本質で絞り込む">
+     <option value="">すべての本質</option>${tags.map(t=>`<option value="${esc(t)}" ${t===netFilters.tag?'selected':''}>${esc(t)}</option>`).join('')}
+   </select></label>
+   <button id="netFilterClear" type="button" ${netFilters.root||netFilters.tag?'':'disabled'}>解除</button>
+ </div>
+ <p class="net-filter-status" id="netFilterStatus" role="status"></p>
+ <div class="net-graph" id="netShell">
+ <canvas id="netCanvas" role="img" aria-label="L0から具体的な行動へ枝分かれするネットワーク。上の本質とL0の絞り込みで該当する行動を強調します。文字で確認するにはランキングや一覧をお使いください。"></canvas>
+ <div class="net-toolbar"><div class="net-switches">
+   <button type="button" data-net-option="reasons" aria-pressed="${g.opts.reasons}">共通の理由</button></div>
+   <button type="button" class="net-fit" id="netFit" aria-label="全体が収まるように表示">⤢</button>
+ </div>
+ <button type="button" id="netLocalDismiss" class="net-local-dismiss" ${g.focus?'':'hidden'}>「${esc(g.nodes.get(g.focus)?.label||'')}」の周り ✕</button>
+ ${!tags.length?'<div class="net-no-tags">本質がまだありません。行動の「分析する」→「本質」で追加すると絞り込めます。</div>':''}
+ <div class="net-legend">
+   <span><i class="net-symbol theme"></i>L0（輪）</span><span><i class="net-symbol tag"></i>行動（階層順の大きさ）</span>
+   <span><i class="net-symbol root-match"></i>L0一致</span><span><i class="net-symbol hub"></i>本質一致</span>
+   <span><i class="net-symbol overlap"></i>両方一致</span><span><i class="net-symbol reason"></i>共通の理由</span>
+   <small>点をタップして詳細／ドラッグで動かす／2本指で拡大／ダブルタップで全体</small>
+ </div>
+ <div class="net-detail" id="netDetail" hidden></div></div>`;
+ const shell=$('#netShell'),canvas=$('#netCanvas'),ctx=canvas.getContext('2d');if(!ctx)return;
+ const media=matchMedia('(prefers-reduced-motion: reduce)'),dark=matchMedia('(prefers-color-scheme: dark)');
+ const live={shell,canvas,ctx,raf:0,points:new Map(),drag:null,view:null,resize:null,cleanup:null,media,colors:netColors()};
+ netLive=live;
+ function resize(){
+   if(!canvas.isConnected)return;
+   const bottom=document.querySelector('.bottom')?.getBoundingClientRect(),rect=shell.getBoundingClientRect();
+   const available=Math.max(380,Math.round((bottom?.top||innerHeight)-rect.top-10));
+   if(Math.abs(rect.height-available)>1){shell.style.height=available+'px';return;}
+   const box=shell.getBoundingClientRect(),w=Math.max(1,box.width),h=Math.max(1,box.height),dpr=Math.min(3,devicePixelRatio||1);
+   const old=live.view;if(old&&old.w===w&&old.h===h&&old.dpr===dpr)return;
+   live.view={w,h,dpr};canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+   if(!g.hasCamera){g.cam={x:w/2,y:h/2,z:1};g.hasCamera=true;g.fitOnSettle=true;}
+   else if(old||g.lastView){const p=old||g.lastView;g.cam.x+=(w-p.w)/2;g.cam.y+=(h-p.h)/2;}
+   g.lastView={w,h};netSchedule();
+ }
+ live.resize=typeof ResizeObserver!=='undefined'?new ResizeObserver(resize):null;
+ if(live.resize)live.resize.observe(shell);
+ window.addEventListener('resize',resize);
+ const recolor=()=>{if(netLive!==live)return;live.colors=netColors();netSchedule();};
+ dark.addEventListener?.('change',recolor);
+ const visibility=()=>{if(document.hidden){if(live.raf)cancelAnimationFrame(live.raf);live.raf=0;}else netSchedule();};
+ document.addEventListener('visibilitychange',visibility);
+ const prevent=e=>e.preventDefault();
+ shell.addEventListener('gesturestart',prevent,{passive:false});shell.addEventListener('gesturechange',prevent,{passive:false});
+ live.cleanup=()=>{
+   window.removeEventListener('resize',resize);dark.removeEventListener?.('change',recolor);document.removeEventListener('visibilitychange',visibility);
+   shell.removeEventListener('gesturestart',prevent);shell.removeEventListener('gesturechange',prevent);
+ };
+ canvas.addEventListener('pointerdown',netPointerDown);
+ canvas.addEventListener('pointermove',netPointerMove);
+ canvas.addEventListener('pointerup',netPointerUp);
+ canvas.addEventListener('pointercancel',netPointerUp);
+ canvas.addEventListener('wheel',netWheel,{passive:false});
+ canvas.addEventListener('dblclick',e=>{e.preventDefault();if(!netHit(e.offsetX,e.offsetY))netFit(true);});
+ $('#netRootFilter').onchange=e=>netSetFilters(e.target.value,netFilters.tag);
+ $('#netTagFilter').onchange=e=>netSetFilters(netFilters.root,e.target.value);
+ $('#netFilterClear').onclick=()=>netSetFilters(null,null);
+ shell.querySelector('[data-net-option]').onclick=()=>{
+   const opts=netOptions();opts.reasons=!opts.reasons;ls.set('tane.net',JSON.stringify(opts));renderMain();
+ };
+ $('#netFit').onclick=()=>netFit(true);
+ $('#netLocalDismiss').onclick=()=>netLocal(false);
+ resize();
+ // The first ResizeObserver notification may land after setup.
+ if(media.matches){
+   for(let i=0;i<260&&g.alpha>0;i++)netPhysics();g.alpha=0;g.fitOnSettle=false;
+   if(live.view)netFit(false);
+   if(live.raf){cancelAnimationFrame(live.raf);live.raf=0;}
+ }
+ netSetFilters(netFilters.root,netFilters.tag);
+ if(g.selected&&g.nodes.has(g.selected))netPanel();
+ if(g.fitOnSettle||g.alpha>0)netSchedule();
 }
-
 function netColors(){
-  const st=getComputedStyle(document.documentElement),get=n=>st.getPropertyValue(n).trim();
-  return {paper:get('--paper'),frame:get('--frame'),ink:get('--ink'),gray:get('--ink-2'),line:get('--line'),panel:get('--panel'),green:'#2ba772',soft:'rgba(42,174,113,.14)',orange:get('--warn')||'#c78b41'};
+ const v=getComputedStyle(document.documentElement),get=k=>v.getPropertyValue(k).trim();
+ return {paper:get('--paper'),frame:get('--frame'),ink:get('--ink'),gray:get('--ink-2'),line:get('--line'),
+   panel:get('--panel'),blue:get('--accent'),green:'#2eaa79',gold:'#d8a443',orange:get('--warn')||'#c18b50'};
 }
-
 function netVisible(){return netGraph?[...netGraph.active].map(k=>netGraph.nodes.get(k)).filter(Boolean):[];}
 
 function netPhysics(){
@@ -1536,18 +1563,22 @@ function netCamera(id){const g=netGraph,v=netLive?.view,n=g?.nodes.get(id);if(!n
 }
 
 function netFit(smooth){
-  const g=netGraph,v=netLive?.view;if(!g||!v)return;
-  const ns=netVisible();if(!ns.length)return;
-  const pad=58,availH=g.selected?v.h*.53:v.h-40;
-  const xs=ns.map(n=>n.x),ys=ns.map(n=>n.y);
-  const loX=Math.min(...xs)-25,hiX=Math.max(...xs)+25,loY=Math.min(...ys)-25,hiY=Math.max(...ys)+25;
-  const z=Math.max(.2,Math.min(1.8,(v.w-pad*2)/(hiX-loX),(availH-pad*2)/(hiY-loY)));
-  const t={x:v.w/2-(loX+hiX)/2*z,y:availH/2-(loY+hiY)/2*z,z};
-  g.fitOnSettle=false;
-  if(smooth&&!netLive.media.matches){g.camTarget=t;netSchedule();}
-  else {g.cam=t;g.camTarget=null;netSchedule();}
+ const g=netGraph,v=netLive?.view;if(!g||!v)return;
+ let nodes=netVisible();
+ if(netFilters.root||netFilters.tag){
+   const matches=nodes.filter(n=>netMatchOpacity(n)>=.95);
+   if(matches.length)nodes=matches;
+ }
+ if(!nodes.length)return;
+ const pad=58,h=g.selected?v.h*.53:v.h-40;
+ const xs=nodes.map(n=>n.x),ys=nodes.map(n=>n.y);
+ const loX=Math.min(...xs)-25,hiX=Math.max(...xs)+25,loY=Math.min(...ys)-25,hiY=Math.max(...ys)+25;
+ const z=Math.max(.24,Math.min(1.8,(v.w-pad*2)/Math.max(1,hiX-loX),(h-pad*2)/Math.max(1,hiY-loY)));
+ const target={x:v.w/2-(loX+hiX)/2*z,y:h/2-(loY+hiY)/2*z,z};
+ g.fitOnSettle=false;
+ if(smooth&&!netLive.media.matches){g.camTarget=target;netSchedule();}
+ else{g.cam=target;g.camTarget=null;netSchedule();}
 }
-
 function netSetZoom(newZ,x,y){
   const g=netGraph;if(!g)return;const cam=g.cam,z=Math.max(.25,Math.min(3.8,newZ));
   const wx=(x-cam.x)/cam.z,wy=(y-cam.y)/cam.z;
@@ -1589,79 +1620,82 @@ function netSchedule(){
 }
 
 function netFrame(){
-  const live=netLive,g=netGraph;if(!live)return;live.raf=0;if(!live.canvas.isConnected)return;
-  if(g.alpha>0&&!document.hidden)netPhysics();
-  if(g.fitOnSettle&&g.alpha<.075){g.fitOnSettle=false;netFit(true);}
-  let moving=false;
-  if(g.camTarget){
-    for(const k of ['x','y','z'])g.cam[k]+=(g.camTarget[k]-g.cam[k])*.18;
-    moving=Math.abs(g.cam.x-g.camTarget.x)+Math.abs(g.cam.y-g.camTarget.y)+30*Math.abs(g.cam.z-g.camTarget.z)>.3;
-    if(!moving){g.cam=g.camTarget;g.camTarget=null;}
-  }
-  const highlighted=g.selected?netNeighbors(g.selected):g.hover?netNeighbors(g.hover):null;
-  let fading=false;
-  for(const n of netVisible()){
-    const target=!highlighted||highlighted.has(n.id)?1:.15;
-    n.fade+=(target-n.fade)*.24;
-    if(Math.abs(target-n.fade)>.008)fading=true;else n.fade=target;
-    const labelTarget=n.type==='theme'||n.type==='tag'&&n.themes>=2||
-      highlighted?.has(n.id)||n.type==='tag'&&g.cam.z>1.05||
-      n.type==='action'&&g.cam.z>1.75||n.type==='reason'&&g.cam.z>1.5?1:0;
-    n.labelFade+=(labelTarget-n.labelFade)*.2;
-    if(Math.abs(labelTarget-n.labelFade)>.015)fading=true;else n.labelFade=labelTarget;
-  }
-  for(const e of g.links){
-    const target=!highlighted||(highlighted.has(e.a)&&highlighted.has(e.b)&&(g.selected?e.a===g.selected||e.b===g.selected:e.a===g.hover||e.b===g.hover))?1:.15;
-    e.fade+=(target-e.fade)*.24;
-    if(Math.abs(target-e.fade)>.008)fading=true;else e.fade=target;
-  }
-  netPaint();
-  if(g.alpha>0||moving||fading)netSchedule();
+ const live=netLive,g=netGraph;if(!live)return;
+ live.raf=0;if(!live.canvas.isConnected)return;
+ if(g.alpha>0&&!document.hidden)netPhysics();
+ if(g.fitOnSettle&&g.alpha<.075){g.fitOnSettle=false;netFit(true);}
+ let moving=false;
+ if(g.camTarget){
+   for(const k of ['x','y','z'])g.cam[k]+=(g.camTarget[k]-g.cam[k])*.18;
+   moving=Math.abs(g.cam.x-g.camTarget.x)+Math.abs(g.cam.y-g.camTarget.y)+30*Math.abs(g.cam.z-g.camTarget.z)>.3;
+   if(!moving){g.cam=g.camTarget;g.camTarget=null;}
+ }
+ const neighboring=g.selected?netNeighbors(g.selected):g.hover?netNeighbors(g.hover):null;
+ let fading=false;
+ for(const n of netVisible()){
+   const base=netMatchOpacity(n),target=base*(!neighboring||neighboring.has(n.id)?1:.6);
+   n.fade+=(target-n.fade)*.23;if(Math.abs(target-n.fade)>.008)fading=true;else n.fade=target;
+   const labelTarget=n.type==='reason'?g.cam.z>1.4||neighboring?.has(n.id)?1:0:
+     n.depth===0||netMatchKind(n)&&base>=.9||neighboring?.has(n.id)||g.cam.z>1.22+Math.min(.65,n.depth*.13)?1:0;
+   n.labelFade+=(labelTarget-n.labelFade)*.2;
+   if(Math.abs(labelTarget-n.labelFade)>.015)fading=true;else n.labelFade=labelTarget;
+ }
+ for(const e of g.links){
+   const a=g.nodes.get(e.a),b=g.nodes.get(e.b),near=!neighboring||
+     (neighboring.has(e.a)&&neighboring.has(e.b)&&(e.a===g.selected||e.b===g.selected||e.a===g.hover||e.b===g.hover));
+   const target=Math.min(netMatchOpacity(a),netMatchOpacity(b))*(near?1:.5);
+   e.fade+=(target-e.fade)*.24;if(Math.abs(target-e.fade)>.008)fading=true;else e.fade=target;
+ }
+ netPaint();if(g.alpha>0||moving||fading)netSchedule();
 }
-
 function netPaint(){
-  const live=netLive,g=netGraph;if(!live||!g)return;
-  const {ctx,view,colors:c}=live;if(!view)return;const {w,h,dpr}=view,cam=g.cam;
-  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
-  const project=n=>({x:cam.x+n.x*cam.z,y:cam.y+n.y*cam.z});
-  for(const e of g.links){
-    const n=g.nodes.get(e.a),m=g.nodes.get(e.b);if(!n||!m)continue;
-    const p=project(n),q=project(m);
-    ctx.globalAlpha=e.fade*.5;ctx.strokeStyle=e.type==='reason-link'?c.orange:c.line;
-    ctx.lineWidth=e.type==='theme-tag'?Math.min(3,.95+Math.log2(1+e.weight)*.5):1.05;
-    ctx.setLineDash(e.type==='reason-link'?[4,5]:[]);
-    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
-  }
-  ctx.setLineDash([]);
-  const ns=netVisible().sort((a,b)=>a.type===b.type?0:(a.type==='theme'?-1:b.type==='theme'?1:0));
-  for(const n of ns){
-    const p=project(n),r=Math.max(2.8,n.r*cam.z),selected=n.id===g.selected,hover=n.id===g.hover;
-    ctx.globalAlpha=n.fade;
-    if(selected){ctx.strokeStyle=c.green;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,r+7,0,Math.PI*2);ctx.stroke();}
-    if(n.type==='tag'&&n.themes>=2){ctx.shadowColor=c.green;ctx.shadowBlur=13;}
-    ctx.beginPath();
-    if(n.type==='reason'){ctx.moveTo(p.x,p.y-r);ctx.lineTo(p.x+r,p.y);ctx.lineTo(p.x,p.y+r);ctx.lineTo(p.x-r,p.y);ctx.closePath();}
-    else ctx.arc(p.x,p.y,r+(hover?2:0),0,Math.PI*2);
-    const action=S.nodes.get(n.source);
-    const seed=n.type==='action'&&action?.seed;
-    ctx.fillStyle=n.type==='theme'?c.frame:n.type==='tag'?(n.themes>=2?c.green:c.gray):n.type==='reason'?c.orange:seed?c.green:c.gray;
-    ctx.fill();
-    ctx.shadowBlur=0;ctx.lineWidth=n.type==='theme'?Math.max(2,2.5*cam.z):1.5;
-    if(n.type==='theme'){ctx.strokeStyle=c.ink;ctx.stroke();}
-    if(n.type==='action'&&action&&['gone','fading'].includes(rstatus(action))){ctx.strokeStyle=c.green;ctx.beginPath();ctx.arc(p.x,p.y,r+4,0,Math.PI*2);ctx.stroke();}
-    if(n.labelFade>.025){
-      ctx.globalAlpha=n.fade*n.labelFade;
-      const size=Math.max(10,Math.min(15,12/Math.sqrt(cam.z)));
-      const txt=n.label.length>16?n.label.slice(0,16)+'…':n.label;
-      ctx.font=`${n.type==='theme'||selected?'700':'500'} ${size}px -apple-system, "Hiragino Sans", sans-serif`;
-      ctx.textAlign='center';ctx.textBaseline='top';ctx.lineJoin='round';
-      ctx.lineWidth=3.5;ctx.strokeStyle=c.paper;ctx.strokeText(txt,p.x,p.y+r+5);
-      ctx.fillStyle=c.ink;ctx.fillText(txt,p.x,p.y+r+5);
-    }
-  }
-  ctx.globalAlpha=1;
+ const live=netLive,g=netGraph;if(!live?.view||!g)return;
+ const {ctx,view,colors:c}=live,{w,h,dpr}=view,cam=g.cam;
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ const pos=n=>({x:cam.x+n.x*cam.z,y:cam.y+n.y*cam.z});
+ for(const e of g.links){
+   const n=g.nodes.get(e.a),m=g.nodes.get(e.b);if(!n||!m)continue;
+   const p=pos(n),q=pos(m);ctx.globalAlpha=.65*e.fade;
+   ctx.strokeStyle=e.type==='reason-link'?c.orange:c.line;
+   ctx.lineWidth=e.type==='reason-link'?1.3:1.5;
+   ctx.setLineDash(e.type==='reason-link'?[4,4]:[]);
+   ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
+ }
+ ctx.setLineDash([]);
+ for(const n of netVisible()){
+   const p=pos(n),radius=Math.max(3,n.r*cam.z),selected=n.id===g.selected,hover=n.id===g.hover;
+   const kind=netMatchKind(n),original=n.type==='action'?S.nodes.get(n.source):null;
+   ctx.globalAlpha=n.fade;
+   if(selected){ctx.strokeStyle=c.ink;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,p.y,radius+8,0,2*Math.PI);ctx.stroke();}
+   if(kind==='both'){ctx.strokeStyle=c.gold;ctx.lineWidth=3.4;ctx.shadowColor=c.gold;ctx.shadowBlur=8;
+     ctx.beginPath();ctx.arc(p.x,p.y,radius+5,0,2*Math.PI);ctx.stroke();ctx.shadowBlur=0;}
+   else if(kind==='root'||kind==='tag'){
+     ctx.strokeStyle=kind==='root'?c.blue:c.green;ctx.lineWidth=2;
+     ctx.beginPath();ctx.arc(p.x,p.y,radius+4,0,2*Math.PI);ctx.stroke();
+   }
+   ctx.beginPath();
+   if(n.type==='reason'){
+     ctx.moveTo(p.x,p.y-radius);ctx.lineTo(p.x+radius,p.y);ctx.lineTo(p.x,p.y+radius);ctx.lineTo(p.x-radius,p.y);ctx.closePath();
+     ctx.fillStyle=c.orange;ctx.fill();
+   }else{
+     ctx.arc(p.x,p.y,radius+(hover?2:0),0,2*Math.PI);
+     const color=kind==='both'?c.green:kind==='root'?c.blue:kind==='tag'?c.green:original?.seed?c.green:c.gray;
+     ctx.fillStyle=n.depth===0?c.frame:color;ctx.fill();
+     if(n.depth===0){ctx.strokeStyle=kind==='both'?c.gold:kind==='root'?c.blue:c.ink;ctx.lineWidth=Math.max(2,2.2*cam.z);ctx.stroke();}
+     if(original&&['gone','fading'].includes(rstatus(original))){
+       ctx.strokeStyle=c.green;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(p.x,p.y,radius+2,0,2*Math.PI);ctx.stroke();
+     }
+   }
+   if(n.labelFade>.03){
+     ctx.globalAlpha=n.fade*n.labelFade;
+     const sz=Math.max(10,Math.min(15,12/Math.sqrt(cam.z))),label=n.label.length>16?n.label.slice(0,16)+'…':n.label;
+     ctx.font=`${n.depth===0||selected?'700':'500'} ${sz}px -apple-system,"Hiragino Sans",sans-serif`;
+     ctx.textAlign='center';ctx.textBaseline='top';ctx.lineJoin='round';ctx.lineWidth=3.5;
+     ctx.strokeStyle=c.frame;ctx.strokeText(label,p.x,p.y+radius+6);ctx.fillStyle=c.ink;ctx.fillText(label,p.x,p.y+radius+6);
+   }
+ }
+ ctx.globalAlpha=1;
 }
-
 function netPointerDown(e){
   const live=netLive,g=netGraph;if(!live||e.button>0)return;e.preventDefault();
   const rect=live.canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
@@ -1719,61 +1753,63 @@ function netWheel(e){
 }
 
 function netSelect(id,center){
-  const g=netGraph;if(!g)return;
-  if(id&&!g.nodes.has(id))return;
-  if(id&&g.focus&&!g.active.has(id)){
-    g.focus=null;netActive();const reset=$('#netLocalDismiss');if(reset)reset.hidden=true;
-  }
-  if(id&&g.selected===id){netCamera(id);return;}
-  g.selected=id;g.hover=null;
-  if(id){netPanel();const n=g.nodes.get(id);const v=netLive?.view;
-    if(v){const sy=g.cam.y+n.y*g.cam.z;if(center||sy>v.h*.49)netCamera(id);}
-  }else{const p=$('#netDetail');if(p){p.hidden=true;p.innerHTML='';netLive?.shell.classList.remove('has-detail');}}
-  netSchedule();
+ const g=netGraph;if(!g||id&&!g.nodes.has(id))return;
+ if(id&&g.focus&&!g.active.has(id)){g.focus=null;netActive();const close=$('#netLocalDismiss');if(close)close.hidden=true;}
+ const n=id?g.nodes.get(id):null;
+ // Selecting an L0 ring is also an L0 filter action.
+ if(n?.type==='action'&&n.depth===0)netSetFilters(n.source,netFilters.tag);
+ if(id&&g.selected===id){netCamera(id);return;}
+ g.selected=id;g.hover=null;
+ if(id){
+   netPanel();const v=netLive?.view;
+   if(v){const y=g.cam.y+n.y*g.cam.z;if(center||y>v.h*.49)netCamera(id);}
+ }else{
+   const p=$('#netDetail');if(p){p.hidden=true;p.innerHTML='';netLive?.shell.classList.remove('has-detail');}
+ }
+ netSchedule();
 }
-
 function netPanel(){
-  const g=netGraph,id=g?.selected,p=$('#netDetail');if(!p||!id)return;
-  const n=g.nodes.get(id);if(!n)return;
-  const stats=n.type==='tag'?sameStats().find(x=>x.name===n.source):null;
-  const theme=n.type==='theme'?netThemeMetrics(n.source):null;
-  const reason=n.type==='reason'?reasonIndex().get(n.source):null;
-  const original=n.type==='action'?S.nodes.get(n.source):null;
-  const head=`<div class="net-detail-head"><div><small>${{tag:'本質',theme:'テーマ',action:'行動',reason:'共通の理由'}[n.type]}</small><h3>${esc(n.label)}</h3></div><button type="button" class="net-detail-close" id="netClose" aria-label="閉じる">✕</button></div>`;
-  const around=`<button class="btn sm" type="button" id="netLocalToggle">${g.focus?'全体に戻す':'この周りだけ表示'}</button>`;
-  let body='';
-  if(stats){
-    body=`<p class="muted">${stats.themes.length}テーマ・${stats.count}行動${stats.aged?`・理由が薄れた・消えた ${stats.aged}`:''}</p>
-    <div class="net-detail-chips">${stats.themes.map(t=>`<button type="button" data-net-pick="${esc('theme:'+t)}">${esc(S.nodes.get(t)?.text||'')}</button>`).join('')}</div>
-    <div class="btnrow">${around}<button class="btn sm" type="button" data-mkidea-tag="${esc(n.source)}">事業案にする</button></div>${stats.ns.map(hitBtn).join('')}`;
-  }else if(theme){
-    body=`<p class="muted">${theme.ns.length}行動・${theme.tags.length}本質</p>
-    <div class="net-detail-chips">${theme.tags.map(t=>{const g=sameStats().find(x=>x.name===t);return `<button type="button" data-net-pick="${esc('tag:'+t)}">${esc(t)}${g?.themes.length>=2?`・${g.themes.length}テーマ`:''}</button>`;}).join('')}</div>
-    <div class="btnrow">${around}<button class="btn sm" type="button" id="netTreeOpen">ツリーで開く</button></div>`;
-  }else if(original){
-    body=`<p class="muted">${esc(pathOf(n.source).map(x=>x.text).join(' › '))}</p><div class="net-badges">${badges(original)}</div>
-    <div class="btnrow">${around}<button class="btn sm" type="button" id="netAnalyze">分析を開く</button></div>`;
-  }else if(reason){
-    const themes=new Set(reason.items.map(x=>rootOf(x.n.id)).filter(Boolean));
-    body=`<p class="muted">${themes.size}テーマ・${reason.items.length}行動・${esc(kindLabel(reason.kind))}</p>
-    <div class="btnrow">${around}</div>${reason.items.map(x=>hitBtn(x.n)).join('')}`;
-  }else body=`<div class="btnrow">${around}</div>`;
-  p.innerHTML=head+body;p.hidden=false;
-  netLive?.shell.classList.add('has-detail');
-  $('#netClose').onclick=()=>netSelect(null,false);
-  $('#netLocalToggle').onclick=()=>netLocal(!g.focus);
-  p.querySelectorAll('[data-net-pick]').forEach(b=>b.onclick=()=>netSelect(b.dataset.netPick,true));
-  const tree=$('#netTreeOpen');if(tree)tree.onclick=()=>{S.theme=n.source;S.focus=null;S.tab='tree';openSheet(false);render();};
-  const analyze=$('#netAnalyze');if(analyze)analyze.onclick=()=>select(n.source,true);
-  bindGo(p);bindMkIdea(p);
+ const g=netGraph,id=g?.selected,p=$('#netDetail');if(!g||!id||!p)return;
+ const point=g.nodes.get(id);if(!point)return;
+ const original=point.type==='action'?S.nodes.get(point.source):null;
+ const isRoot=original?.parent===null;
+ const group=point.type==='reason'?reasonIndex().get(point.source):null;
+ const around=`<button class="btn sm" type="button" id="netLocalToggle">${g.focus?'全体に戻す':'この周りだけ表示'}</button>`;
+ const head=`<div class="net-detail-head"><div><small>${point.type==='reason'?'共通の理由':isRoot?'L0（起点の行動）':'行動'}</small>
+   <h3>${esc(point.label)}</h3></div><button id="netClose" class="net-detail-close" type="button" aria-label="閉じる">✕</button></div>`;
+ let body='';
+ if(original){
+   const path=pathOf(original.id).map(x=>x.text).join(' › ');
+   const descendantsList=isRoot?descendants(original.id).map(id=>S.nodes.get(id)).filter(Boolean):[];
+   const tags=[...new Set((isRoot?descendantsList:[original]).flatMap(n=>n.tags||[]))];
+   body=`<p class="muted">${isRoot?`${descendantsList.length}行動・${tags.length}本質`:esc(path)}</p>
+     <div class="net-badges">${badges(original)}</div>
+     <div class="net-detail-chips">${tags.map(t=>`<button type="button" data-net-tag="${esc(t)}">${esc(t)}${netFilters.tag===t?' ✓':''}</button>`).join('')}</div>
+     <div class="btnrow">${around}
+     ${isRoot?`<button type="button" class="btn sm" id="netRootPick">このL0で絞る</button>
+       <button type="button" class="btn sm" id="netTreeOpen">ツリーで開く</button>`:
+       `<button type="button" class="btn sm" id="netAnalyze">分析を開く</button>
+       <button type="button" class="btn sm" data-mkidea="${esc(original.id)}">事業案にする</button>`}
+     </div>`;
+ }else if(group){
+   const rootsSet=new Set(group.items.map(x=>rootOf(x.n.id)).filter(Boolean));
+   body=`<p class="muted">${rootsSet.size}つのL0・${group.items.length}行動・${esc(kindLabel(group.kind))}</p>
+     <div class="btnrow">${around}</div>${group.items.map(x=>hitBtn(x.n)).join('')}`;
+ }
+ p.innerHTML=head+body;p.hidden=false;netLive?.shell.classList.add('has-detail');
+ $('#netClose').onclick=()=>netSelect(null,false);
+ $('#netLocalToggle').onclick=()=>netLocal(!g.focus);
+ p.querySelectorAll('[data-net-tag]').forEach(b=>b.onclick=()=>netSetFilters(netFilters.root,b.dataset.netTag));
+ const rootPick=$('#netRootPick');if(rootPick)rootPick.onclick=()=>netSetFilters(original.id,netFilters.tag);
+ const tree=$('#netTreeOpen');if(tree)tree.onclick=()=>{S.theme=original.id;S.focus=null;S.tab='tree';openSheet(false);render();};
+ const analyze=$('#netAnalyze');if(analyze)analyze.onclick=()=>select(original.id,true);
+ bindGo(p);bindMkIdea(p);
 }
-
 function netLocal(on){
-  const g=netGraph;if(!g)return;
-  g.focus=on?g.selected:null;netActive();g.alpha=Math.max(g.alpha,.16);
-  const b=$('#netLocalDismiss');if(b){b.hidden=!g.focus;b.textContent=g.focus?`「${g.nodes.get(g.focus)?.label||''}」の周り ✕`:'';}
-  if(g.selected)netPanel();
-  netFit(true);netSchedule();
+ const g=netGraph;if(!g)return;
+ g.focus=on?g.selected:null;netActive();g.alpha=Math.max(g.alpha,.15);
+ const b=$('#netLocalDismiss');if(b){b.hidden=!g.focus;b.textContent=g.focus?`「${g.nodes.get(g.focus)?.label||''}」の周り ✕`:'';}
+ if(g.selected)netPanel();netFit(true);netSchedule();
 }
 function renderSameList(m){
   const untagged=untaggedNodes();
@@ -2520,7 +2556,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=41',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=42',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
