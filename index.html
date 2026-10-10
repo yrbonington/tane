@@ -562,6 +562,20 @@ body{background:var(--paper)}
 .b-star{background:#FFF4D1;color:#6B4E00}
 @media (prefers-color-scheme:dark){.b-star{background:#4A3B12;color:#F7DE84}}
 @media(max-width:360px){.lens-btn small{display:none}}
+
+/* AIを使う新規テーマ作成は、見出しと3ステップを一枚のカードに収める。
+   事業化のAIカードと同じ階層: 外側のカード > 内側の手順。 */
+.choice-panel .theme-ai-card{display:flex;flex-direction:column;gap:14px;background:var(--frame);border:1px solid var(--line);border-radius:18px;padding:17px;min-width:0}
+.choice-panel .theme-ai-card > .entry-option:not(.pri){min-height:0;margin:0;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;gap:3px}
+.theme-ai-card > .entry-option strong{font-size:17px;line-height:1.45}
+.theme-ai-card > .entry-option small{font-size:12px;line-height:1.5}
+.theme-ai-card .seed-ai-actions{gap:12px;padding:12px 0 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;min-width:0}
+.theme-ai-card .ai-flow-step{padding:15px;border-radius:15px}
+.theme-ai-card .ai-flow-choice{padding:2px 0}
+@media(max-width:380px){
+  .choice-panel .theme-ai-card{padding:14px}
+  .theme-ai-card .ai-flow-step{padding:12px}
+}
 </style>
 </head>
 <body>
@@ -750,8 +764,9 @@ function renderTree(m){
       <div class="card intro-choice intro-frame">
       <div class="welcome-heading"><h3>新しいテーマ</h3><span class="frame-step">タネ探しを始める</span></div>
       <div class="welcome-panel choice-panel"><h4>どうやって始めますか？</h4>
-        <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>AIと対話してタネを探す</small></button>
-        <div class="seed-ai-actions" id="themeAIActions">
+        <div class="card ai-flow theme-ai-card">
+          <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>AIと対話してタネを探す</small></button>
+          <div class="seed-ai-actions" id="themeAIActions">
           <div class="ai-flow-step">
             <strong>① プロンプトをコピー</strong>
             <p class="muted">タネ探しの質問をコピー</p>
@@ -770,6 +785,7 @@ function renderTree(m){
             <p class="muted">対話の最後に「保存」と送る</p>
             <button class="btn ai-secondary" id="themeGoImport">JSONを取り込む →</button>
           </div>
+        </div>
         </div>
         <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力する</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
@@ -1243,7 +1259,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=17',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=18',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
