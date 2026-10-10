@@ -519,8 +519,6 @@ body{background:var(--paper)}
   .act b{font-size:12px}
   .act small{font-size:10px}
 }
-.chatgpt-web-fallback{margin:0;font-size:12px;text-align:left}
-.chatgpt-web-fallback a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -669,48 +667,36 @@ function addHint(n,mode){
   if(mode==='down')return `「${n.text}」を、具体的にはどうやっている？　この行動の1段下に入れます。続けて何個でも追加できます。`;
   const p=n.parent&&S.nodes.get(n.parent);return p?`「${p.text}」のために、ほかにどんな行動をしている？　この行動と同じ段に入れます。`:'';
 }
-/* iPhoneではインストール済みのChatGPTアプリの起動を試みる。
-   chatgpt:// は外部URLスキームであり、OS・アプリの状態によって開けない場合がある。 */
-function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
-function chatGPTLaunchLink(){
-  if(isIOS())return '<a class="btn ai-provider" href="chatgpt://" aria-label="ChatGPTアプリを開く">ChatGPTアプリを開く ↗</a>';
-  return '<a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>';
-}
-function chatGPTFallbackLink(){
-  return isIOS()?'<p class="muted chatgpt-web-fallback">ChatGPTアプリが開かない場合は <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ブラウザ版を開く ↗</a></p>':'';
-}
 function renderTree(m){
   if(S.themeStart){
     m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ タネ探しに戻る</button></div>
       <div class="card intro-choice intro-frame">
       <div class="welcome-heading"><h3>新しいテーマ</h3><span class="frame-step">タネ探しを始める</span></div>
-      <div class="welcome-panel choice-panel"><h4>どうやってタネ探しを始めますか？</h4>
-        <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>プロンプトをコピーして、ChatGPTかClaudeでタネ探しを始めます。</small></button>
+      <div class="welcome-panel choice-panel"><h4>どうやって始めますか？</h4>
+        <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>AIと対話してタネを探す</small></button>
         <div class="seed-ai-actions" id="themeAIActions">
           <div class="ai-flow-step">
             <strong>① プロンプトをコピー</strong>
-            <p class="muted">タネ探しのための質問とJSONの保存ルールをまとめてコピーします。</p>
-            <button class="btn pri big" id="themeCopyNew">新しいテーマ用プロンプトをコピー</button>
+            <p class="muted">タネ探しの質問をコピー</p>
+            <button class="btn pri big" id="themeCopyNew">プロンプトをコピー</button>
             ${S.nodes.size?'<button class="btn ai-secondary" id="themeCopyData">今のタネ帳も一緒にコピー</button>':''}
           </div>
           <div class="ai-flow-choice">
             <strong>② 使いたいAIを開く</strong>
-            <p class="muted">コピーした文章をChatGPTかClaudeに貼り付けます。</p>
             <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    ${chatGPTLaunchLink()}
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
     <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
   </div>
-    ${chatGPTFallbackLink()}
           </div>
           <div class="ai-flow-step">
             <strong>③ 結果を取り込む</strong>
-            <p class="muted">AIとの対話の最後に「保存」と伝え、出力されたJSONを貼り付けます。</p>
+            <p class="muted">対話の最後に「保存」と送る</p>
             <button class="btn ai-secondary" id="themeGoImport">JSONを取り込む →</button>
           </div>
         </div>
-        <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力して、アプリで行動を整理します。</small></button>
+        <button class="btn entry-option" id="themeStartManual"><strong>自分でテーマを作る →</strong><small>テーマ名を入力する</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="テーマ名" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
-      </div></div><p class="muted">AIの対話で作ったJSONは「データ」から取り込めます。</p></div>`;
+      </div></div></div>`;
     $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
     $('#themeStartAI').onclick=()=>{
       $('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;
@@ -731,7 +717,7 @@ function renderTree(m){
   if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card welcome-frame">
     <div class="welcome-heading"><h3>市場のタネ帳</h3><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-8M12 13c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/></svg></div>
     <div class="welcome-panel"><h4>今日の観察から、<br>タネを探そう。</h4>
-    <p>違和感がなくても大丈夫。人が普段している行動から始めます。</p>
+    <p>人の行動から、市場のタネを見つける。</p>
     <button class="btn pri big" id="startNewTheme">＋ 最初のテーマを作る</button>
     <p class="welcome-help">前のデータがある場合は「データ」から復元</p></div>
   </div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
@@ -744,7 +730,7 @@ function renderTree(m){
     if(!shut)for(const k of ks)walk(k.id);};
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button data-zoom="">全体</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
-  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップすると、抽象化・具体化・分析のボタンが出ます。</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
+  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップして操作</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
   renderThemes();
   m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
@@ -795,7 +781,7 @@ function renderSame(m){
   const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}テーマ・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-mkidea-tag="${esc(g.t)}">事業案にする</button><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
     ${S.renaming===g.t?`<form class="inline" data-renform="${esc(g.t)}"><input value="${esc(g.t)}" aria-label="新しい名前"><button class="btn pri sm" type="submit">変更</button></form>`:''}${g.ns.map(hitBtn).join('')}</div>`;
   m.innerHTML=`<div class="list">
-    <p class="muted" style="margin:0">行動ごとに「本質的には何をしているか」を書くと、同じ本質を持つ行動がここに集まります。「車の」など場面の言葉を外した書き方（例：モノの価値を決める）にすると、テーマをまたいでつながりやすくなります。</p>
+    <p class="muted" style="margin:0">同じ本質を持つ行動が、テーマをまたいでつながります。</p>
     <p class="h2">テーマをまたいでつながる本質</p>${cross.length?cross.map(card).join(''):`<div class="muted">2つ以上のテーマで同じ本質が書かれると、ここに出ます。</div>`}
     <p class="h2">同じテーマの中で繰り返し出てくる本質</p>${within.length?within.map(card).join(''):`<div class="muted">まだありません。</div>`}
     <p class="h2">文言が似ている行動（同じ本質かもしれないもの）</p>
@@ -815,9 +801,9 @@ function renderSeeds(m){const all=[...S.nodes.values()];
   const dig=all.filter(n=>!n.seed&&(n.frictions||[]).length>=2&&!n.why&&!n.constraint);
   const seedCard=n=>`<div class="card"><h4>${esc(n.text)}<span class="b b-seed">${scoreOf(n)}/10</span></h4><div class="bars">${ELEMENTS.map(([k,l])=>{const v=Number(n.scores?.[k])||0;return `<span><i class="${v>=1?'on':''}"></i><i class="${v>=2?'on':''}"></i>${esc(l.slice(0,6))}</span>`;}).join('')}</div>${hitBtn(n)}<div><button class="btn sm" data-mkidea="${esc(n.id)}">事業案にする</button></div></div>`;
   m.innerHTML=`<div class="list">
-    <p class="h2">タネ候補</p>${seeds.length?seeds.map(seedCard).join(''):`<div class="empty">まだタネ候補はありません。行動を選んで「分析する」→「タネ」で候補にすると、5つの要素で採点してここに並びます。</div>`}
-    <p class="h2">制約が消えた・薄れているのに、行動が残っている</p>${gone.length?`<div class="card">${gone.map(hitBtn).join('')}</div>`:`<div class="muted">「分解」で、制約が「もう無い」「薄れている」とした行動がここに出ます。</div>`}
-    <p class="h2">摩擦が多いのに、まだ分解していない行動</p>${dig.length?`<div class="card">${dig.map(hitBtn).join('')}</div>`:`<div class="muted">摩擦のサインが2つ以上あり、背景と制約が空の行動がここに出ます。</div>`}
+    <p class="h2">タネ候補</p>${seeds.length?seeds.map(seedCard).join(''):`<div class="empty">「分析する」→「タネ」から候補を追加</div>`}
+    <p class="h2">制約が消えた・薄れているのに、行動が残っている</p>${gone.length?`<div class="card">${gone.map(hitBtn).join('')}</div>`:`<div class="muted">該当する行動はまだありません。</div>`}
+    <p class="h2">摩擦が多いのに、まだ分解していない行動</p>${dig.length?`<div class="card">${dig.map(hitBtn).join('')}</div>`:`<div class="muted">該当する行動はまだありません。</div>`}
   </div>`; bindGo(m); bindMkIdea(m);}
 
 /* ---------- データ（バックアップ） ---------- */
@@ -856,12 +842,12 @@ function renderData(m){
   const d=daysSinceExport(); const themes=roots().length;
   m.innerHTML=`<div class="list">
     <div class="card"><h4>この端末のデータ</h4><div class="stat"><span><b>${themes}</b>テーマ</span><span><b>${S.nodes.size-themes}</b>行動</span><span><b>${S.ideas.size}</b>事業案</span><span><b>${d===null?'—':d+'日前'}</b>最後のバックアップ</span></div>
-      <p class="muted" style="margin:0">書いた内容は、このiPhoneの中にだけ保存されます。インターネットには送られません。機種変更や故障、Safariのデータ削除で消えることがあるので、週に1回はバックアップを取ってください。</p></div>
+      <p class="muted" style="margin:0">データはこの端末に保存されます。消失に備えてバックアップしてください。</p></div>
     <div class="card"><h4>バックアップを取る</h4>
-      <p class="muted" style="margin:0">「ファイルに保存」では、共有メニューから「"ファイル"に保存」を選ぶと、iPhoneの中かiCloud Driveに残せます。ChatGPTやClaudeに分析を頼むときは「コピー」して、チャットに貼ってください。</p>
+      <p class="muted" style="margin:0">ファイル保存、またはコピーできます。</p>
       <div class="btnrow"><button class="btn pri" id="exShare">ファイルに保存</button><button class="btn" id="exCopy">コピー</button></div></div>
     <div class="card"><h4>取り込む</h4>
-      <p class="muted" style="margin:0">バックアップのファイルや、AIが出したJSONを取り込みます。前後に説明文が付いていても大丈夫です。取り込む前に、新規・上書きの件数を確認できます。</p>
+      <p class="muted" style="margin:0">ファイルまたはJSONを取り込む。上書き前に確認できます。</p>
       <div class="btnrow"><label class="btn" for="imFile">ファイルを選ぶ</label><input type="file" id="imFile" accept=".json,application/json,text/plain" hidden><button class="btn" id="imPasteOpen">貼り付けて取り込む</button></div>
       <div id="imPasteBox" hidden><textarea id="imText" rows="5" placeholder="バックアップやAIの結果を貼り付け"></textarea><div class="btnrow" style="margin-top:6px"><button class="btn pri" id="imPasteGo">取り込む</button></div></div>
       <div id="imResult" class="muted"></div></div>
@@ -884,12 +870,12 @@ const stLabel=v=>(IDEA_ST.find(([k])=>k===v)||IDEA_ST[0])[1];
 const FIT=[['margin','利益率','利益率30%以上を狙える'],['national','全国・海外','全国・海外に売れる'],['stage1','受託で検証','最初は受託で稼ぎながら検証できる'],['campus','拠点','将来の自社拠点（キャンパス）と噛み合う']];
 const FITV=[['ok','○'],['mid','△'],['ng','×']];
 const IDEA_FIELDS=[
-  ['customer','1　誰の困りごとか（顧客）','個人か会社か、どんな立場の人か'],
+  ['customer','1　誰の困りごとか（顧客）','個人・会社・立場'],
   ['pain','どんな困りごとか',''],
-  ['alt','今はどうやって済ませているか','代わりの手段。ここが不格好なほどチャンスです'],
+  ['alt','今はどうやって済ませているか','現在の代替手段'],
   ['whyNow','2　なぜ今できるのか','何が変わったか（技術・規制・コスト）'],
   ['solution','3　解決の仮説','何を提供するか'],
-  ['payer','4　誰がお金を払うか','すでにどの名目で払われているお金を取りにいくか'],
+  ['payer','4　誰がお金を払うか','予算名目と単価'],
   ['edge','5　自分が勝てる理由','経験・知識・人脈など']];
 function blankIdea(title,sources){return{title,status:'idea',sources,customer:'',pain:'',alt:'',whyNow:'',solution:'',payer:'',edge:'',fit:{},fitNote:'',next:'',dropReason:'',memo:'',created:Date.now()};}
 function mkIdea(sources,title){const id='i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -907,11 +893,11 @@ function renderIdeas(m){
   const seeds=[...S.nodes.values()].filter(n=>n.seed).sort((a,b)=>scoreOf(b)-scoreOf(a));
   m.innerHTML=`<div class="list">
     <div class="card"><h4>タネから事業案をつくる</h4>
-      <p class="muted" style="margin:0">タネ探しで見つけた行動を選んで事業案にします。1つのタネから複数の案を作れます。元になった行動とのつながりも残ります。</p>
-      ${seeds.length?seeds.slice(0,6).map(n=>`<button class="btn entry-option" data-mkidea="${esc(n.id)}"><strong>＋ ${esc(n.text)}</strong><small>${esc(themeName(n.id))}・タネ評価 ${scoreOf(n)}/10</small></button>`).join(''):`<p class="muted" style="margin:0">まだタネ候補がありません。「タネ探し」で行動を分析し、タネ候補にしてください。</p>`}
+      <p class="muted" style="margin:0">タネ候補から事業案を作る。1つのタネから複数作れます。</p>
+      ${seeds.length?seeds.slice(0,6).map(n=>`<button class="btn entry-option" data-mkidea="${esc(n.id)}"><strong>＋ ${esc(n.text)}</strong><small>${esc(themeName(n.id))}・タネ評価 ${scoreOf(n)}/10</small></button>`).join(''):`<p class="muted" style="margin:0">タネ候補はまだありません。</p>`}
       <button class="btn" id="ideaViewSeeds">タネ候補をすべて見る →</button></div>
     <p class="h2">事業案一覧</p>
-    ${all.length?all.map(card).join(''):`<div class="empty">まだ事業案はありません。上のタネ候補から始めるのがおすすめです。</div>`}
+    ${all.length?all.map(card).join(''):`<div class="empty">事業案はまだありません。</div>`}
     <button class="btn" id="ideaNew">タネを選ばず、白紙から作る</button>
   </div>`;
   $('#ideaNew').onclick=()=>mkIdea([],'新しい事業案');
@@ -927,21 +913,19 @@ function renderIdeaEditor(m,x){const id=x.id;
       <h4>AIと事業案を詰める</h4>
       <div class="ai-flow-step">
         <strong>① プロンプトをコピー</strong>
-        <p class="muted">この事業案と元のタネを含めてコピーします。</p>
-        <button class="btn pri big" id="ideaAI">この事業案のプロンプトをコピー</button>
+        <p class="muted">事業案と元のタネをコピー</p>
+        <button class="btn pri big" id="ideaAI">プロンプトをコピー</button>
       </div>
       <div class="ai-flow-choice">
         <strong>② 使いたいAIを開く</strong>
-        <p class="muted">ChatGPTかClaudeに貼り付け、事業案を検証します。</p>
         <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    ${chatGPTLaunchLink()}
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
     <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
   </div>
-    ${chatGPTFallbackLink()}
       </div>
       <div class="ai-flow-step">
         <strong>③ 結果を取り込む</strong>
-        <p class="muted">AIに「保存」と伝え、返ってきたJSONを取り込みます。</p>
+        <p class="muted">対話の最後に「保存」と送る</p>
         <button class="btn ai-secondary" id="ideaImport">JSONを取り込む →</button>
       </div>
     </div>
@@ -963,7 +947,7 @@ function renderIdeaEditor(m,x){const id=x.id;
         ${IDEA_FIELDS.slice(6).map(([k,q,h])=>`<label class="f"><span class="q">${q}</span>${h?`<small>${h}</small>`:''}<textarea data-f="${k}" rows="2"></textarea></label>`).join('')}
         <h4>15年計画との相性</h4>${FIT.map(([k,sh,l])=>`<div class="fit"><span>${l}</span><div class="tri">${tri(k)}</div></div>`).join('')}
         <label class="f">相性のメモ<textarea data-f="fitNote" rows="2"></textarea></label>
-        <h4>次の一手</h4><label class="f"><small>誰に何を聞いて確かめるか。1週間以内にできることにします</small><textarea data-f="next" rows="2"></textarea></label>
+        <h4>次の一手</h4><label class="f"><small>1週間でできる検証</small><textarea data-f="next" rows="2"></textarea></label>
         <label class="f">メモ<textarea data-f="memo" rows="3"></textarea></label>
       </div></details></div></div>
     <div class="card"><div><button class="btn sm danger" id="ideaDel">この事業案を削除</button></div></div>
@@ -1014,7 +998,7 @@ async function copyText(text){
   try{
     if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error('clipboard unsupported');
     await navigator.clipboard.writeText(text);
-    toast('コピーしました。ChatGPTかClaudeに貼り付けてください');
+    toast('コピーしました');
   }catch(e){
     const dialog=$('#copyFallback');
     const field=$('#copyFallbackText');
@@ -1111,7 +1095,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=15',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=16',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
