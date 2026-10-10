@@ -658,11 +658,15 @@ body{background:var(--paper)}
 .idea-menu-option{width:100%;min-height:54px;padding:13px 17px;border:0;
   background:transparent;color:#1C1C1E;font-size:15px;font-weight:550;
   text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.idea-menu-option + .idea-menu-option{border-top:1px solid rgba(60,60,67,.18)}
 .idea-menu-option svg{height:20px;width:20px;flex:none;stroke:currentColor;stroke-width:1.8;
   fill:none;stroke-linecap:round;stroke-linejoin:round}
 .idea-menu-option.danger{color:#D92B37}
-.idea-menu-option:active{background:rgba(60,60,67,.13)}
+.idea-menu-option:active,.idea-menu-option.is-hovered{background:rgba(60,60,67,.16)}
+.idea-menu-dismiss.is-hovered{background:var(--line)}
+.idea-menu:focus{outline:none}
+.idea-menu-option:focus:not(:focus-visible){outline:none}
+.idea-menu-option:focus-visible{outline:2px solid var(--accent);outline-offset:-4px;position:relative;z-index:1}
+.idea-menu{touch-action:none}
 .idea-menu-dismiss{width:100%;min-height:50px;flex:none;border:1px solid var(--line);
   border-radius:16px;background:var(--surface);color:var(--ink);
   font-size:15px;font-weight:650;text-align:center}
@@ -672,9 +676,8 @@ body.idea-menu-open{overflow:hidden}
 @media(prefers-color-scheme:dark){
   .idea-menu{background:rgba(45,45,49,.97);border-color:rgba(255,255,255,.11)}
   .idea-menu-option{color:#F4F4F8}
-  .idea-menu-option + .idea-menu-option{border-top-color:rgba(255,255,255,.14)}
   .idea-menu-option.danger{color:#FF6B6B}
-  .idea-menu-option:active{background:rgba(255,255,255,.1)}
+  .idea-menu-option:active,.idea-menu-option.is-hovered{background:rgba(255,255,255,.16)}
   .idea-menu-confirm p{color:#B6B6C0;border-bottom-color:rgba(255,255,255,.14)}
 }
 @keyframes idea-preview-in{from{opacity:.2;transform:scale(.92) translateY(12px)}
@@ -713,7 +716,7 @@ body.idea-menu-open{overflow:hidden}
 <div class="idea-menu-overlay" id="ideaMenu" hidden>
   <div class="idea-menu-stage">
     <div class="idea-menu-preview card ideacard" id="ideaMenuPreview" aria-hidden="true"></div>
-    <div class="idea-menu" role="dialog" aria-modal="true" aria-labelledby="ideaMenuTitle">
+    <div class="idea-menu" role="dialog" aria-modal="true" aria-labelledby="ideaMenuTitle" tabindex="-1">
       <h3 class="visually-hidden" id="ideaMenuTitle"></h3>
       <div id="ideaMenuActions" class="idea-menu-actions">
         <button class="idea-menu-option" id="ideaMenuCopy" type="button">プロンプトをコピー
@@ -1113,6 +1116,71 @@ function bindMkIdea(m){
   m.querySelectorAll('[data-mkidea-tag]').forEach(b=>b.onclick=()=>{const t=b.dataset.mkideaTag;mkIdea([{type:'tag',name:t}],t);});}
 function srcLabel(x){if(x.type==='tag')return `本質：${x.name}`;const n=S.nodes.get(x.id);return n?`${themeName(n.id)}／${n.text}`:'（削除された行動）';}
 function fitMarks(x){return FIT.map(([k,sh])=>{const v=(x.fit||{})[k]||'';const mk=v==='ok'?'○':v==='mid'?'△':v==='ng'?'×':'－';return `<span class="fm fm-${v||'none'}">${sh} ${mk}</span>`;}).join('');}
+/* 指を滑らせた位置を拾い、離した行のアクションだけを実行する。 */
+let ideaPointerDrag=null;
+function ideaMenuHit(x,y){
+  if($('#ideaMenu').hidden)return null;
+  const el=document.elementFromPoint(x,y);
+  const target=el?.closest?.('.idea-menu-option,.idea-menu-dismiss');
+  return target&&$('#ideaMenu').contains(target)&&!target.hidden?target:null;
+}
+function ideaMenuHover(x,y){
+  const target=ideaMenuHit(x,y);
+  $('#ideaMenu').querySelectorAll('.idea-menu-option,.idea-menu-dismiss').forEach(b=>{
+    b.classList.toggle('is-hovered',b===target);
+  });
+  return target;
+}
+function ideaMenuClearHover(){
+  $('#ideaMenu').querySelectorAll('.is-hovered').forEach(b=>b.classList.remove('is-hovered'));
+}
+function ideaMenuEndDrag(x,y){
+  const chosen=ideaMenuHit(x,y);
+  ideaMenuClearHover();
+  if(chosen)chosen.click();
+}
+/* 長押し直後の指は元のカードがtouchイベントの対象のまま。
+   メニュー表示後に移動してもスクロールせず選べるよう、カード側で追跡する。 */
+let ideaMenuTouchGesture=null;
+$('#ideaMenu').addEventListener('touchstart',e=>{
+  if(e.touches.length!==1||ideaMenuTouchGesture||$('#ideaMenu').hidden)return;
+  if(!e.target.closest('.idea-menu-option,.idea-menu-dismiss'))return;
+  const t=e.touches[0];
+  ideaMenuTouchGesture={id:t.identifier,x:t.clientX,y:t.clientY,moved:false};
+  ideaMenuHover(t.clientX,t.clientY);
+},{passive:true});
+$('#ideaMenu').addEventListener('touchmove',e=>{
+  if(!ideaMenuTouchGesture)return;
+  const t=Array.from(e.touches).find(t=>t.identifier===ideaMenuTouchGesture.id);
+  if(!t)return;
+  if(e.cancelable)e.preventDefault();
+  if(Math.hypot(t.clientX-ideaMenuTouchGesture.x,t.clientY-ideaMenuTouchGesture.y)>6)ideaMenuTouchGesture.moved=true;
+  ideaMenuHover(t.clientX,t.clientY);
+},{passive:false});
+$('#ideaMenu').addEventListener('touchend',e=>{
+  if(!ideaMenuTouchGesture)return;
+  const t=Array.from(e.changedTouches).find(t=>t.identifier===ideaMenuTouchGesture.id);
+  if(!t)return;
+  const moved=ideaMenuTouchGesture.moved;
+  ideaMenuTouchGesture=null;
+  if(moved){
+    if(e.cancelable)e.preventDefault();
+    ideaMenuEndDrag(t.clientX,t.clientY);
+  }else ideaMenuClearHover();
+},{passive:false});
+$('#ideaMenu').addEventListener('touchcancel',()=>{
+  ideaMenuTouchGesture=null;ideaMenuClearHover();
+},{passive:true});
+document.addEventListener('pointermove',e=>{
+  if(ideaPointerDrag&&e.pointerId===ideaPointerDrag.id)ideaMenuHover(e.clientX,e.clientY);
+},true);
+document.addEventListener('pointerup',e=>{
+  if(!ideaPointerDrag||e.pointerId!==ideaPointerDrag.id)return;
+  ideaPointerDrag=null;ideaMenuEndDrag(e.clientX,e.clientY);
+},true);
+document.addEventListener('pointercancel',e=>{
+  if(ideaPointerDrag&&e.pointerId===ideaPointerDrag.id){ideaPointerDrag=null;ideaMenuClearHover();}
+},true);
 /* 長押しは先にカードを押し込んでから、プレビュー付き操作メニューを表示する。 */
 let ideaMenuOpener=null,ideaMenuOpenedAt=0;
 function openIdeaMenu(id,opener){
@@ -1131,12 +1199,13 @@ function openIdeaMenu(id,opener){
   ideaMenuOpenedAt=performance.now();
   document.body.classList.add('idea-menu-open');
   menu.hidden=false;
-  $('#ideaMenuCopy').focus({preventScroll:true});
+  menu.querySelector('.idea-menu').focus({preventScroll:true});
 }
 function closeIdeaMenu(){
   const menu=$('#ideaMenu');
   menu.hidden=true;delete menu.dataset.idea;
   document.body.classList.remove('idea-menu-open');
+  ideaPointerDrag=null;ideaMenuTouchGesture=null;ideaMenuClearHover();
   $('#ideaMenuPreview').replaceChildren();
   if(ideaMenuOpener?.isConnected)ideaMenuOpener.focus({preventScroll:true});
   ideaMenuOpener=null;
@@ -1184,39 +1253,79 @@ function renderIdeas(m){
   $('#ideaViewSeeds').onclick=()=>{S.tab='seed';render();window.scrollTo({top:0});};
   bindMkIdea(m);
   m.querySelectorAll('[data-idea]').forEach(b=>{
-    let pressTimer=null,pressed=false,startX=0,startY=0,suppressClickUntil=0;
-    const clearPress=()=>{
-      clearTimeout(pressTimer);pressTimer=null;pressed=false;
-      b.classList.remove('is-pressing');
-    };
-    b.onpointerdown=e=>{
-      if(e.button!==0||!$('#ideaMenu').hidden)return;
-      clearPress();
-      pressed=true;startX=e.clientX;startY=e.clientY;
-      if(e.pointerType!=='mouse'||matchMedia('(hover:none)').matches){
-        b.classList.add('is-pressing');
-      }
-      pressTimer=setTimeout(()=>{
-        if(!pressed)return;
-        suppressClickUntil=performance.now()+650;
-        clearPress();
+    let timer=null,startX=0,startY=0,suppressClickUntil=0;
+    let touchId=null,touchHeld=false,touchOpened=false;
+    let pointerHeld=false,pointerId=null;
+    const stopVisual=()=>{clearTimeout(timer);timer=null;b.classList.remove('is-pressing');};
+    // Safari/iOS touch: before long press, allow normal scrolling;
+    // after menu opens, follow the finger even though the touch target is still this card.
+    b.addEventListener('touchstart',e=>{
+      if(e.touches.length!==1||!$('#ideaMenu').hidden)return;
+      stopVisual();
+      const t=e.touches[0];
+      touchId=t.identifier;touchHeld=true;touchOpened=false;
+      startX=t.clientX;startY=t.clientY;
+      b.classList.add('is-pressing');
+      timer=setTimeout(()=>{
+        if(!touchHeld||!$('#ideaMenu').hidden)return;
+        touchOpened=true;suppressClickUntil=performance.now()+1200;
+        stopVisual();
         openIdeaMenu(b.dataset.idea,b);
+      },530);
+    },{passive:true});
+    b.addEventListener('touchmove',e=>{
+      const t=Array.from(e.touches).find(t=>t.identifier===touchId);
+      if(!t||!touchHeld)return;
+      if(touchOpened){
+        if(e.cancelable)e.preventDefault();
+        ideaMenuHover(t.clientX,t.clientY);
+      }else if(Math.hypot(t.clientX-startX,t.clientY-startY)>12){
+        touchHeld=false;stopVisual();
+      }
+    },{passive:false});
+    b.addEventListener('touchend',e=>{
+      const t=Array.from(e.changedTouches).find(t=>t.identifier===touchId);
+      if(!t)return;
+      const wasOpen=touchOpened;
+      touchHeld=false;touchOpened=false;touchId=null;stopVisual();
+      if(wasOpen){
+        if(e.cancelable)e.preventDefault();
+        ideaMenuEndDrag(t.clientX,t.clientY);
+      }
+    },{passive:false});
+    b.addEventListener('touchcancel',()=>{
+      touchHeld=false;touchOpened=false;touchId=null;stopVisual();ideaMenuClearHover();
+    },{passive:true});
+    // Mouse and pen get the same press feedback; global pointer tracking keeps dragging alive.
+    b.onpointerdown=e=>{
+      if(e.pointerType==='touch'||e.button!==0||!$('#ideaMenu').hidden)return;
+      stopVisual();
+      pointerHeld=true;pointerId=e.pointerId;startX=e.clientX;startY=e.clientY;
+      b.classList.add('is-pressing');
+      timer=setTimeout(()=>{
+        if(!pointerHeld||!$('#ideaMenu').hidden)return;
+        pointerHeld=false;suppressClickUntil=performance.now()+1200;
+        stopVisual();
+        openIdeaMenu(b.dataset.idea,b);
+        ideaPointerDrag={id:pointerId};
       },530);
     };
     b.onpointermove=e=>{
-      if(pressed&&(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12))clearPress();
+      if(pointerHeld&&Math.hypot(e.clientX-startX,e.clientY-startY)>12){
+        pointerHeld=false;stopVisual();
+      }
     };
-    b.onpointerup=clearPress;
-    b.onpointercancel=clearPress;
-    b.onpointerleave=clearPress;
+    b.onpointerup=()=>{pointerHeld=false;stopVisual();};
+    b.onpointercancel=()=>{pointerHeld=false;stopVisual();};
+    b.onpointerleave=()=>{if(pointerHeld){pointerHeld=false;stopVisual();}};
     b.oncontextmenu=e=>{
-      e.preventDefault();clearPress();
-      suppressClickUntil=performance.now()+650;
+      e.preventDefault();pointerHeld=false;stopVisual();
+      suppressClickUntil=performance.now()+1200;
       if($('#ideaMenu').hidden)openIdeaMenu(b.dataset.idea,b);
     };
     b.onkeydown=e=>{
       if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){
-        e.preventDefault();clearPress();openIdeaMenu(b.dataset.idea,b);
+        e.preventDefault();stopVisual();openIdeaMenu(b.dataset.idea,b);
       }
     };
     b.onclick=e=>{
@@ -1486,7 +1595,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=23',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=24',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
