@@ -922,6 +922,9 @@ body.idea-menu-open{overflow:hidden}
 .net-no-tags{position:absolute;top:68px;left:12px;right:12px;max-width:410px;background:var(--paper);padding:12px;border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.6;color:var(--ink)}
 .net-no-tags button{display:block;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:9px;font-size:13px}
 .net-detail{position:absolute;left:0;right:0;bottom:0;height:min(46%,340px);min-height:175px;background:var(--panel);border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -7px 26px rgba(0,0,0,.12);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:14px 15px calc(14px + env(safe-area-inset-bottom));color:var(--ink);z-index:3}
+.net-graph.has-detail .net-legend{bottom:calc(46% + 10px)}
+.net-detail:not([hidden]){animation:net-detail-rise .22s ease-out}
+@keyframes net-detail-rise{from{transform:translateY(14px);opacity:.7}to{transform:translateY(0);opacity:1}}
 .net-detail-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;align-items:start}
 .net-detail-head small{display:block;font-size:11px;color:var(--ink-2);margin-bottom:4px}
 .net-detail-head h3{margin:0;font-size:18px;overflow-wrap:anywhere;line-height:1.5}
@@ -932,7 +935,7 @@ body.idea-menu-open{overflow:hidden}
 .net-detail .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .net-badges{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}
 @media(prefers-color-scheme:dark){.same-rank-num.is-hub{background:#277c5e}.same-theme-meter>i.on,.same-theme-meter>.same-meter-fill{background:#55bb88}}
-@media(prefers-reduced-motion:reduce){.same-rank-arrow{transition:none}}
+@media(prefers-reduced-motion:reduce){.same-rank-arrow{transition:none}.net-detail:not([hidden]){animation:none}}
 </style>
 </head>
 <body>
@@ -1491,7 +1494,7 @@ function netRender(m){
 
 function netColors(){
   const st=getComputedStyle(document.documentElement),get=n=>st.getPropertyValue(n).trim();
-  return {paper:get('--paper'),ink:get('--ink'),gray:get('--ink-2'),line:get('--line'),panel:get('--panel'),green:'#2ba772',soft:'rgba(42,174,113,.14)',orange:get('--warn')||'#c78b41'};
+  return {paper:get('--paper'),frame:get('--frame'),ink:get('--ink'),gray:get('--ink-2'),line:get('--line'),panel:get('--panel'),green:'#2ba772',soft:'rgba(42,174,113,.14)',orange:get('--warn')||'#c78b41'};
 }
 
 function netVisible(){return netGraph?[...netGraph.active].map(k=>netGraph.nodes.get(k)).filter(Boolean):[];}
@@ -1534,7 +1537,7 @@ function netCamera(id){const g=netGraph,v=netLive?.view,n=g?.nodes.get(id);if(!n
 function netFit(smooth){
   const g=netGraph,v=netLive?.view;if(!g||!v)return;
   const ns=netVisible();if(!ns.length)return;
-  const pad=58,availH=g.selected?v.h*.63:v.h-40;
+  const pad=58,availH=g.selected?v.h*.53:v.h-40;
   const xs=ns.map(n=>n.x),ys=ns.map(n=>n.y);
   const loX=Math.min(...xs)-25,hiX=Math.max(...xs)+25,loY=Math.min(...ys)-25,hiY=Math.max(...ys)+25;
   const z=Math.max(.2,Math.min(1.8,(v.w-pad*2)/(hiX-loX),(availH-pad*2)/(hiY-loY)));
@@ -1566,7 +1569,21 @@ function netHit(x,y){
 }
 
 function netSchedule(){
-  if(!netLive||netLive.raf||document.hidden||!netLive.canvas.isConnected)return;
+  if(!netLive||document.hidden||!netLive.canvas.isConnected)return;
+  if(netLive.media.matches){
+    const g=netGraph;if(!g)return;
+    if(g.camTarget){g.cam=g.camTarget;g.camTarget=null;}
+    const neighbors=g.selected?netNeighbors(g.selected):g.hover?netNeighbors(g.hover):null;
+    for(const n of netVisible()){
+      n.fade=!neighbors||neighbors.has(n.id)?1:.15;
+      n.labelFade=n.type==='theme'||n.type==='tag'&&n.themes>=2||neighbors?.has(n.id)||
+        n.type==='tag'&&g.cam.z>1.05||n.type==='action'&&g.cam.z>1.75||
+        n.type==='reason'&&g.cam.z>1.5?1:0;
+    }
+    for(const e of g.links)e.fade=!neighbors||(g.selected?e.a===g.selected||e.b===g.selected:e.a===g.hover||e.b===g.hover)?1:.15;
+    netPaint();return;
+  }
+  if(netLive.raf)return;
   netLive.raf=requestAnimationFrame(netFrame);
 }
 
@@ -1626,7 +1643,7 @@ function netPaint(){
     else ctx.arc(p.x,p.y,r+(hover?2:0),0,Math.PI*2);
     const action=S.nodes.get(n.source);
     const seed=n.type==='action'&&action?.seed;
-    ctx.fillStyle=n.type==='theme'?c.paper:n.type==='tag'?(n.themes>=2?c.green:c.gray):n.type==='reason'?c.orange:seed?c.green:c.gray;
+    ctx.fillStyle=n.type==='theme'?c.frame:n.type==='tag'?(n.themes>=2?c.green:c.gray):n.type==='reason'?c.orange:seed?c.green:c.gray;
     ctx.fill();
     ctx.shadowBlur=0;ctx.lineWidth=n.type==='theme'?Math.max(2,2.5*cam.z):1.5;
     if(n.type==='theme'){ctx.strokeStyle=c.ink;ctx.stroke();}
@@ -1707,7 +1724,7 @@ function netSelect(id,center){
   g.selected=id;g.hover=null;
   if(id){netPanel();const n=g.nodes.get(id);const v=netLive?.view;
     if(v){const sy=g.cam.y+n.y*g.cam.z;if(center||sy>v.h*.49)netCamera(id);}
-  }else{const p=$('#netDetail');if(p){p.hidden=true;p.innerHTML='';}}
+  }else{const p=$('#netDetail');if(p){p.hidden=true;p.innerHTML='';netLive?.shell.classList.remove('has-detail');}}
   netSchedule();
 }
 
@@ -1738,6 +1755,7 @@ function netPanel(){
     <div class="btnrow">${around}</div>${reason.items.map(x=>hitBtn(x.n)).join('')}`;
   }else body=`<div class="btnrow">${around}</div>`;
   p.innerHTML=head+body;p.hidden=false;
+  netLive?.shell.classList.add('has-detail');
   $('#netClose').onclick=()=>netSelect(null,false);
   $('#netLocalToggle').onclick=()=>netLocal(!g.focus);
   p.querySelectorAll('[data-net-pick]').forEach(b=>b.onclick=()=>netSelect(b.dataset.netPick,true));
@@ -2498,7 +2516,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=39',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=40',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
