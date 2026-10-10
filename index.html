@@ -519,6 +519,8 @@ body{background:var(--paper)}
   .act b{font-size:12px}
   .act small{font-size:10px}
 }
+.chatgpt-web-fallback{margin:0;font-size:12px;text-align:left}
+.chatgpt-web-fallback a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -667,6 +669,16 @@ function addHint(n,mode){
   if(mode==='down')return `「${n.text}」を、具体的にはどうやっている？　この行動の1段下に入れます。続けて何個でも追加できます。`;
   const p=n.parent&&S.nodes.get(n.parent);return p?`「${p.text}」のために、ほかにどんな行動をしている？　この行動と同じ段に入れます。`:'';
 }
+/* iPhoneではインストール済みのChatGPTアプリの起動を試みる。
+   chatgpt:// は外部URLスキームであり、OS・アプリの状態によって開けない場合がある。 */
+function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+function chatGPTLaunchLink(){
+  if(isIOS())return '<a class="btn ai-provider" href="chatgpt://" aria-label="ChatGPTアプリを開く">ChatGPTアプリを開く ↗</a>';
+  return '<a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>';
+}
+function chatGPTFallbackLink(){
+  return isIOS()?'<p class="muted chatgpt-web-fallback">ChatGPTアプリが開かない場合は <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ブラウザ版を開く ↗</a></p>':'';
+}
 function renderTree(m){
   if(S.themeStart){
     m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ タネ探しに戻る</button></div>
@@ -685,9 +697,10 @@ function renderTree(m){
             <strong>② 使いたいAIを開く</strong>
             <p class="muted">コピーした文章をChatGPTかClaudeに貼り付けます。</p>
             <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+    ${chatGPTLaunchLink()}
     <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
   </div>
+    ${chatGPTFallbackLink()}
           </div>
           <div class="ai-flow-step">
             <strong>③ 結果を取り込む</strong>
@@ -921,9 +934,10 @@ function renderIdeaEditor(m,x){const id=x.id;
         <strong>② 使いたいAIを開く</strong>
         <p class="muted">ChatGPTかClaudeに貼り付け、事業案を検証します。</p>
         <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
+    ${chatGPTLaunchLink()}
     <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
   </div>
+    ${chatGPTFallbackLink()}
       </div>
       <div class="ai-flow-step">
         <strong>③ 結果を取り込む</strong>
@@ -1097,7 +1111,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=14',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=15',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
