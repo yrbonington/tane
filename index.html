@@ -1408,7 +1408,8 @@ function netThemeMetrics(root){
 }
 
 function netRender(m){
-  netStop();netBuild();
+  netStop();if(netJump&&netGraph)netGraph.focus=null;
+  netBuild();
   const g=netGraph;const tagCount=sameStats().length;const total=roots().length;
   if(!total){
     m.innerHTML='<div class="empty">まだ何もありません。<p class="muted">行動一覧から最初の行動を追加すると、ここにつながりが現れます。</p></div>';
@@ -1720,6 +1721,9 @@ function netWheel(e){
 function netSelect(id,center){
   const g=netGraph;if(!g)return;
   if(id&&!g.nodes.has(id))return;
+  if(id&&g.focus&&!g.active.has(id)){
+    g.focus=null;netActive();const reset=$('#netLocalDismiss');if(reset)reset.hidden=true;
+  }
   if(id&&g.selected===id){netCamera(id);return;}
   g.selected=id;g.hover=null;
   if(id){netPanel();const n=g.nodes.get(id);const v=netLive?.view;
@@ -2516,7 +2520,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=40',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=41',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
