@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="タネ帳">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#202020" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0B0B0D" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="assets/icon/tanecho-icon.svg" type="image/svg+xml">
@@ -519,6 +519,49 @@ body{background:var(--paper)}
   .act b{font-size:12px}
   .act small{font-size:10px}
 }
+
+/* ---- 解像度（深さ・広さ・構造・時間） ---- */
+.lens-meter{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.lens-btn{border:1px solid var(--panel-line);background:var(--panel);border-radius:13px;padding:9px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;color:var(--ink)}
+.lens-btn b{font-size:14px;font-weight:720}
+.lens-btn small{font-size:10px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.lens-btn[aria-pressed="true"]{background:var(--frame);border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.ldots{display:flex;gap:3px}
+.ldots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.ldots i.on{background:var(--blue-button)}
+.lens-body{display:flex;flex-direction:column;gap:12px}
+.lens-q{margin:0;font-size:13px;line-height:1.65;color:var(--ink-2)}
+.rtree{display:flex;flex-direction:column;gap:8px}
+.rcard,.acard,.trow{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:10px 11px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.rcard.child{border-left:3px solid var(--blue-button)}
+.rhead{display:flex;align-items:center;gap:6px;min-width:0}
+.rhead .sp{flex:1}
+.rsel{font:inherit;font-size:16px;line-height:1.2;border:1px solid var(--line);background:var(--frame);color:var(--ink);border-radius:999px;padding:4px 8px;min-height:34px;max-width:100%;min-width:0}
+.rstar{flex:none;border:1px solid var(--line);background:var(--frame);border-radius:999px;width:34px;height:34px;color:var(--ink-2);font-size:15px}
+.rstar[aria-pressed="true"]{background:#F5C84B;border-color:#F5C84B;color:#3A2A00}
+.rx{flex:none;border:0;background:none;color:var(--ink-2);width:34px;height:34px;font-size:14px}
+.rcard textarea,.acard textarea,.r-add textarea{min-height:52px;background:var(--frame);padding:8px 10px;font-size:16px}
+.acard input,.trow input{min-height:40px;border:1px solid var(--line);background:var(--frame);border-radius:10px;padding:7px 10px;font-size:16px;width:100%}
+.rmeta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--ink-2)}
+.rst{font-size:11px;border-radius:999px;padding:2px 8px;background:var(--line);color:var(--ink-2)}
+.rst-gone{background:var(--seed);color:var(--seed-ink);font-weight:700}
+.rst-fading{background:var(--seed-soft);color:var(--seed-ink)}
+.rst-still{background:var(--accent-soft);color:var(--ink)}
+.r-add{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px dashed var(--line);border-radius:14px}
+.r-add .inline{justify-content:space-between;flex-wrap:wrap}
+.rwhy{display:flex;flex-direction:column;gap:6px}
+.kgroup{display:flex;flex-direction:column;gap:6px}
+.kgroup h5{margin:0;font-size:12px;color:var(--ink-2);font-weight:700;letter-spacing:.04em}
+.krow{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:6px 8px;min-width:0}
+.krow span{flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere}
+.tlist{display:flex;flex-direction:column;gap:10px}
+.trow p{margin:0;font-size:14px;overflow-wrap:anywhere}
+.trow .seg{background:var(--frame)}
+.rcard textarea,.acard textarea,.r-add textarea,#d-res textarea{resize:none;overflow:hidden}
+.b-res{background:var(--panel);color:var(--ink-2);border:1px solid var(--panel-line)}
+.b-star{background:#FFF4D1;color:#6B4E00}
+@media (prefers-color-scheme:dark){.b-star{background:#4A3B12;color:#F7DE84}}
+@media(max-width:360px){.lens-btn small{display:none}}
 </style>
 </head>
 <body>
@@ -558,7 +601,7 @@ const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
 const FRICTIONS=[['parties','複数の当事者'],['docs','書類・情報の手渡し'],['money','お金が動く'],['wait','待ち時間'],['manual','手作業'],['repeat','毎回やり直し']];
 const STATUS=[['still','まだある'],['fading','薄れている'],['gone','もう無い'],['unknown','未確認']];
 const ELEMENTS=[['alt','代わりの手段で無理やり済ませている'],['now','「なぜ今」がある（技術・規制・コストの変化）'],['money','お金がすでに別の名目で使われている'],['repeat','繰り返し起こり、広がっている'],['gap','大手がやりたがらない理由がある']];
-const S={ideas:new Map(),ideaSel:null,nodes:new Map(),theme:null,sel:null,focus:null,tab:'tree',collapsed:new Set(),detailFor:null,sheetTab:'cut',adding:null,renaming:null,importText:null,confirmReplace:false,themeStart:false,pendingImport:null};
+const S={ideas:new Map(),ideaSel:null,nodes:new Map(),theme:null,sel:null,focus:null,tab:'tree',collapsed:new Set(),detailFor:null,sheetTab:'res',lens:'depth',whyFor:null,adding:null,renaming:null,importText:null,confirmReplace:false,themeStart:false,pendingImport:null};
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -568,14 +611,46 @@ const wide=()=>matchMedia('(min-width:900px)').matches;
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2400);}
 
 /* ---------- 端末内の保存 ---------- */
-function loadAll(){ try{ const o=JSON.parse(ls.get(KEY)||'null'); if(o&&Array.isArray(o.nodes)) S.nodes=new Map(o.nodes.filter(n=>n&&n.id).map(n=>[n.id,n])); if(o&&Array.isArray(o.ideas)) S.ideas=new Map(o.ideas.filter(n=>n&&n.id).map(n=>[n.id,n])); }catch(e){} }
+function loadAll(){ try{ const o=JSON.parse(ls.get(KEY)||'null'); if(o&&Array.isArray(o.nodes)) S.nodes=new Map(o.nodes.filter(n=>n&&n.id).map(n=>[n.id,normNode(n)])); if(o&&Array.isArray(o.ideas)) S.ideas=new Map(o.ideas.filter(n=>n&&n.id).map(n=>[n.id,n])); }catch(e){} }
 let saveTimer=null;
 function saveNow(){ const ok=ls.set(KEY,JSON.stringify({version:2,savedAt:Date.now(),nodes:[...S.nodes.values()],ideas:[...S.ideas.values()]})); if(!ok) toast('保存できませんでした。端末の空き容量を確認してください。'); }
 function saveSoon(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,300); }
 window.addEventListener('pagehide',saveNow);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') saveNow(); });
 
-function blank(text,parent,order){return{text,parent,order,frictions:[],why:'',constraint:'',status:'',tags:[],seed:false,scores:{},memo:'',created:Date.now()};}
+function blank(text,parent,order){return{text,parent,order,frictions:[],why:'',constraint:'',status:'',reasons:[],actors:[],assume:'',alts:'',since:'',future:'',tags:[],seed:false,scores:{},memo:'',created:Date.now()};}
+const rid=()=>'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const aid=()=>'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const RKINDS=[['need','目的・必要'],['tech','技術'],['rule','規制・ルール'],['custom','慣習・文化'],['cost','コスト'],['info','情報の偏り'],['trust','信頼・責任'],['phys','物理・時間']];
+const kindLabel=k=>(RKINDS.find(([v])=>v===k)||[0,'未分類'])[1];
+const LENSES=[['depth','深さ','なぜを重ねる'],['breadth','広さ','視点を変える'],['struct','構造','分けて選ぶ'],['time','時間','経緯と変化']];
+/* 古い「背景・制約」の1欄ずつを、理由カードに移す */
+function normNode(n){
+  if(!n||typeof n!=='object')return n;
+  if(!Array.isArray(n.reasons))n.reasons=[];
+  if(!Array.isArray(n.actors))n.actors=[];
+  for(const k of ['assume','alts','since','future'])if(typeof n[k]!=='string')n[k]='';
+  if(!n.reasons.length&&(n.why||n.constraint)){
+    if(n.why)n.reasons.push({id:rid(),text:String(n.why),kind:'need',who:'',status:'',evidence:'',star:false,parent:null});
+    if(n.constraint)n.reasons.push({id:rid(),text:String(n.constraint),kind:'',who:'',status:n.status||'',evidence:'',star:false,parent:null});
+    n.why='';n.constraint='';
+  }
+  n.reasons=n.reasons.filter(r=>r&&typeof r.text==='string').map(r=>({id:typeof r.id==='string'&&r.id?r.id:rid(),text:r.text,kind:RKINDS.some(([v])=>v===r.kind)?r.kind:'',who:String(r.who||''),status:['still','fading','gone','unknown'].includes(r.status)?r.status:'',evidence:String(r.evidence||''),star:!!r.star,parent:typeof r.parent==='string'&&r.parent?r.parent:null}));
+  const ids=new Set(n.reasons.map(r=>r.id));n.reasons.forEach(r=>{if(r.parent&&(!ids.has(r.parent)||r.parent===r.id))r.parent=null;});
+  n.actors=n.actors.filter(a=>a&&(a.name||a.wants||a.pains)).map(a=>({id:typeof a.id==='string'&&a.id?a.id:aid(),name:String(a.name||''),wants:String(a.wants||''),pains:String(a.pains||'')}));
+  return n;}
+/* 行動全体の「理由は今もある？」：理由カードがあればそこから決める */
+function rstatus(n){const rs=n.reasons||[];if(rs.length){if(rs.some(r=>r.status==='gone'))return 'gone';if(rs.some(r=>r.status==='fading'))return 'fading';return '';}return n.status||'';}
+function rlevel(n,r){let d=0,x=r,g=0;const m=new Map((n.reasons||[]).map(q=>[q.id,q]));while(x&&x.parent&&m.has(x.parent)&&g++<20){d++;x=m.get(x.parent);}return d;}
+function lensScore(n){const rs=n.reasons||[];
+  const depth=rs.length?Math.min(3,1+Math.max(...rs.map(r=>rlevel(n,r)))):0;
+  const named=(n.actors||[]).filter(a=>a.name.trim()).length;
+  const breadth=Math.min(3,Math.min(2,named)+((n.assume||'').trim()||(n.alts||'').trim()?1:0));
+  const struct=(rs.length>=2?1:0)+(rs.length&&rs.every(r=>r.kind)?1:0)+(rs.some(r=>r.star)?1:0);
+  const time=((n.since||'').trim()?1:0)+(rs.length&&rs.every(r=>r.status)?1:0)+((n.future||'').trim()?1:0);
+  return {depth,breadth,struct,time,total:depth+breadth+struct+time};}
+const normText=t=>String(t||'').replace(/^仮説：/,'').replace(/[\s　。、．，]/g,'');
+function reasonIndex(){const m=new Map();for(const n of S.nodes.values())for(const r of(n.reasons||[])){const k=normText(r.text);if(k.length<4)continue;if(!m.has(k))m.set(k,{text:r.text,kind:r.kind,items:[]});const g=m.get(k);if(!g.items.some(x=>x.n.id===n.id))g.items.push({n,r});if(!g.kind&&r.kind)g.kind=r.kind;}return m;}
 function put(id,data){ S.nodes.set(id,{id,...data}); saveSoon(); render(); }
 function patch(id,data,quiet){ const n=S.nodes.get(id); if(!n) return; Object.assign(n,data); saveSoon(); if(!quiet) render(); else { renderMain(); renderTabs(); } }
 function remove(id){ S.nodes.delete(id); }
@@ -654,7 +729,9 @@ function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastS
   $('#n-seed').textContent=[...S.nodes.values()].filter(n=>n.seed).length||'';
 }
 function badges(n){const o=[];const fr=(n.frictions||[]).length;
-  if(n.status==='gone')o.push(`<span class="b b-gone">制約が消えた</span>`);else if(n.status==='fading')o.push(`<span class="b b-fade">制約が薄れている</span>`);
+  const st=rstatus(n);if(st==='gone')o.push(`<span class="b b-gone">理由が消えた</span>`);else if(st==='fading')o.push(`<span class="b b-fade">理由が薄れている</span>`);
+  const star=(n.reasons||[]).find(r=>r.star);if(star)o.push(`<span class="b b-star">★ ${esc(star.text.length>18?star.text.slice(0,18)+'…':star.text)}</span>`);
+  const ls=lensScore(n);if(ls.total)o.push(`<span class="b b-res">解像度 ${ls.total}/12</span>`);
   if(fr)o.push(`<span class="b b-fr">摩擦のサイン ${fr}つ</span>`);
   for(const t of(n.tags||[]))o.push(`<span class="b b-tag">本質：${esc(t)}</span>`);
   if(n.seed)o.push(`<span class="b b-seed">タネ ${scoreOf(n)}点</span>`);
@@ -684,8 +761,8 @@ function renderTree(m){
           <div class="ai-flow-choice">
             <strong>② 使いたいAIを開く</strong>
             <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
-    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
+    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
   </div>
           </div>
           <div class="ai-flow-step">
@@ -743,7 +820,7 @@ function actionBar(n,rel){const isRoot=!n.parent;const a=S.adding&&S.adding.id==
     <button class="act ${a==='up'?'main':''}" data-add="up"><b><i>↑</i>抽象化する</b><small>目的を1段上へ</small></button>
     <button class="act ${a==='down'?'main':''}" data-add="down"><b><i>↓</i>具体化する</b><small>やり方を1段下へ</small></button>
     ${isRoot?'':`<button class="act ${a==='sib'?'main':''}" data-add="sib"><b><i>→</i>同じ段に追加</b><small>並ぶ行動を追加</small></button>`}
-    <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>摩擦・制約などを整理</small></button>
+    <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>なぜを4つの視点で掘る</small></button>
     ${S.focus===n.id||!kids(n.id).length?'':`<button class="act" id="zoomHere"><b><i>⌕</i>この下だけ表示</b><small>この行動に集中</small></button>`}
   </div>${a?`<div class="addbox" style="padding-left:${pad}px"><span class="hint">${esc(addHint(n,a))}</span>
     <form class="inline" id="addForm"><input id="addIn" enterkeyhint="done" autocomplete="off" aria-label="${esc(addHint(n,a))}"><button class="btn pri" type="submit">追加</button><button class="btn icon" type="button" id="addX" aria-label="閉じる">✕</button></form></div>`:''}`;}
@@ -778,12 +855,14 @@ function bindGo(m){m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>sele
 function renderSame(m){
   const groups=[...tagIndex().entries()].map(([t,ns])=>({t,ns,themes:new Set(ns.map(n=>rootOf(n.id))).size})).sort((a,b)=>b.themes-a.themes||b.ns.length-a.ns.length);
   const cross=groups.filter(g=>g.themes>=2),within=groups.filter(g=>g.themes<2&&g.ns.length>=2),single=groups.filter(g=>g.ns.length<2);const cand=similarGroups();
+  const rgroups=[...reasonIndex().values()].filter(g=>g.items.length>=2).map(g=>({...g,themes:new Set(g.items.map(x=>rootOf(x.n.id))).size})).sort((a,b)=>b.themes-a.themes||b.items.length-a.items.length);
   const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}テーマ・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-mkidea-tag="${esc(g.t)}">事業案にする</button><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
     ${S.renaming===g.t?`<form class="inline" data-renform="${esc(g.t)}"><input value="${esc(g.t)}" aria-label="新しい名前"><button class="btn pri sm" type="submit">変更</button></form>`:''}${g.ns.map(hitBtn).join('')}</div>`;
   m.innerHTML=`<div class="list">
     <p class="muted" style="margin:0">同じ本質を持つ行動が、テーマをまたいでつながります。</p>
     <p class="h2">テーマをまたいでつながる本質</p>${cross.length?cross.map(card).join(''):`<div class="muted">2つ以上のテーマで同じ本質が書かれると、ここに出ます。</div>`}
     <p class="h2">同じテーマの中で繰り返し出てくる本質</p>${within.length?within.map(card).join(''):`<div class="muted">まだありません。</div>`}
+    <p class="h2">同じ理由を持つ行動</p>${rgroups.length?rgroups.map(g=>`<div class="card"><h4><span class="mark">${esc(g.text)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}テーマ・`:''}${g.items.length}か所</span>${g.kind?`<span class="b b-res">${esc(kindLabel(g.kind))}</span>`:''}</h4>${g.items.map(x=>hitBtn(x.n)).join('')}</div>`).join(''):`<div class="muted">2つ以上の行動で同じ理由が書かれると、ここに出ます。「解像度」の深さで、これまでに書いた理由から選ぶとそろいます。</div>`}
     <p class="h2">文言が似ている行動（同じ本質かもしれないもの）</p>
     ${cand.length?cand.map((ns,i)=>`<div class="card"><h4>${esc(ns[0].text)}<span class="b b-tag">${ns.length}か所</span></h4>${ns.map(hitBtn).join('')}<form class="inline" data-candform="${i}"><input placeholder="共通の本質（例：審査を受ける）" aria-label="共通の本質"><button class="btn sm" type="submit">この本質でまとめる</button></form></div>`).join(''):`<div class="muted">文言が似ている行動が見つかると、ここに候補として出ます。</div>`}
     ${single.length?`<p class="h2">1か所だけの本質</p><div class="card">${single.map(g=>`<div class="tags"><span class="b b-tag">${esc(g.t)}</span></div>${g.ns.map(hitBtn).join('')}`).join('')}</div>`:''}
@@ -797,13 +876,13 @@ function renderSame(m){
 }
 function renderSeeds(m){const all=[...S.nodes.values()];
   const seeds=all.filter(n=>n.seed).sort((a,b)=>scoreOf(b)-scoreOf(a));
-  const gone=all.filter(n=>!n.seed&&(n.status==='gone'||n.status==='fading'));
-  const dig=all.filter(n=>!n.seed&&(n.frictions||[]).length>=2&&!n.why&&!n.constraint);
+  const gone=all.filter(n=>!n.seed&&(rstatus(n)==='gone'||rstatus(n)==='fading'));
+  const dig=all.filter(n=>!n.seed&&(n.frictions||[]).length>=2&&!(n.reasons||[]).length);
   const seedCard=n=>`<div class="card"><h4>${esc(n.text)}<span class="b b-seed">${scoreOf(n)}/10</span></h4><div class="bars">${ELEMENTS.map(([k,l])=>{const v=Number(n.scores?.[k])||0;return `<span><i class="${v>=1?'on':''}"></i><i class="${v>=2?'on':''}"></i>${esc(l.slice(0,6))}</span>`;}).join('')}</div>${hitBtn(n)}<div><button class="btn sm" data-mkidea="${esc(n.id)}">事業案にする</button></div></div>`;
   m.innerHTML=`<div class="list">
     <p class="h2">タネ候補</p>${seeds.length?seeds.map(seedCard).join(''):`<div class="empty">「分析する」→「タネ」から候補を追加</div>`}
-    <p class="h2">制約が消えた・薄れているのに、行動が残っている</p>${gone.length?`<div class="card">${gone.map(hitBtn).join('')}</div>`:`<div class="muted">該当する行動はまだありません。</div>`}
-    <p class="h2">摩擦が多いのに、まだ分解していない行動</p>${dig.length?`<div class="card">${dig.map(hitBtn).join('')}</div>`:`<div class="muted">該当する行動はまだありません。</div>`}
+    <p class="h2">理由が消えた・薄れているのに、行動が残っている</p>${gone.length?`<div class="card">${gone.map(hitBtn).join('')}</div>`:`<div class="muted">該当する行動はまだありません。</div>`}
+    <p class="h2">摩擦が多いのに、まだ理由を掘っていない行動</p>${dig.length?`<div class="card">${dig.map(hitBtn).join('')}</div>`:`<div class="muted">該当する行動はまだありません。</div>`}
   </div>`; bindGo(m); bindMkIdea(m);}
 
 /* ---------- データ（バックアップ） ---------- */
@@ -814,7 +893,7 @@ function parseBackup(text){let o=null;const t=String(text||'').trim();
   try{o=JSON.parse(t);}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a){try{o=JSON.parse(t.slice(a,b+1));}catch(e2){}}}
   if(!o||typeof o!=='object') throw new Error('JSONとして読み取れませんでした。AIの出力やバックアップの中身を、最初の { から最後の } まで丸ごと貼ってください。');
   const arr=Array.isArray(o)?o:Array.isArray(o.nodes)?o.nodes:[]; const iarr=Array.isArray(o.ideas)?o.ideas:[];
-  const nodes=arr.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string').map(n=>({...blank('',null,0),...n}));
+  const nodes=arr.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string').map(n=>normNode({...blank('',null,0),...n,reasons:Array.isArray(n.reasons)?n.reasons:[],actors:Array.isArray(n.actors)?n.actors:[]}));
   const ideas=iarr.filter(x=>x&&typeof x.id==='string').map(x=>({...blankIdea('',[]),...x,title:String(x.title||'無題の事業案')}));
   if(!nodes.length&&!ideas.length) throw new Error('読み込める行動や事業案が入っていませんでした。');
   return {nodes,ideas};}
@@ -919,8 +998,8 @@ function renderIdeaEditor(m,x){const id=x.id;
       <div class="ai-flow-choice">
         <strong>② 使いたいAIを開く</strong>
         <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a>
-    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claudeを開く ↗</a>
+    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
+    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
   </div>
       </div>
       <div class="ai-flow-step">
@@ -983,8 +1062,8 @@ function renderIdeaEditor(m,x){const id=x.id;
 }
 
 /* ---------- AIと対話 ---------- */
-const PROMPT_SEED="あなたは「市場のタネ帳」の相棒です。わたしが日常や仕事で観察した人の行動を一緒に分解し、新しい市場のタネを探します。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「広げる」段階です。判断を急がず、小さな違和感や、当たり前すぎて誰も気にしていない行動も拾います。事業として成り立つかの厳しい評価はしません（それは事業化の段階でやります）。\n- わたしの観察を引き出し、整理し、問いを投げる相棒です。答えを決めるのはわたしです。\n- わたしが見たこと（事実）と、あなたの推測（仮説）をはっきり分けてください。あなたの推測を書くときは、文頭に「仮説：」と付けます。\n- わたしが言っていない行動や事実を、勝手に足さないでください。候補を出すのは歓迎ですが、採用するかはわたしが決めます。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n次の順に進めます。わたしが別の順を望んだら、それに合わせてください。\n\n1. 始める\n   最初に「新しいテーマを始めますか？それとも、タネ帳から書き出したJSONを貼りますか？」と聞いてください。\n   - JSONが貼られたら、中身を読み取り、テーマと行動のツリーを短くまとめて見せてから続けます。\n   - 新しいテーマなら、テーマ名（例：家を借りる）を聞きます。\n\n2. 行動を書き出す\n   そのテーマで人がやっている行動を、思いつくまま挙げてもらいます。違和感がなくても、普通にやっている行動で構いません。\n   書き出しが終わったら、番号付きの一覧にして見せます。\n\n3. 上下に動かす（抽象化・具体化）\n   気になる行動を1つ選んでもらい、次の2つの問いで上下に動かします。\n   - 抽象化：「それは何のためにやっている？」（答えを1段上に置く）\n   - 具体化：「具体的にはどうやっている？」（答えを1段下に置く）\n   複数の当事者が関わる、書類や情報を人が手で集めて渡す、お金が動く、といった行動は、具体化して掘る価値が高いと伝えてください。\n   深く掘りすぎて話が細かくなりすぎたら、一度上に戻ることを提案してください。\n\n4. 分解する\n   掘った行動について、次を1つずつ聞きます。\n   - 摩擦のサイン：複数の当事者／書類・情報の手渡し／お金が動く／待ち時間／手作業／毎回やり直し、のうちどれがあるか\n   - 背景：なぜ人はこのやり方をしているのか\n   - 制約：何がこのやり方を強いているのか（技術、規制、慣習、コスト、情報の偏りなど）\n   - その制約は今もあるか：まだある／薄れている／もう無い／未確認\n   「制約が消えた・薄れているのに、行動だけが残っている」ものが見つかったら、市場のタネの典型として強調してください。\n\n5. 本質を書く\n   それぞれの行動が「本質的には何をしているか」を短く言い表します（例：協定価額を決める → モノの価値を決める）。\n   場面の言葉（車の、家の、など）を外した言い方にして、他のテーマともつながるようにします。すでに使っている本質の言い方があれば、それを優先して使います。\n   同じ本質が別の行動や別のテーマにも出てきたら、そのつながりを指摘してください。\n\n6. タネとして評価する\n   わたしが「これはタネかも」と言った行動は、次の5つを0〜2点で一緒に採点します。点の理由も一言添えてください。\n   - alt：代わりの手段で無理やり済ませている\n   - now：「なぜ今」がある（技術・規制・コストの変化）\n   - money：お金がすでに別の名目で使われている\n   - repeat：繰り返し起こり、広がっている\n   - gap：大手がやりたがらない理由がある\n   有望なタネが出てきたら、「アプリのタネ候補で『事業案にする』を押し、事業化用のプロンプトで詰めましょう」と伝えてください。\n\n# わたしが使う合図\n- 「まとめ」：今のツリーを、字下げした一覧で見せてください（各行に、本質・摩擦・制約の状態・タネの点数があれば添える）。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n- 「戻る」：1つ前の段階に戻ります。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- nodes には、この会話で新しく作った行動と、内容を変えた行動だけを入れます。変えていない既存の行動は入れません。\n- 既存の行動（最初に貼られたJSONにあったもの）を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しい行動の id は、他と重ならないように「t」＋今日の日付8桁＋「-」＋3桁の連番にします（例：t20261010-001）。日付が分からなければ、最初にわたしに聞いてください。\n- parent には親の行動の id を入れます。テーマ（いちばん上）だけ null にします。既存の行動の下に足すときは、その既存の id を parent に入れます。\n- order は、同じ親の中での並び順です（0から）。\n- frictions は次の英語のキーだけを使います：parties（複数の当事者）、docs（書類・情報の手渡し）、money（お金が動く）、wait（待ち時間）、manual（手作業）、repeat（毎回やり直し）。\n- status は次のどれかです：still（まだある）、fading（薄れている）、gone（もう無い）、unknown（未確認）、\"\"（未記入）。\n- tags には「本質」の言い方を文字列で入れます。\n- seed は、タネ候補なら true です。scores は alt, now, money, repeat, gap をそれぞれ 0〜2 の数字で入れます。\n- why（背景）、constraint（制約）は、わたしが同意した内容だけを入れます。あなたの仮説のままのものは、memo に「仮説：〜」として入れます。\n- 行動が多くて1回で出し切れないときは、「続く」と書いて分割し、わたしが「続き」と言ったら残りを出します。分割したそれぞれが、単独で正しいJSONになるようにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 1,\n  \"exportedAt\": 0,\n  \"nodes\": [\n    {\n      \"id\": \"t20261010-001\",\n      \"text\": \"家を借りる\",\n      \"parent\": null,\n      \"order\": 0,\n      \"frictions\": [],\n      \"why\": \"\",\n      \"constraint\": \"\",\n      \"status\": \"\",\n      \"tags\": [],\n      \"seed\": false,\n      \"scores\": {},\n      \"memo\": \"\"\n    },\n    {\n      \"id\": \"t20261010-002\",\n      \"text\": \"入居審査を受ける\",\n      \"parent\": \"t20261010-001\",\n      \"order\": 0,\n      \"frictions\": [\"parties\", \"docs\", \"wait\"],\n      \"why\": \"貸主が、家賃を払い続けられる人かを事前に確かめたい。\",\n      \"constraint\": \"借り手の支払い能力を示す共通の情報がなく、毎回書類で証明するしかない。\",\n      \"status\": \"fading\",\n      \"tags\": [\"支払い能力を証明する\"],\n      \"seed\": true,\n      \"scores\": {\"alt\": 2, \"now\": 1, \"money\": 1, \"repeat\": 2, \"gap\": 1},\n      \"memo\": \"仮説：保証会社ごとに審査をやり直している\"\n    }\n  ]\n}\n```\n\nでは、始めてください。\n";
-const PROMPT_BIZ="あなたは、わたしの事業案を一緒に詰める相棒であり、厳しめの審査役です。わたしは「市場のタネ帳」というノートで、人の行動を観察・分解して市場のタネを探しています。この会話では、そのタネから生まれた事業案を、「進める／形を変える／保留／やめる」のどれかを判断できるところまで詰めます。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「絞る」段階です。甘い評価はしません。根拠のない楽観には「その根拠は？」と聞き返してください。\n- 弱い点は、遠慮せずに具体的に指摘してください。×なら×と言います。やめる判断も前進です。\n- ただし、否定だけで終わらせず、「どう変えれば成り立つか」も一緒に考えてください。\n- わたしが言ったこと（事実）と、あなたの推測をはっきり分けます。推測には文頭に「仮説：」を付けます。\n- 数字は、粗くても桁が合っていることを重視します。分からない数字は、わたしに聞くか、置いた前提を明示して概算します。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n1. 最初に、「今回の事業案」にある事業案と元になったタネを3行で要約し、この事業案の一番弱い点を3つ挙げてください。そのうえで、どこから詰めるかをわたしに選んでもらいます。\n2. 次の項目を1つずつ詰めます。わたしの答えが薄いときは、問いを変えて深掘りします。\n   - 顧客：具体的な1人（1社）を思い描けるか。話を聞ける知り合いはいるか\n   - 困りごと：どのくらいの頻度で、どのくらい痛いか。今いくら、何時間を使っているか\n   - 代わりの手段：今はどう済ませているか。それで困っていない人は誰か\n   - なぜ今：何が変わったからできるのか。5年前にできなかった理由は何か\n   - 解決の仮説：何を提供するか。いちばん小さく試すなら何か\n   - 誰がお金を払うか：どの予算名目のお金か。1件あたりいくらか\n   - 市場の大きさ：顧客数×単価で桁を出す。国内と海外の両方\n   - 競合と代替：同じことをしている会社、似たことをしている会社、「何もしない」という選択\n   - 勝てる理由：わたしの実際の経験や強みとどうつながるか。真似されにくいか\n   - 15年計画との相性：次の4つを ○／△／× で判定し、理由を一言添えます\n     - margin：利益率30%以上を狙えるか\n     - national：全国・海外に売れるか\n     - stage1：最初は受託で稼ぎながら検証できるか\n     - campus：将来の自社拠点構想と噛み合うか。構想が未定なら未判定にする\n   - 次の一手：1週間以内にできる具体的な行動。誰に何を聞くか。どんな答えなら進め、どんな答えならやめるか\n3. 一通り詰めたら、「進める／形を変える／保留／やめる」のどれがよいか、理由を添えて提案してください。決めるのはわたしです。\n   形を変える場合は、新しい事業案として分けるか、今の事業案を書き換えるかをわたしに聞いてください。\n\n# わたしが使う合図\n- 「まとめ」：今の事業案を、項目ごとに短く一覧で見せてください。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- 出力するのは ideas だけです。この会話で変えた事業案と、新しく分けた事業案を入れます。\n- 渡された事業案を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しく分けた事業案の id は「i」＋今日の日付8桁＋「-」＋3桁の連番にします（例：i20261010-001）。日付が分からなければ、わたしに聞いてください。sources は元の事業案のものを引き継ぎます。\n- 各項目の入れ先は次のとおりです：customer（顧客）、pain（困りごと）、alt（代わりの手段）、whyNow（なぜ今）、solution（解決の仮説）、payer（誰がお金を払うか。1件あたりの金額も）、edge（勝てる理由）、next（次の一手。進める・やめる基準も）。\n- 市場の大きさと競合は、memo に「市場：〜」「競合：〜」の形で入れます。元の memo にあった内容は消さずに残します。\n- fit は margin, national, stage1, campus のそれぞれに \"ok\"（○）、\"mid\"（△）、\"ng\"（×）、\"\"（未判定）のどれかを入れます。理由は fitNote にまとめます。\n- status は \"idea\"（アイデア）、\"testing\"（検証中）、\"hold\"（保留）、\"dropped\"（やめた）のどれかです。やめた場合は dropReason に理由を入れます。\n- わたしが同意していない推測をどこかの項目に入れるときは、文頭の「仮説：」を付けたままにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 2,\n  \"ideas\": [\n    {\n      \"id\": \"i20261010-001\",\n      \"title\": \"支払い能力をまとめて証明できる仕組み\",\n      \"status\": \"testing\",\n      \"sources\": [\n        {\n          \"type\": \"node\",\n          \"id\": \"t20261010-002\"\n        },\n        {\n          \"type\": \"tag\",\n          \"name\": \"支払い能力を証明する\"\n        }\n      ],\n      \"customer\": \"都市部で賃貸物件を探す20〜30代の会社員と、その審査をする保証会社\",\n      \"pain\": \"物件ごと、保証会社ごとに同じ書類を出して審査をやり直している。引っ越しのたびに数日かかる\",\n      \"alt\": \"源泉徴収票や在籍証明を毎回集めて、紙や画像で提出している\",\n      \"whyNow\": \"仮説：給与や口座の情報を本人同意で連携できる仕組みが広がってきた\",\n      \"solution\": \"一度の確認で、複数の審査先に支払い能力を証明できるサービス。まずは保証会社1社の審査書類チェックを受託する\",\n      \"payer\": \"保証会社。審査1件あたりの人件費の一部（仮説：1件数百円〜千円台）\",\n      \"edge\": \"会計の知識で、収入や支払い能力の見方を設計できる\",\n      \"fit\": {\n        \"margin\": \"mid\",\n        \"national\": \"ok\",\n        \"stage1\": \"ok\",\n        \"campus\": \"\"\n      },\n      \"fitNote\": \"審査書類チェックの受託から始めれば、稼ぎながら検証できる\",\n      \"next\": \"保証会社の審査担当2人に、1件あたりの審査時間と、一番手間がかかる書類を聞く。半分以上が書類集めと答えたら進める\",\n      \"dropReason\": \"\",\n      \"memo\": \"市場：仮説：国内の賃貸契約は年間数百万件。競合：大手保証会社の自社システム、何もしない\"\n    }\n  ]\n}\n```\n\n# 今回の事業案\n（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）\n\nでは、始めてください。\n";
+const PROMPT_SEED="あなたは「市場のタネ帳」の相棒です。わたしが日常や仕事で観察した人の行動を一緒に分解し、新しい市場のタネを探します。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「広げる」段階です。判断を急がず、小さな違和感や、当たり前すぎて誰も気にしていない行動も拾います。事業として成り立つかの厳しい評価はしません（それは事業化の段階でやります）。\n- わたしの観察を引き出し、整理し、問いを投げる相棒です。答えを決めるのはわたしです。\n- わたしが見たこと（事実）と、あなたの推測（仮説）をはっきり分けてください。あなたの推測を書くときは、文頭に「仮説：」と付けます。\n- わたしが言っていない行動や事実を、勝手に足さないでください。候補を出すのは歓迎ですが、採用するかはわたしが決めます。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n次の順に進めます。わたしが別の順を望んだら、それに合わせてください。\n\n1. 始める\n   最初に「新しいテーマを始めますか？それとも、タネ帳から書き出したJSONを貼りますか？」と聞いてください。\n   - JSONが貼られたら、中身を読み取り、テーマと行動のツリーを短くまとめて見せてから続けます。\n   - 新しいテーマなら、テーマ名（例：家を借りる）を聞きます。\n\n2. 行動を書き出す\n   そのテーマで人がやっている行動を、思いつくまま挙げてもらいます。違和感がなくても、普通にやっている行動で構いません。\n   書き出しが終わったら、番号付きの一覧にして見せます。\n\n3. 上下に動かす（抽象化・具体化）\n   気になる行動を1つ選んでもらい、次の2つの問いで上下に動かします。\n   - 抽象化：「それは何のためにやっている？」（答えを1段上に置く）\n   - 具体化：「具体的にはどうやっている？」（答えを1段下に置く）\n   複数の当事者が関わる、書類や情報を人が手で集めて渡す、お金が動く、といった行動は、具体化して掘る価値が高いと伝えてください。\n   深く掘りすぎて話が細かくなりすぎたら、一度上に戻ることを提案してください。\n\n4. 解像度を上げる\n   掘った行動について、「なぜこの行動をしているのか」を、次の4つの視点で構造化します。1回に1つずつ聞いてください。\n   - 深さ：なぜこのやり方をしているのか。答えに対して「なぜそうなっている？」を重ね、症状ではなく根本の理由まで掘ります。理由はいくつあっても構いません。\n   - 広さ：この行動に関わる当事者は誰か。それぞれ何を望み、何に困っているか。当たり前だと思っている前提は何か。ほかのやり方（他業界のやり方も）はないか。\n   - 構造：理由を種類で分けます（目的・必要／技術／規制・ルール／慣習・文化／コスト／情報の偏り／信頼・責任／物理・時間）。どの理由が一番強くこの行動を縛っているかを、一緒に1つ選びます。摩擦のサイン（複数の当事者／書類・情報の手渡し／お金が動く／待ち時間／手作業／毎回やり直し）も確認します。\n   - 時間：いつから、どんな経緯でこうなったか。それぞれの理由は今もあるか（まだある／薄れている／もう無い／未確認）と、その根拠。この先どう変わりそうか。\n   ほかの行動で出てきた理由と同じものがあれば、同じ言い方にそろえて、そのつながりを指摘してください。\n   「理由が消えた・薄れているのに、行動だけが残っている」ものが見つかったら、市場のタネの典型として強調してください。\n   4つのうち、まだ薄い視点があれば、そこを掘ることを提案してください。\n\n5. 本質を書く\n   それぞれの行動が「本質的には何をしているか」を短く言い表します（例：協定価額を決める → モノの価値を決める）。\n   場面の言葉（車の、家の、など）を外した言い方にして、他のテーマともつながるようにします。すでに使っている本質の言い方があれば、それを優先して使います。\n   同じ本質が別の行動や別のテーマにも出てきたら、そのつながりを指摘してください。\n\n6. タネとして評価する\n   わたしが「これはタネかも」と言った行動は、次の5つを0〜2点で一緒に採点します。点の理由も一言添えてください。\n   - alt：代わりの手段で無理やり済ませている\n   - now：「なぜ今」がある（技術・規制・コストの変化）\n   - money：お金がすでに別の名目で使われている\n   - repeat：繰り返し起こり、広がっている\n   - gap：大手がやりたがらない理由がある\n   有望なタネが出てきたら、「アプリのタネ候補で『事業案にする』を押し、事業化用のプロンプトで詰めましょう」と伝えてください。\n\n# わたしが使う合図\n- 「まとめ」：今のツリーを、字下げした一覧で見せてください（各行に、本質・一番効いている理由・その理由が今もあるか・タネの点数があれば添える）。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n- 「戻る」：1つ前の段階に戻ります。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- nodes には、この会話で新しく作った行動と、内容を変えた行動だけを入れます。変えていない既存の行動は入れません。\n- 既存の行動（最初に貼られたJSONにあったもの）を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しい行動の id は、他と重ならないように「t」＋今日の日付8桁＋「-」＋3桁の連番にします（例：t20261010-001）。理由と当事者の id も同じ考え方です。日付が分からなければ、最初にわたしに聞いてください。\n- parent には親の行動の id を入れます。テーマ（いちばん上）だけ null にします。既存の行動の下に足すときは、その既存の id を parent に入れます。\n- order は、同じ親の中での並び順です（0から）。\n- frictions は次の英語のキーだけを使います：parties（複数の当事者）、docs（書類・情報の手渡し）、money（お金が動く）、wait（待ち時間）、manual（手作業）、repeat（毎回やり直し）。\n- reasons には、この行動をしている理由を入れます。各理由は id, text, kind, who, status, evidence, star, parent を持ちます。\n  - id は「r」＋今日の日付8桁＋「-」＋3桁の連番にします（例：r20261010-001）。\n  - kind は need（目的・必要）、tech（技術）、rule（規制・ルール）、custom（慣習・文化）、cost（コスト）、info（情報の偏り）、trust（信頼・責任）、phys（物理・時間）、\"\"（未分類）のどれかです。\n  - who は、その理由が誰の都合かを、actors の name で入れます。分からなければ \"\" にします。\n  - status は still（まだある）、fading（薄れている）、gone（もう無い）、unknown（未確認）、\"\"（未記入）のどれかです。evidence に、その根拠を一言入れます。\n  - star は、一番強くこの行動を縛っている理由だけ true にします（行動ごとに1つまで）。\n  - parent は、「なぜそうなっている？」で掘った元の理由の id です。いちばん上の理由は null にします。\n- actors には当事者を入れます。各当事者は id（「a」＋日付8桁＋「-」＋連番）, name, wants（望んでいること）, pains（困っていること）を持ちます。\n- assume（当たり前だと思っている前提）、alts（ほかのやり方）、since（いつから・どんな経緯で）、future（この先の変化）は文章で入れます。\n- 既存の行動の reasons や actors を変えたときは、その行動の reasons と actors を全部出し直します（アプリは行動ごと上書きします）。\n- 理由・当事者・前提は、わたしが同意した内容だけを入れます。あなたの仮説のままのものは、文頭に「仮説：」を付けます。\n- 行動が多くて1回で出し切れないときは、「続く」と書いて分割し、わたしが「続き」と言ったら残りを出します。分割したそれぞれが、単独で正しいJSONになるようにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 3,\n  \"exportedAt\": 0,\n  \"nodes\": [\n    {\n      \"id\": \"t20261010-001\",\n      \"text\": \"家を借りる\",\n      \"parent\": null,\n      \"order\": 0,\n      \"frictions\": [],\n      \"reasons\": [],\n      \"actors\": [],\n      \"assume\": \"\",\n      \"alts\": \"\",\n      \"since\": \"\",\n      \"future\": \"\",\n      \"tags\": [],\n      \"seed\": false,\n      \"scores\": {},\n      \"memo\": \"\"\n    },\n    {\n      \"id\": \"t20261010-002\",\n      \"text\": \"入居審査を受ける\",\n      \"parent\": \"t20261010-001\",\n      \"order\": 0,\n      \"frictions\": [\n        \"parties\",\n        \"docs\",\n        \"wait\"\n      ],\n      \"reasons\": [\n        {\n          \"id\": \"r20261010-001\",\n          \"text\": \"貸主が、家賃を払い続けられる人かを事前に確かめたい\",\n          \"kind\": \"need\",\n          \"who\": \"貸主\",\n          \"status\": \"still\",\n          \"evidence\": \"\",\n          \"star\": false,\n          \"parent\": null\n        },\n        {\n          \"id\": \"r20261010-002\",\n          \"text\": \"借り手の支払い能力を示す共通の情報がない\",\n          \"kind\": \"info\",\n          \"who\": \"保証会社\",\n          \"status\": \"fading\",\n          \"evidence\": \"仮説：給与や口座の情報を本人同意で連携する仕組みが広がっている\",\n          \"star\": true,\n          \"parent\": \"r20261010-001\"\n        },\n        {\n          \"id\": \"r20261010-003\",\n          \"text\": \"審査の結果を他社に渡せない\",\n          \"kind\": \"rule\",\n          \"who\": \"保証会社\",\n          \"status\": \"unknown\",\n          \"evidence\": \"\",\n          \"star\": false,\n          \"parent\": \"r20261010-002\"\n        }\n      ],\n      \"actors\": [\n        {\n          \"id\": \"a20261010-001\",\n          \"name\": \"貸主\",\n          \"wants\": \"家賃を確実に受け取りたい\",\n          \"pains\": \"滞納のリスク\"\n        },\n        {\n          \"id\": \"a20261010-002\",\n          \"name\": \"保証会社\",\n          \"wants\": \"審査を早く安く済ませたい\",\n          \"pains\": \"書類の確認に人手がかかる\"\n        }\n      ],\n      \"assume\": \"支払い能力は書類で証明するもの\",\n      \"alts\": \"仮説：海外では信用スコアで即日審査\",\n      \"since\": \"保証会社の利用が当たり前になってから、会社ごとに審査するようになった\",\n      \"future\": \"仮説：本人同意のデータ連携で、審査は数分になる\",\n      \"tags\": [\n        \"支払い能力を証明する\"\n      ],\n      \"seed\": true,\n      \"scores\": {\n        \"alt\": 2,\n        \"now\": 1,\n        \"money\": 1,\n        \"repeat\": 2,\n        \"gap\": 1\n      },\n      \"memo\": \"\"\n    }\n  ]\n}\n```\n\nでは、始めてください。\n";
+const PROMPT_BIZ="あなたは、わたしの事業案を一緒に詰める相棒であり、厳しめの審査役です。わたしは「市場のタネ帳」というノートで、人の行動を観察・分解して市場のタネを探しています。この会話では、そのタネから生まれた事業案を、「進める／形を変える／保留／やめる」のどれかを判断できるところまで詰めます。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「絞る」段階です。甘い評価はしません。根拠のない楽観には「その根拠は？」と聞き返してください。\n- 弱い点は、遠慮せずに具体的に指摘してください。×なら×と言います。やめる判断も前進です。\n- ただし、否定だけで終わらせず、「どう変えれば成り立つか」も一緒に考えてください。\n- わたしが言ったこと（事実）と、あなたの推測をはっきり分けます。推測には文頭に「仮説：」を付けます。\n- 数字は、粗くても桁が合っていることを重視します。分からない数字は、わたしに聞くか、置いた前提を明示して概算します。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n1. 最初に、「今回の事業案」にある事業案と元になったタネを3行で要約し（元のタネの reasons にある、理由の構造と、今もあるかの判定も踏まえます）、この事業案の一番弱い点を3つ挙げてください。そのうえで、どこから詰めるかをわたしに選んでもらいます。\n2. 次の項目を1つずつ詰めます。わたしの答えが薄いときは、問いを変えて深掘りします。\n   - 顧客：具体的な1人（1社）を思い描けるか。話を聞ける知り合いはいるか\n   - 困りごと：どのくらいの頻度で、どのくらい痛いか。今いくら、何時間を使っているか\n   - 代わりの手段：今はどう済ませているか。それで困っていない人は誰か\n   - なぜ今：何が変わったからできるのか。5年前にできなかった理由は何か\n   - 解決の仮説：何を提供するか。いちばん小さく試すなら何か\n   - 誰がお金を払うか：どの予算名目のお金か。1件あたりいくらか\n   - 市場の大きさ：顧客数×単価で桁を出す。国内と海外の両方\n   - 競合と代替：同じことをしている会社、似たことをしている会社、「何もしない」という選択\n   - 勝てる理由：わたしの実際の経験や強みとどうつながるか。真似されにくいか\n   - 15年計画との相性：次の4つを ○／△／× で判定し、理由を一言添えます\n     - margin：利益率30%以上を狙えるか\n     - national：全国・海外に売れるか\n     - stage1：最初は受託で稼ぎながら検証できるか\n     - campus：将来の自社拠点構想と噛み合うか。構想が未定なら未判定にする\n   - 次の一手：1週間以内にできる具体的な行動。誰に何を聞くか。どんな答えなら進め、どんな答えならやめるか\n3. 一通り詰めたら、「進める／形を変える／保留／やめる」のどれがよいか、理由を添えて提案してください。決めるのはわたしです。\n   形を変える場合は、新しい事業案として分けるか、今の事業案を書き換えるかをわたしに聞いてください。\n\n# わたしが使う合図\n- 「まとめ」：今の事業案を、項目ごとに短く一覧で見せてください。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- 出力するのは ideas だけです。この会話で変えた事業案と、新しく分けた事業案を入れます。\n- 渡された事業案を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しく分けた事業案の id は「i」＋今日の日付8桁＋「-」＋3桁の連番にします（例：i20261010-001）。日付が分からなければ、わたしに聞いてください。sources は元の事業案のものを引き継ぎます。\n- 各項目の入れ先は次のとおりです：customer（顧客）、pain（困りごと）、alt（代わりの手段）、whyNow（なぜ今）、solution（解決の仮説）、payer（誰がお金を払うか。1件あたりの金額も）、edge（勝てる理由）、next（次の一手。進める・やめる基準も）。\n- 市場の大きさと競合は、memo に「市場：〜」「競合：〜」の形で入れます。元の memo にあった内容は消さずに残します。\n- fit は margin, national, stage1, campus のそれぞれに \"ok\"（○）、\"mid\"（△）、\"ng\"（×）、\"\"（未判定）のどれかを入れます。理由は fitNote にまとめます。\n- status は \"idea\"（アイデア）、\"testing\"（検証中）、\"hold\"（保留）、\"dropped\"（やめた）のどれかです。やめた場合は dropReason に理由を入れます。\n- わたしが同意していない推測をどこかの項目に入れるときは、文頭の「仮説：」を付けたままにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 2,\n  \"ideas\": [\n    {\n      \"id\": \"i20261010-001\",\n      \"title\": \"支払い能力をまとめて証明できる仕組み\",\n      \"status\": \"testing\",\n      \"sources\": [\n        {\n          \"type\": \"node\",\n          \"id\": \"t20261010-002\"\n        },\n        {\n          \"type\": \"tag\",\n          \"name\": \"支払い能力を証明する\"\n        }\n      ],\n      \"customer\": \"都市部で賃貸物件を探す20〜30代の会社員と、その審査をする保証会社\",\n      \"pain\": \"物件ごと、保証会社ごとに同じ書類を出して審査をやり直している。引っ越しのたびに数日かかる\",\n      \"alt\": \"源泉徴収票や在籍証明を毎回集めて、紙や画像で提出している\",\n      \"whyNow\": \"仮説：給与や口座の情報を本人同意で連携できる仕組みが広がってきた\",\n      \"solution\": \"一度の確認で、複数の審査先に支払い能力を証明できるサービス。まずは保証会社1社の審査書類チェックを受託する\",\n      \"payer\": \"保証会社。審査1件あたりの人件費の一部（仮説：1件数百円〜千円台）\",\n      \"edge\": \"会計の知識で、収入や支払い能力の見方を設計できる\",\n      \"fit\": {\n        \"margin\": \"mid\",\n        \"national\": \"ok\",\n        \"stage1\": \"ok\",\n        \"campus\": \"\"\n      },\n      \"fitNote\": \"審査書類チェックの受託から始めれば、稼ぎながら検証できる\",\n      \"next\": \"保証会社の審査担当2人に、1件あたりの審査時間と、一番手間がかかる書類を聞く。半分以上が書類集めと答えたら進める\",\n      \"dropReason\": \"\",\n      \"memo\": \"市場：仮説：国内の賃貸契約は年間数百万件。競合：大手保証会社の自社システム、何もしない\"\n    }\n  ]\n}\n```\n\n# 今回の事業案\n（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）\n\nでは、始めてください。\n";
 const BIZ_SLOT='（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）';
 function buildSeedPrompt(withData){let p=PROMPT_SEED;
   if(withData)p+='\n\n---\n以下は、いまのタネ帳のJSONです。これを読み取ってから始めてください。\n```json\n'+exportJSON()+'\n```';return p;}
@@ -1008,28 +1087,103 @@ async function copyText(text){
 }
 function openImport(){S.themeStart=false;S.tab='data';S.openPaste=true;openSheet(false);render();window.scrollTo({top:0});}
 
+
+/* ---------- 解像度（深さ・広さ・構造・時間） ---------- */
+const STLABEL={still:'まだある',fading:'薄れている',gone:'もう無い',unknown:'未確認'};
+function kindOptions(sel){return `<option value="">種類：未分類</option>`+RKINDS.map(([v,l])=>`<option value="${v}" ${v===sel?'selected':''}>${l}</option>`).join('');}
+function whoOptions(n,sel){const names=(n.actors||[]).map(a=>a.name.trim()).filter(Boolean);if(sel&&!names.includes(sel))names.push(sel);
+  return `<option value="">誰の都合：未設定</option>`+names.map(v=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(v)}</option>`).join('');}
+function rchildren(n,pid){return (n.reasons||[]).filter(r=>(r.parent||null)===pid);}
+function updateMeter(n){const ls=lensScore(n);document.querySelectorAll('#d-res [data-lens]').forEach(b=>b.querySelectorAll('.ldots i').forEach((i,k)=>i.classList.toggle('on',ls[b.dataset.lens]>k)));}
+function growAll(box){box.querySelectorAll('textarea').forEach(t=>{const g=()=>{t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';};g();t.addEventListener('input',g);});}
+function commitRes(n,re){n.updated=Date.now();saveSoon();renderMain();renderTabs();if(re)renderRes(n);else updateMeter(n);}
+function renderRes(n){const box=$('#d-res');if(!box)return;const ls=lensScore(n);const lens=S.lens||'depth';
+  const meter=`<div class="lens-meter" role="tablist" aria-label="解像度の4つの視点">${LENSES.map(([k,l,h])=>`<button class="lens-btn" role="tab" data-lens="${k}" aria-pressed="${k===lens}"><b>${l}</b><span class="ldots">${[1,2,3].map(i=>`<i class="${ls[k]>=i?'on':''}"></i>`).join('')}</span><small>${h}</small></button>`).join('')}</div>`;
+  let body='';
+  if(lens==='depth'){
+    const card=(r,lvl)=>`<div class="rcard ${lvl?'child':''}" style="margin-left:${Math.min(lvl,4)*14}px" data-r="${esc(r.id)}">
+      <div class="rhead"><select class="rsel" data-rk="${esc(r.id)}" aria-label="理由の種類">${kindOptions(r.kind)}</select><span class="sp"></span><button class="rstar" data-rs="${esc(r.id)}" aria-pressed="${!!r.star}" aria-label="一番効いている理由にする">★</button><button class="rx" data-rx="${esc(r.id)}" aria-label="この理由を削除">✕</button></div>
+      <textarea data-rt="${esc(r.id)}" rows="2" aria-label="理由">${esc(r.text)}</textarea>
+      <div class="rmeta"><select class="rsel" data-rw="${esc(r.id)}" aria-label="誰の都合か">${whoOptions(n,r.who)}</select>${r.status?`<span class="rst rst-${r.status}">${STLABEL[r.status]}</span>`:''}</div>
+      ${S.whyFor===r.id?`<form class="rwhy" data-rwf="${esc(r.id)}"><textarea rows="2" placeholder="なぜそうなっている？" aria-label="なぜそうなっている？"></textarea><div class="btnrow"><button class="btn pri sm" type="submit">掘る</button><button class="btn sm" type="button" data-rwx>やめる</button></div></form>`:`<div><button class="linkbtn" data-rwhy="${esc(r.id)}">＋ なぜそうなっている？</button></div>`}
+    </div>`;
+    const walk=(pid,lvl)=>rchildren(n,pid).map(r=>card(r,lvl)+walk(r.id,lvl+1)).join('');
+    const mine=new Set((n.reasons||[]).map(r=>normText(r.text)));
+    const others=[...reasonIndex().values()].filter(g=>!mine.has(normText(g.text))).sort((a,b)=>b.items.length-a.items.length).slice(0,6);
+    body=`<p class="lens-q"><b>なぜこの行動をしている？</b> 答えに「なぜそうなっている？」を重ね、症状ではなく根本の理由まで掘ります。理由はいくつあっても構いません。</p>
+      <div class="rtree">${walk(null,0)||'<span class="muted">まだ理由がありません。</span>'}</div>
+      <form class="r-add" id="r-add"><textarea id="r-add-in" rows="2" placeholder="例：保険会社が車の価値を自力で判断できない" aria-label="新しい理由"></textarea>
+        <div class="inline"><select class="rsel" id="r-add-kind" aria-label="理由の種類">${kindOptions('')}</select><button class="btn pri sm" type="submit">理由を追加</button></div>
+        ${others.length?`<div class="tags"><span class="muted">ほかの行動で書いた理由：</span>${others.map((g,i)=>`<button class="tagx" type="button" data-rq="${i}">＋ ${esc(g.text.length>24?g.text.slice(0,24)+'…':g.text)}</button>`).join('')}</div>`:''}
+      </form>`;
+    box.innerHTML=meter+body;
+    box.querySelectorAll('[data-rq]').forEach(b=>b.onclick=()=>{const g=others[Number(b.dataset.rq)];n.reasons.push({id:rid(),text:g.text,kind:g.kind||'',who:'',status:'',evidence:'',star:false,parent:null});commitRes(n,true);toast('同じ理由としてつなげました');});
+  }else if(lens==='breadth'){
+    body=`<p class="lens-q"><b>誰の視点で見ると、理由は変わる？</b> 当事者ごとに、望むことと困っていることを書きます。前提を疑い、ほかのやり方も考えます。</p>
+      <div class="rtree">${(n.actors||[]).map(a=>`<div class="acard" data-a="${esc(a.id)}"><div class="rhead"><input data-af="name" data-aid="${esc(a.id)}" value="${esc(a.name)}" placeholder="当事者（例：保険会社）" aria-label="当事者"><button class="rx" data-ax="${esc(a.id)}" aria-label="この当事者を削除">✕</button></div>
+        <label class="f">望んでいること<textarea data-af="wants" data-aid="${esc(a.id)}" rows="2">${esc(a.wants)}</textarea></label>
+        <label class="f">困っていること・恐れていること<textarea data-af="pains" data-aid="${esc(a.id)}" rows="2">${esc(a.pains)}</textarea></label></div>`).join('')||'<span class="muted">まだ当事者がいません。</span>'}</div>
+      <div><button class="btn sm" id="a-add" type="button">＋ 当事者を追加</button></div>
+      <label class="f">当たり前だと思っている前提は？<textarea data-nf="assume" rows="2" placeholder="例：保険の価値は書類で証明するもの">${esc(n.assume)}</textarea></label>
+      <label class="f">ほかのやり方はない？（代わりの手段・他業界のやり方）<textarea data-nf="alts" rows="2">${esc(n.alts)}</textarea></label>`;
+    box.innerHTML=meter+body;
+  }else if(lens==='struct'){
+    const rs=n.reasons||[];const fr=new Set(n.frictions||[]);
+    const groups=[...RKINDS,['','未分類']].map(([k,l])=>({k,l,items:rs.filter(r=>(r.kind||'')===k)})).filter(g=>g.items.length);
+    const idx=reasonIndex();
+    const shared=rs.map(r=>({r,g:idx.get(normText(r.text))})).filter(x=>x.g&&x.g.items.length>=2);
+    body=`<p class="lens-q"><b>どの理由が一番効いている？</b> 理由を種類で分け、行動を一番強く縛っている理由に★を付けます。</p>
+      ${groups.length?groups.map(g=>`<div class="kgroup"><h5>${g.l}　${g.items.length}</h5>${g.items.map(r=>`<div class="krow"><button class="rstar" data-rs="${esc(r.id)}" aria-pressed="${!!r.star}" aria-label="一番効いている理由にする">★</button><span>${esc(r.text)}</span><select class="rsel" data-rk="${esc(r.id)}" aria-label="理由の種類">${kindOptions(r.kind)}</select></div>`).join('')}</div>`).join(''):'<span class="muted">「深さ」で理由を書くと、ここで分けて比べられます。</span>'}
+      <div class="sec"><h3>摩擦のサイン</h3><div class="toggles">${FRICTIONS.map(([k,l])=>`<button class="tg" data-fr="${k}" aria-pressed="${fr.has(k)}">${l}</button>`).join('')}</div></div>
+      ${shared.length?`<div class="sec"><h3>同じ理由がある、ほかの行動</h3>${shared.map(x=>`<div class="muted">${esc(x.r.text)}</div>${x.g.items.filter(y=>y.n.id!==n.id).map(y=>hitBtn(y.n)).join('')}`).join('')}</div>`:''}`;
+    box.innerHTML=meter+body;
+    box.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{const cur=new Set(n.frictions||[]);cur.has(b.dataset.fr)?cur.delete(b.dataset.fr):cur.add(b.dataset.fr);n.frictions=[...cur];commitRes(n,true);});
+    box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>select(b.dataset.go,true));
+  }else{
+    const rs=n.reasons||[];const gone=rs.some(r=>r.status==='gone');
+    body=`<p class="lens-q"><b>いつから、なぜこうなった？ その理由は今もある？</b> 理由が消えたのに行動だけが残っているところが、市場のタネです。</p>
+      <label class="f">いつから、どんな経緯でこうなった？<textarea data-nf="since" rows="2" placeholder="例：中古車の相場情報が紙の雑誌しかなかった頃から">${esc(n.since)}</textarea></label>
+      <div class="tlist">${rs.map(r=>`<div class="trow"><p>${r.star?'★ ':''}${esc(r.text)}</p><div class="seg">${Object.entries(STLABEL).map(([k,l])=>`<button data-tst="${esc(r.id)}" data-v="${k}" aria-pressed="${r.status===k}">${l}</button>`).join('')}</div><input data-tev="${esc(r.id)}" value="${esc(r.evidence)}" placeholder="根拠（例：2022年に電子契約が解禁）" aria-label="根拠"></div>`).join('')||'<span class="muted">「深さ」で理由を書くと、ここで今もあるかを判定できます。</span>'}</div>
+      ${gone?'<div class="callout">理由が消えたのに、行動だけが残っています。市場のタネの典型的な形です。</div>':''}
+      <label class="f">この先どう変わりそう？<textarea data-nf="future" rows="2" placeholder="例：相場データの公開が進み、5年後には自動で決まる">${esc(n.future)}</textarea></label>`;
+    box.innerHTML=meter+body;
+    box.querySelectorAll('[data-tst]').forEach(b=>b.onclick=()=>{const r=n.reasons.find(x=>x.id===b.dataset.tst);if(!r)return;r.status=r.status===b.dataset.v?'':b.dataset.v;commitRes(n,true);});
+    box.querySelectorAll('[data-tev]').forEach(t=>t.oninput=()=>{const r=n.reasons.find(x=>x.id===t.dataset.tev);if(r){r.evidence=t.value;commitRes(n,false);}});
+  }
+  /* 共通の操作 */
+  growAll(box);
+  box.querySelectorAll('[data-lens]').forEach(b=>b.onclick=()=>{S.lens=b.dataset.lens;S.whyFor=null;renderRes(n);});
+  box.querySelectorAll('[data-rk]').forEach(sl=>sl.onchange=()=>{const r=n.reasons.find(x=>x.id===sl.dataset.rk);if(r){r.kind=sl.value;commitRes(n,S.lens==='struct');}});
+  box.querySelectorAll('[data-rw]').forEach(sl=>sl.onchange=()=>{const r=n.reasons.find(x=>x.id===sl.dataset.rw);if(r){r.who=sl.value;commitRes(n,false);}});
+  box.querySelectorAll('[data-rt]').forEach(t=>t.oninput=()=>{const r=n.reasons.find(x=>x.id===t.dataset.rt);if(r){r.text=t.value;commitRes(n,false);}});
+  box.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{const r=n.reasons.find(x=>x.id===b.dataset.rs);if(!r)return;const on=!r.star;n.reasons.forEach(x=>x.star=false);r.star=on;commitRes(n,true);});
+  box.querySelectorAll('[data-rx]').forEach(b=>b.onclick=()=>{const r=n.reasons.find(x=>x.id===b.dataset.rx);if(!r)return;n.reasons.forEach(x=>{if(x.parent===r.id)x.parent=r.parent||null;});n.reasons=n.reasons.filter(x=>x!==r);commitRes(n,true);toast('理由を削除しました');});
+  box.querySelectorAll('[data-rwhy]').forEach(b=>b.onclick=()=>{S.whyFor=b.dataset.rwhy;renderRes(n);const t=box.querySelector('[data-rwf] textarea');if(t)t.focus();});
+  box.querySelectorAll('[data-rwf]').forEach(f=>{f.onsubmit=e=>{e.preventDefault();const v=f.querySelector('textarea').value.trim();if(!v)return;const p=n.reasons.find(x=>x.id===f.dataset.rwf);n.reasons.push({id:rid(),text:v,kind:'',who:p?p.who:'',status:'',evidence:'',star:false,parent:f.dataset.rwf});S.whyFor=null;commitRes(n,true);};
+    const x=f.querySelector('[data-rwx]');if(x)x.onclick=()=>{S.whyFor=null;renderRes(n);};});
+  const ra=$('#r-add');if(ra)ra.onsubmit=e=>{e.preventDefault();const v=$('#r-add-in').value.trim();if(!v)return;n.reasons.push({id:rid(),text:v,kind:$('#r-add-kind').value,who:'',status:'',evidence:'',star:false,parent:null});commitRes(n,true);const t=$('#r-add-in');if(t)t.focus();};
+  box.querySelectorAll('[data-nf]').forEach(t=>t.oninput=()=>{n[t.dataset.nf]=t.value;commitRes(n,false);});
+  const aa=$('#a-add');if(aa)aa.onclick=()=>{n.actors.push({id:aid(),name:'',wants:'',pains:''});renderRes(n);const ins=box.querySelectorAll('[data-af="name"]');if(ins.length)ins[ins.length-1].focus();};
+  box.querySelectorAll('[data-af]').forEach(t=>t.oninput=()=>{let a=n.actors.find(x=>x.id===t.dataset.aid);if(a){a[t.dataset.af]=t.value;commitRes(n,false);}});
+  box.querySelectorAll('[data-ax]').forEach(b=>b.onclick=()=>{n.actors=n.actors.filter(a=>a.id!==b.dataset.ax);commitRes(n,true);});
+}
+
 /* ---------- 分析シート ---------- */
 function renderSheet(){const sh=$('#sheet');const n=S.sel&&S.nodes.get(S.sel);
   if(!n){S.detailFor=null;sh.innerHTML=`<div class="sec"><h3>使い方</h3><ol class="muted" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
     <li>テーマを作り、観察した行動をそのまま書き出す。</li>
     <li>行動をタップして、「↑抽象化する」で何のためかを上に、「↓具体化する」で具体的なやり方を下に足す。</li>
-    <li>「分析する」で、摩擦のサイン、背景、制約、その制約が今もあるかを書く。</li>
+    <li>「分析する」→「解像度」で、なぜこの行動をしているのかを、深さ・広さ・構造・時間の4つの視点で掘る。</li>
     <li>行動ごとに「本質的には何をしているか」を書く。同じ本質はテーマをまたいでつながる。</li>
     <li>気になる行動はタネ候補にして、5つの要素で採点する。</li></ol></div>`;return;}
   if(S.detailFor!==n.id){buildSheet(n);S.detailFor=n.id;}else syncSheet(n);}
-const STABS=[['cut','分解'],['tag','本質'],['seed','タネ'],['etc','その他']];
-function buildSheet(n){const id=n.id;const sh=$('#sheet');
+const STABS=[['res','解像度'],['tag','本質'],['seed','タネ'],['etc','その他']];
+function buildSheet(n){const id=n.id;const sh=$('#sheet');S.whyFor=null;
   sh.innerHTML=`<div class="grab" aria-hidden="true"></div>
   <div class="sheet-h"><div style="min-width:0;flex:1"><div class="crumb" id="d-crumb"></div></div><button class="close" id="d-close" aria-label="閉じる">✕</button></div>
   <input class="title-in" id="d-text" aria-label="行動" autocomplete="off">
   <div class="stabs" role="tablist">${STABS.map(([k,l])=>`<button role="tab" data-st="${k}">${l}</button>`).join('')}</div>
-  <div class="panel" data-panel="cut">
-    <div class="sec"><h3>摩擦のサイン</h3><div class="toggles" id="d-fr">${FRICTIONS.map(([k,l])=>`<button class="tg" data-fr="${k}">${l}</button>`).join('')}</div></div>
-    <label class="f">なぜそうしているのか（背景）<textarea id="d-why" rows="2"></textarea></label>
-    <label class="f">何がそうさせているのか（制約）<textarea id="d-con" rows="2"></textarea></label>
-    <div class="sec"><h3>その制約は今もある？</h3><div class="seg" id="d-st">${STATUS.map(([k,l])=>`<button data-v="${k}">${l}</button>`).join('')}</div>
-    <div class="callout" id="d-gone" hidden>制約が消えたのに行動だけが残っています。市場のタネの典型的な形です。</div></div>
-  </div>
+  <div class="panel" data-panel="res"><div id="d-res" class="lens-body"></div></div>
   <div class="panel" data-panel="tag" hidden>
     <div class="sec"><h3>この行動は、本質的には何をしている？</h3><div class="tags" id="d-tags"></div>
     <form class="inline" id="d-tagf"><input id="d-tag-in" list="d-taglist" placeholder="例：モノの価値を決める" aria-label="本質" autocomplete="off"><datalist id="d-taglist"></datalist><button class="btn" type="submit">追加</button></form>
@@ -1049,11 +1203,7 @@ function buildSheet(n){const id=n.id;const sh=$('#sheet');
   sh.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{S.sheetTab=b.dataset.st;showSheetTab();});
   $('#d-close').onclick=()=>openSheet(false);
   $('#d-text').oninput=e=>patchLater(id,'text',e.target.value);
-  $('#d-why').oninput=e=>patchLater(id,'why',e.target.value);
-  $('#d-con').oninput=e=>patchLater(id,'constraint',e.target.value);
   $('#d-memo').oninput=e=>patchLater(id,'memo',e.target.value);
-  $('#d-fr').querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{const cur=new Set(S.nodes.get(id).frictions||[]);cur.has(b.dataset.fr)?cur.delete(b.dataset.fr):cur.add(b.dataset.fr);patch(id,{frictions:[...cur]});});
-  $('#d-st').querySelectorAll('button').forEach(b=>b.onclick=()=>{const cur=S.nodes.get(id).status;patch(id,{status:cur===b.dataset.v?'':b.dataset.v});});
   const addTag=v=>{v=v.trim();if(!v)return;const cur=S.nodes.get(id).tags||[];if(!cur.includes(v))patch(id,{tags:[...cur,v]});};
   $('#d-tagf').onsubmit=e=>{e.preventDefault();addTag($('#d-tag-in').value);$('#d-tag-in').value='';};
   $('#d-tagq').addEventListener('click',e=>{const b=e.target.closest('[data-qt]');if(b)addTag(b.dataset.qt);});
@@ -1070,10 +1220,8 @@ function syncSheet(n,first){
   const setVal=(sel,v)=>{const el=$(sel);if(el&&(first||document.activeElement!==el))el.value=v||'';};
   const cr=pathOf(n.id).slice(0,-1).map(p=>p.text).join(' › ');
   $('#d-crumb').textContent=`L${depth(n.id)}${cr?'　'+cr+' ›':''}`;
-  setVal('#d-text',n.text);setVal('#d-why',n.why);setVal('#d-con',n.constraint);setVal('#d-memo',n.memo);
-  const fr=new Set(n.frictions||[]);$('#d-fr').querySelectorAll('[data-fr]').forEach(b=>b.setAttribute('aria-pressed',String(fr.has(b.dataset.fr))));
-  $('#d-st').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(n.status===b.dataset.v)));
-  $('#d-gone').hidden=n.status!=='gone';
+  setVal('#d-text',n.text);setVal('#d-memo',n.memo);
+  const rb=$('#d-res');if(rb&&(first||!rb.contains(document.activeElement)))renderRes(n);
   const tags=n.tags||[];
   $('#d-tags').innerHTML=tags.map(t=>`<button class="tagx" data-rm="${esc(t)}" aria-label="${esc(t)}を外す">${esc(t)} ✕</button>`).join('')||`<span class="muted">まだありません</span>`;
   $('#d-tags').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>patch(n.id,{tags:(S.nodes.get(n.id).tags||[]).filter(t=>t!==b.dataset.rm)}));
@@ -1095,7 +1243,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=16',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=17',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
