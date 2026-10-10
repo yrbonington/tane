@@ -620,28 +620,71 @@ body{background:var(--paper)}
   .item.sel .node-stack > .actions > .act small{font-size:10px}
 }
 
-/* 事業案：長押し（または…）で開く静かなアクションシート */
+/* iOS風コンテキストメニュー：押し込み、カードプレビュー、半透明アクション */
 .idea-card-wrap{position:relative;min-width:0}
-.idea-card-wrap .ideacard{width:100%}
+.idea-card-wrap .ideacard{width:100%;transform-origin:center center;
+  transition:transform .18s cubic-bezier(.2,.75,.25,1),background .18s,box-shadow .18s,border-color .18s}
 .idea-card-wrap .ideacard h4{padding-right:35px}
+.idea-card-wrap .ideacard.is-pressing{transform:scale(.965);background:var(--panel);
+  border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft),0 9px 24px rgba(0,0,0,.12)}
 .idea-more{position:absolute;right:10px;top:10px;width:38px;height:38px;
   border:0;border-radius:50%;background:transparent;color:var(--ink-2);
   font-size:24px;line-height:1;display:flex;justify-content:center;align-items:center}
 .idea-more:active{background:var(--panel)}
-.ideacard{touch-action:pan-y; -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.idea-menu-overlay{position:fixed;inset:0;z-index:65;display:flex;align-items:flex-end;
-  justify-content:center;background:rgba(0,0,0,.6);
-  padding:16px 16px calc(22px + env(safe-area-inset-bottom))}
-.idea-menu{width:min(100%,480px);padding:18px;background:var(--panel);
-  border:1px solid var(--line);border-radius:22px;
-  display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 45px rgba(0,0,0,.26)}
-.idea-menu h3{margin:0 0 2px;font-size:16px;line-height:1.45;overflow-wrap:anywhere}
-.idea-menu-actions,.idea-menu-confirm{display:flex;flex-direction:column;gap:8px}
-.idea-menu-option,.idea-menu-dismiss{width:100%;min-height:48px;padding:12px 15px;border:1px solid var(--line);
-  border-radius:14px;background:var(--frame);color:var(--ink);font-size:14px;font-weight:650;text-align:left}
-.idea-menu-option.danger{color:var(--warn)}
-.idea-menu-dismiss{text-align:center;background:transparent}
-.idea-menu-confirm p{margin:0 0 4px;color:var(--ink-2);font-size:13px}
+.ideacard{touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.idea-menu-overlay{position:fixed;inset:0;z-index:65;display:flex;align-items:center;
+  justify-content:center;background:rgba(3,3,8,.46);backdrop-filter:blur(13px);
+  -webkit-backdrop-filter:blur(13px);padding:20px 18px;
+  touch-action:pan-y}
+.idea-menu-stage{width:min(100%,440px);max-height:calc(100dvh - 40px);
+  display:flex;flex-direction:column;gap:11px;min-width:0;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.idea-menu-stage::-webkit-scrollbar{display:none}
+.idea-menu-preview{width:100%;max-height:34dvh;overflow:hidden;pointer-events:none;
+  background:var(--surface);border:1px solid var(--line);border-radius:22px;
+  padding:18px;box-shadow:0 24px 55px rgba(0,0,0,.22);
+  animation:idea-preview-in .28s cubic-bezier(.2,.85,.25,1) both}
+.idea-menu-preview h4{padding:0!important;font-size:17px}
+.idea-menu-preview .origin,.idea-menu-preview .nextline{display:-webkit-box;
+  -webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+.idea-menu{width:100%;padding:0;background:rgba(242,242,247,.96);
+  border:1px solid rgba(255,255,255,.22);border-radius:16px;
+  overflow:hidden;box-shadow:0 20px 45px rgba(0,0,0,.24);
+  animation:idea-options-in .27s cubic-bezier(.2,.85,.25,1) both}
+.idea-menu h3.visually-hidden{position:absolute;width:1px;height:1px;
+  padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);
+  white-space:nowrap;border:0}
+.idea-menu-actions,.idea-menu-confirm{display:flex;flex-direction:column;gap:0}
+.idea-menu-option{width:100%;min-height:54px;padding:13px 17px;border:0;
+  background:transparent;color:#1C1C1E;font-size:15px;font-weight:550;
+  text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.idea-menu-option + .idea-menu-option{border-top:1px solid rgba(60,60,67,.18)}
+.idea-menu-option svg{height:20px;width:20px;flex:none;stroke:currentColor;stroke-width:1.8;
+  fill:none;stroke-linecap:round;stroke-linejoin:round}
+.idea-menu-option.danger{color:#D92B37}
+.idea-menu-option:active{background:rgba(60,60,67,.13)}
+.idea-menu-dismiss{width:100%;min-height:50px;flex:none;border:1px solid var(--line);
+  border-radius:16px;background:var(--surface);color:var(--ink);
+  font-size:15px;font-weight:650;text-align:center}
+.idea-menu-confirm p{margin:0;padding:15px 17px;color:#58585F;font-size:13px;line-height:1.5;
+  border-bottom:1px solid rgba(60,60,67,.18)}
+body.idea-menu-open{overflow:hidden}
+@media(prefers-color-scheme:dark){
+  .idea-menu{background:rgba(45,45,49,.97);border-color:rgba(255,255,255,.11)}
+  .idea-menu-option{color:#F4F4F8}
+  .idea-menu-option + .idea-menu-option{border-top-color:rgba(255,255,255,.14)}
+  .idea-menu-option.danger{color:#FF6B6B}
+  .idea-menu-option:active{background:rgba(255,255,255,.1)}
+  .idea-menu-confirm p{color:#B6B6C0;border-bottom-color:rgba(255,255,255,.14)}
+}
+@keyframes idea-preview-in{from{opacity:.2;transform:scale(.92) translateY(12px)}
+  to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes idea-options-in{from{opacity:0;transform:translateY(14px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+  .idea-card-wrap .ideacard{transition:none}
+  .idea-menu-preview,.idea-menu{animation:none}
+}
 @media(hover:hover){.idea-more:hover{background:var(--surface)}}
 </style>
 </head>
@@ -668,15 +711,24 @@ body{background:var(--paper)}
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <div class="idea-menu-overlay" id="ideaMenu" hidden>
-  <div class="idea-menu" role="dialog" aria-modal="true" aria-labelledby="ideaMenuTitle">
-    <h3 id="ideaMenuTitle"></h3>
-    <div id="ideaMenuActions" class="idea-menu-actions">
-      <button class="idea-menu-option" id="ideaMenuCopy" type="button">プロンプトをコピー</button>
-      <button class="idea-menu-option danger" id="ideaMenuDelete" type="button">削除</button>
-    </div>
-    <div id="ideaMenuConfirm" class="idea-menu-confirm" hidden>
-      <p>この事業案を削除しますか？</p>
-      <button class="idea-menu-option danger" id="ideaMenuDeleteConfirm" type="button">削除する</button>
+  <div class="idea-menu-stage">
+    <div class="idea-menu-preview card ideacard" id="ideaMenuPreview" aria-hidden="true"></div>
+    <div class="idea-menu" role="dialog" aria-modal="true" aria-labelledby="ideaMenuTitle">
+      <h3 class="visually-hidden" id="ideaMenuTitle"></h3>
+      <div id="ideaMenuActions" class="idea-menu-actions">
+        <button class="idea-menu-option" id="ideaMenuCopy" type="button">プロンプトをコピー
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+        </button>
+        <button class="idea-menu-option danger" id="ideaMenuDelete" type="button">削除
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6m4-6v6"/></svg>
+        </button>
+      </div>
+      <div id="ideaMenuConfirm" class="idea-menu-confirm" hidden>
+        <p>この事業案を削除しますか？</p>
+        <button class="idea-menu-option danger" id="ideaMenuDeleteConfirm" type="button">削除する
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+        </button>
+      </div>
     </div>
     <button class="idea-menu-dismiss" id="ideaMenuClose" type="button">キャンセル</button>
   </div>
@@ -1061,26 +1113,37 @@ function bindMkIdea(m){
   m.querySelectorAll('[data-mkidea-tag]').forEach(b=>b.onclick=()=>{const t=b.dataset.mkideaTag;mkIdea([{type:'tag',name:t}],t);});}
 function srcLabel(x){if(x.type==='tag')return `本質：${x.name}`;const n=S.nodes.get(x.id);return n?`${themeName(n.id)}／${n.text}`:'（削除された行動）';}
 function fitMarks(x){return FIT.map(([k,sh])=>{const v=(x.fit||{})[k]||'';const mk=v==='ok'?'○':v==='mid'?'△':v==='ng'?'×':'－';return `<span class="fm fm-${v||'none'}">${sh} ${mk}</span>`;}).join('');}
-/* 長押しメニュー。スクロール時はタイマー解除、誤削除防止は二段階確認。 */
-let ideaMenuOpener=null;
+/* 長押しは先にカードを押し込んでから、プレビュー付き操作メニューを表示する。 */
+let ideaMenuOpener=null,ideaMenuOpenedAt=0;
 function openIdeaMenu(id,opener){
   const idea=S.ideas.get(id);if(!idea)return;
   const menu=$('#ideaMenu');
+  const card=opener?.matches?.('.ideacard')?opener:opener?.closest?.('.idea-card-wrap')?.querySelector('.ideacard');
   ideaMenuOpener=opener;
+  if(card)card.classList.remove('is-pressing');
   menu.dataset.idea=id;
   $('#ideaMenuTitle').textContent=idea.title||'無題の事業案';
+  const preview=$('#ideaMenuPreview');
+  if(card){preview.innerHTML=card.innerHTML;}
+  else{preview.innerHTML='<h4>'+esc(idea.title||'無題の事業案')+'</h4>';}
   $('#ideaMenuActions').hidden=false;
   $('#ideaMenuConfirm').hidden=true;
+  ideaMenuOpenedAt=performance.now();
+  document.body.classList.add('idea-menu-open');
   menu.hidden=false;
   $('#ideaMenuCopy').focus({preventScroll:true});
 }
 function closeIdeaMenu(){
   const menu=$('#ideaMenu');
   menu.hidden=true;delete menu.dataset.idea;
+  document.body.classList.remove('idea-menu-open');
+  $('#ideaMenuPreview').replaceChildren();
   if(ideaMenuOpener?.isConnected)ideaMenuOpener.focus({preventScroll:true});
   ideaMenuOpener=null;
 }
-$('#ideaMenu').onclick=e=>{if(e.target===$('#ideaMenu'))closeIdeaMenu();};
+$('#ideaMenu').onclick=e=>{
+  if(e.target===$('#ideaMenu')&&performance.now()-ideaMenuOpenedAt>400)closeIdeaMenu();
+};
 $('#ideaMenuClose').onclick=closeIdeaMenu;
 $('#ideaMenuCopy').onclick=()=>{
   const idea=S.ideas.get($('#ideaMenu').dataset.idea);
@@ -1121,26 +1184,43 @@ function renderIdeas(m){
   $('#ideaViewSeeds').onclick=()=>{S.tab='seed';render();window.scrollTo({top:0});};
   bindMkIdea(m);
   m.querySelectorAll('[data-idea]').forEach(b=>{
-    let pressTimer=null,pressed=false,ignoreClick=false,startX=0,startY=0;
-    const cancel=()=>{clearTimeout(pressTimer);pressTimer=null;};
+    let pressTimer=null,pressed=false,startX=0,startY=0,suppressClickUntil=0;
+    const clearPress=()=>{
+      clearTimeout(pressTimer);pressTimer=null;pressed=false;
+      b.classList.remove('is-pressing');
+    };
     b.onpointerdown=e=>{
-      if(e.button!==0)return;
-      cancel();pressed=true;ignoreClick=false;startX=e.clientX;startY=e.clientY;
+      if(e.button!==0||!$('#ideaMenu').hidden)return;
+      clearPress();
+      pressed=true;startX=e.clientX;startY=e.clientY;
+      if(e.pointerType!=='mouse'||matchMedia('(hover:none)').matches){
+        b.classList.add('is-pressing');
+      }
       pressTimer=setTimeout(()=>{
         if(!pressed)return;
-        pressTimer=null;ignoreClick=true;
+        suppressClickUntil=performance.now()+650;
+        clearPress();
         openIdeaMenu(b.dataset.idea,b);
-      },550);
+      },530);
     };
     b.onpointermove=e=>{
-      if(pressed&&(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12)){pressed=false;cancel();}
+      if(pressed&&(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>12))clearPress();
     };
-    b.onpointerup=()=>{pressed=false;cancel();};
-    b.onpointercancel=()=>{pressed=false;cancel();};
-    b.onpointerleave=()=>{pressed=false;cancel();};
-    b.oncontextmenu=e=>{e.preventDefault();pressed=false;cancel();ignoreClick=true;openIdeaMenu(b.dataset.idea,b);};
+    b.onpointerup=clearPress;
+    b.onpointercancel=clearPress;
+    b.onpointerleave=clearPress;
+    b.oncontextmenu=e=>{
+      e.preventDefault();clearPress();
+      suppressClickUntil=performance.now()+650;
+      if($('#ideaMenu').hidden)openIdeaMenu(b.dataset.idea,b);
+    };
+    b.onkeydown=e=>{
+      if(e.key==='ContextMenu'||(e.shiftKey&&e.key==='F10')){
+        e.preventDefault();clearPress();openIdeaMenu(b.dataset.idea,b);
+      }
+    };
     b.onclick=e=>{
-      if(ignoreClick){e.preventDefault();ignoreClick=false;return;}
+      if(performance.now()<suppressClickUntil){e.preventDefault();return;}
       if(!$('#ideaMenu').hidden)return;
       S.ideaSel=b.dataset.idea;renderMain();window.scrollTo({top:0});
     };
@@ -1406,7 +1486,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=22',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=23',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
