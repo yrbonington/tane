@@ -689,6 +689,9 @@ body.idea-menu-open{overflow:hidden}
   .idea-menu-preview,.idea-menu{animation:none}
 }
 @media(hover:hover){.idea-more:hover{background:var(--surface)}}
+
+.ai-data-choice{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.ai-data-choice input{width:18px;height:18px;accent-color:var(--blue-button);margin:0}
 </style>
 </head>
 <body>
@@ -903,21 +906,16 @@ function renderTree(m){
         <div class="card ai-flow theme-ai-card">
           <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>AIと対話してタネを探す</small></button>
           <div class="seed-ai-actions" id="themeAIActions">
-          <div class="ai-flow-step">
-            <strong>① プロンプトをコピー</strong>
-            <p class="muted">タネ探しの質問をコピー</p>
-            <button class="btn pri big" id="themeCopyNew">プロンプトをコピー</button>
-            ${S.nodes.size?'<button class="btn ai-secondary" id="themeCopyData">今のタネ帳も一緒にコピー</button>':''}
-          </div>
           <div class="ai-flow-choice">
-            <strong>② 使いたいAIを開く</strong>
+            <strong>① AIを開く</strong>
+            ${S.nodes.size?'<label class="ai-data-choice"><input type="checkbox" id="themeIncludeData">今のタネ帳も含める</label>':''}
             <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
-    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
+    <a class="btn ai-provider" data-ai-provider="chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
+    <a class="btn ai-provider" data-ai-provider="claude" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
   </div>
           </div>
           <div class="ai-flow-step">
-            <strong>③ 結果を取り込む</strong>
+            <strong>② 結果を取り込む</strong>
             <p class="muted">対話の最後に「保存」と送る</p>
             <button class="btn ai-secondary" id="themeGoImport">JSONを取り込む →</button>
           </div>
@@ -930,15 +928,14 @@ function renderTree(m){
     $('#themeStartAI').onclick=()=>{
       $('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;
       $('#themeStartAI').setAttribute('aria-expanded','true');
-      $('#themeCopyNew').focus();
+      $('#themeAIActions [data-ai-provider]').focus();
     };
     $('#themeStartManual').onclick=()=>{
       $('#themeAIActions').hidden=true;$('#startThemeForm').hidden=false;
       $('#themeStartAI').setAttribute('aria-expanded','false');
       $('#startThemeInput').focus();
     };
-    $('#themeCopyNew').onclick=()=>copyText(buildSeedPrompt(false));
-    const themeCopyData=$('#themeCopyData');if(themeCopyData)themeCopyData.onclick=()=>copyText(buildSeedPrompt(true));
+    bindAIPromptLinks($('#themeAIActions'),()=>buildSeedPrompt(!!$('#themeIncludeData')?.checked));
     $('#themeGoImport').onclick=()=>openImport();
     $('#startThemeForm').onsubmit=e=>{e.preventDefault();const v=$('#startThemeInput').value.trim();if(!v)return;S.themeStart=false;addTheme(v);};
     return;
@@ -1342,20 +1339,15 @@ function renderIdeaEditor(m,x){const id=x.id;
     <div><button class="back" id="ideaBack">‹ 事業案の一覧</button></div>
     <div class="card ai-flow biz-ai-workflow">
       <h4>AIと事業案を詰める</h4>
-      <div class="ai-flow-step">
-        <strong>① プロンプトをコピー</strong>
-        <p class="muted">事業案と元のタネをコピー</p>
-        <button class="btn pri big" id="ideaAI">プロンプトをコピー</button>
-      </div>
       <div class="ai-flow-choice">
-        <strong>② 使いたいAIを開く</strong>
+        <strong>① AIを開く</strong>
         <div class="ai-provider-links" aria-label="対話するAIを選ぶ">
-    <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
-    <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
+    <a class="btn ai-provider" data-ai-provider="chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
+    <a class="btn ai-provider" data-ai-provider="claude" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
   </div>
       </div>
       <div class="ai-flow-step">
-        <strong>③ 結果を取り込む</strong>
+        <strong>② 結果を取り込む</strong>
         <p class="muted">対話の最後に「保存」と送る</p>
         <button class="btn ai-secondary" id="ideaImport">JSONを取り込む →</button>
       </div>
@@ -1387,7 +1379,7 @@ function renderIdeaEditor(m,x){const id=x.id;
   $('#i-title').value=x.title||''; $('#i-title').oninput=e=>{x.title=e.target.value;touch();};
   m.querySelectorAll('[data-f]').forEach(t=>{t.value=x[t.dataset.f]||'';t.oninput=()=>{x[t.dataset.f]=t.value;touch();};});
   $('#ideaBack').onclick=()=>{S.ideaSel=null;render();window.scrollTo({top:0});};
-  $('#ideaAI').onclick=()=>copyText(buildBizPrompt(x));
+  bindAIPromptLinks(m.querySelector('.biz-ai-workflow'),()=>buildBizPrompt(x));
   $('#ideaImport').onclick=()=>{saveNow();openImport();};
   $('#i-st').querySelectorAll('button').forEach(b=>b.onclick=()=>{x.status=b.dataset.v;touch();$('#i-st').querySelectorAll('button').forEach(c=>c.setAttribute('aria-pressed',String(c===b)));$('#i-dropwrap').hidden=x.status!=='dropped';renderTabs();});
   m.querySelectorAll('[data-fit]').forEach(b=>b.onclick=()=>{const k=b.dataset.fit;x.fit={...(x.fit||{})};x.fit[k]=x.fit[k]===b.dataset.v?'':b.dataset.v;touch();m.querySelectorAll(`[data-fit="${k}"]`).forEach(c=>c.setAttribute('aria-pressed',String(x.fit[k]===c.dataset.v)));});
@@ -1425,6 +1417,24 @@ function relatedNodes(x){const out=new Map();const add=n=>{for(const q of pathOf
 function buildBizPrompt(x){let p=PROMPT_BIZ;
   if(x)p=p.replace(BIZ_SLOT,'次のJSONの ideas が今回詰める事業案、nodes が元になったタネと、その上の階層の行動です。\n```json\n'+JSON.stringify({ideas:[x],nodes:relatedNodes(x)},null,1)+'\n```');
   return p;}
+/* AIを開く時点でプロンプトを入力しておく。長文だけ自動コピーで補う。 */
+function bindAIPromptLinks(root,getPrompt){
+  if(!root)return;
+  root.querySelectorAll('[data-ai-provider]').forEach(link=>{
+    const base=link.dataset.aiProvider==='chatgpt'?'https://chatgpt.com/':'https://claude.ai/new';
+    link.addEventListener('click',event=>{
+      const prompt=getPrompt();
+      const encoded=encodeURIComponent(prompt);
+      // 長大な URL や Claude の入力文字数制限を避ける。
+      if(prompt.length>13000||encoded.length>60000){
+        link.href=base;
+        if(navigator.clipboard?.writeText){
+          navigator.clipboard.writeText(prompt).then(()=>toast('長文のプロンプトをコピーしました')).catch(()=>copyText(prompt));
+        }else copyText(prompt);
+      }else link.href=base+'?q='+encoded;
+    });
+  });
+}
 async function copyText(text){
   try{
     if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error('clipboard unsupported');
@@ -1595,7 +1605,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=24',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=25',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
