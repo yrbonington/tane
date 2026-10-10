@@ -742,12 +742,19 @@ body.idea-menu-open{overflow:hidden}
   border-radius:12px;background:var(--frame);color:var(--ink);font-size:16px}
 .tag-custom-input:focus{outline:2px solid var(--accent);outline-offset:0}
 .tag-review .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* 現在位置はタブで示し、重複する画面見出しを省いて中身を上へ。 */
+.bar{padding-top:calc(5px + env(safe-area-inset-top));padding-bottom:4px}
+.bar-top.bar-compact{min-height:0;justify-content:flex-end;gap:0;padding-bottom:2px}
+.bar-compact .status{font-size:10px;line-height:1.25;padding:5px 9px;max-width:100%}
+.bar .subnav{margin:3px 0 2px}
+.grid{margin-top:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="bar">
-    <div class="bar-top"><div class="heading"><span class="eyebrow">市場のタネ帳</span><h1 id="areaTitle">タネ探し</h1></div><span class="status" id="status"></span></div>
+    <div class="bar-top bar-compact"><span class="status" id="status"></span></div>
     <div class="subnav" id="subnav" role="tablist">
       <button data-tab="tree">ツリー</button>
       <button data-tab="same">つながり<span class="n" id="n-same"></span></button>
@@ -949,9 +956,8 @@ document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const
   else S.tab='data';
   openSheet(false);render();window.scrollTo({top:0});});
 const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data'};
-const AREA_TITLE={seed:'タネ探し',biz:'事業化',data:'データ'};
 function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
-  $('#areaTitle').textContent=AREA_TITLE[area];$('#subnav').hidden=area!=='seed';
+  $('#subnav').hidden=area!=='seed';
   document.querySelectorAll('#subnav [data-tab]').forEach(t=>{t.setAttribute('aria-pressed',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
   document.querySelectorAll('.bottom [data-area]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.area===area)));
   $('#n-same').textContent=[...tagIndex().values()].filter(a=>a.length>=2).length||'';
@@ -1823,7 +1829,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=32',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=33',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
