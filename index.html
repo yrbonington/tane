@@ -720,6 +720,28 @@ body.idea-menu-open{overflow:hidden}
 .reference-add-row input{flex:1}
 .reference-add-row .btn{flex:none;min-height:43px}
 .reference-error{margin:0;font-size:12px;color:var(--warn)}
+
+/* つながり：本質をまとめて提案してもらうカード */
+.tag-ai-workflow{display:flex;flex-direction:column;gap:14px}
+.tag-ai-workflow>h4{margin:0}
+.tag-ai-workflow>.muted{margin:0;font-size:13px}
+.tag-flow-done{font-size:14px;color:var(--ink-2)}
+/* 提案の確認は、既存データに触れないチップ選択と自由入力だけ */
+.tag-review{color:var(--ink);gap:12px}
+.tag-review>p{margin:0;font-size:13px}
+.tag-review-node{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--line);min-width:0}
+.tag-review-node>strong{font-size:14px;overflow-wrap:anywhere}
+.tag-review-path{color:var(--ink-2);font-size:11px;overflow-wrap:anywhere}
+.tag-review-chips{display:flex;gap:8px;flex-wrap:wrap}
+.tag-suggestion-chip{display:inline-flex;align-items:center;gap:6px;min-height:39px;
+  padding:8px 11px;border-radius:12px;border:1px solid var(--line);
+  background:var(--frame);color:var(--ink);font-size:13px;text-align:left;white-space:normal}
+.tag-suggestion-chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.tag-suggestion-chip small{color:var(--ink-2);font-size:10px;flex:none}
+.tag-custom-input{width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--line);
+  border-radius:12px;background:var(--frame);color:var(--ink);font-size:16px}
+.tag-custom-input:focus{outline:2px solid var(--accent);outline-offset:0}
+.tag-review .btnrow{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -860,6 +882,19 @@ const depth=id=>pathOf(id).length-1;
 function descendants(id){const o=[];const w=x=>{for(const k of kids(x)){o.push(k.id);w(k.id);}};w(id);return o;}
 const scoreOf=n=>ELEMENTS.reduce((s,[k])=>s+(Number(n.scores?.[k])||0),0);
 const themeName=id=>S.nodes.get(rootOf(id))?.text||'';
+/* 未設定の行動を最大80件、既存の本質と言葉を揃えてAIに渡す。 */
+function untaggedNodes(){
+  return [...S.nodes.values()].filter(n=>n.parent!=null&&(!Array.isArray(n.tags)||n.tags.length===0));
+}
+function buildTagPrompt(){
+  const nodes=untaggedNodes().slice(0,80).map(n=>({
+    id:n.id,
+    text:n.text,
+    path:pathOf(n.id).slice(0,-1).map(p=>p.text).join(' › '),
+    reasons:(Array.isArray(n.reasons)?n.reasons:[]).slice(0,5).map(r=>r.text)
+  }));
+  return PROMPT_TAG+'\n\n'+ '```json\n'+JSON.stringify({existingTags:[...tagIndex().keys()],nodes},null,2)+'\n```';
+}
 function tagIndex(){const m=new Map();for(const n of S.nodes.values())for(const t of(n.tags||[])){if(!m.has(t))m.set(t,[]);m.get(t).push(n);}return m;}
 
 /* ---------- 操作 ---------- */
@@ -1045,12 +1080,34 @@ function similarGroups(){const ns=[...S.nodes.values()].filter(n=>n.parent&&(n.t
 function hitBtn(n){return `<button class="hit" data-go="${esc(n.id)}"><span class="ht"><b>${esc(n.text)}</b><small>${esc(pathOf(n.id).slice(1,-1).map(p=>p.text).join(' › '))}</small></span><span class="thm">${esc(themeName(n.id))}・L${depth(n.id)}</span></button>`;}
 function bindGo(m){m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>select(b.dataset.go,true));}
 function renderSame(m){
+  const untagged=untaggedNodes();
   const groups=[...tagIndex().entries()].map(([t,ns])=>({t,ns,themes:new Set(ns.map(n=>rootOf(n.id))).size})).sort((a,b)=>b.themes-a.themes||b.ns.length-a.ns.length);
   const cross=groups.filter(g=>g.themes>=2),within=groups.filter(g=>g.themes<2&&g.ns.length>=2),single=groups.filter(g=>g.ns.length<2);const cand=similarGroups();
   const rgroups=[...reasonIndex().values()].filter(g=>g.items.length>=2).map(g=>({...g,themes:new Set(g.items.map(x=>rootOf(x.n.id))).size})).sort((a,b)=>b.themes-a.themes||b.items.length-a.items.length);
   const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}つの起点・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-mkidea-tag="${esc(g.t)}">事業案にする</button><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
     ${S.renaming===g.t?`<form class="inline" data-renform="${esc(g.t)}"><input value="${esc(g.t)}" aria-label="新しい名前"><button class="btn pri sm" type="submit">変更</button></form>`:''}${g.ns.map(hitBtn).join('')}</div>`;
+  const tagCard=untagged.length?`<div class="card ai-flow tag-ai-workflow">
+    <h4>本質をまとめて付ける</h4>
+    <p class="muted">本質が未設定の行動：${untagged.length}件${untagged.length>80?'（先頭80件から）':''}</p>
+    <div class="ai-flow-step">
+      <strong>① 本質の提案をコピー</strong>
+      <button class="btn pri big" id="tagCopyPrompt" type="button">本質の提案をコピー</button>
+      ${untagged.length>80?'<p class="muted">80件ずつ提案してもらいます</p>':''}
+    </div>
+    <div class="ai-flow-choice">
+      <strong>② AIを開く</strong>
+      <div class="ai-provider-links" aria-label="本質を提案するAIを選ぶ">
+        <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
+        <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
+      </div>
+    </div>
+    <div class="ai-flow-step">
+      <strong>③ 提案を取り込む</strong>
+      <button class="btn ai-secondary" id="tagGoImport" type="button">提案を取り込む →</button>
+    </div>
+  </div>`:'<div class="card tag-flow-done">すべての行動に本質が付いています</div>';
   m.innerHTML=`<div class="list">
+    ${tagCard}
     <p class="muted" style="margin:0">起点の行動が違っても、同じ本質でつながります。</p>
     <p class="h2">起点の行動をまたいでつながる本質</p>${cross.length?cross.map(card).join(''):`<div class="muted">異なる起点の行動で同じ本質が見つかると、ここに表示します。</div>`}
     <p class="h2">同じ起点の行動の下で繰り返す本質</p>${within.length?within.map(card).join(''):`<div class="muted">まだありません。</div>`}
@@ -1060,6 +1117,12 @@ function renderSame(m){
     ${single.length?`<p class="h2">1か所だけの本質</p><div class="card">${single.map(g=>`<div class="tags"><span class="b b-tag">${esc(g.t)}</span></div>${g.ns.map(hitBtn).join('')}`).join('')}</div>`:''}
   </div>`;
   bindGo(m); bindMkIdea(m);
+  const tagCopy=$('#tagCopyPrompt');
+  if(tagCopy)tagCopy.onclick=async()=>{
+    await copyText(buildTagPrompt());
+    if(untagged.length>80)toast('80件ずつ提案してもらいます');
+  };
+  const tagImport=$('#tagGoImport');if(tagImport)tagImport.onclick=()=>openImport();
   m.querySelectorAll('[data-rename]').forEach(b=>b.onclick=()=>{S.renaming=S.renaming===b.dataset.rename?null:b.dataset.rename;renderMain();const i=m.querySelector('[data-renform] input');if(i)i.focus();});
   m.querySelectorAll('[data-renform]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const from=f.dataset.renform;const to=f.querySelector('input').value.trim();S.renaming=null;
     if(to&&to!==from){for(const n of S.nodes.values())if((n.tags||[]).includes(from))n.tags=[...new Set(n.tags.map(t=>t===from?to:t))];saveSoon();toast('名前を変えました');}render();});
@@ -1084,6 +1147,10 @@ function markExported(){ls.set(KEY_EXPORT,String(Date.now()));render();}
 function parseBackup(text){let o=null;const t=String(text||'').trim();
   try{o=JSON.parse(t);}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a){try{o=JSON.parse(t.slice(a,b+1));}catch(e2){}}}
   if(!o||typeof o!=='object') throw new Error('JSONとして読み取れませんでした。AIの出力やバックアップの中身を、最初の { から最後の } まで丸ごと貼ってください。');
+  if(o.kind==='tag-suggestions'||Array.isArray(o.suggestions)){
+    if(!Array.isArray(o.suggestions))throw new Error('本質の提案リスト（suggestions）が見つかりません。');
+    return o;
+  }
   const arr=Array.isArray(o)?o:Array.isArray(o.nodes)?o.nodes:[]; const iarr=Array.isArray(o.ideas)?o.ideas:[];
   const nodes=arr.filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string').map(n=>normNode({...blank('',null,0),...n,reasons:Array.isArray(n.reasons)?n.reasons:[],actors:Array.isArray(n.actors)?n.actors:[]}));
   const ideas=iarr.filter(x=>x&&typeof x.id==='string').map(x=>({...blankIdea('',[]),...x,title:String(x.title||'無題の事業案')}));
@@ -1094,7 +1161,74 @@ function importData(d,outSel){let add=0,upd=0,ia=0,iu=0;
   for(const x of d.ideas){if(S.ideas.has(x.id))iu++;else ia++;S.ideas.set(x.id,x);}
   saveNow();S.sel=null;S.detailFor=null;S.focus=null;S.theme=null;S.ideaSel=null;render();
   const el=$(outSel);if(el)el.textContent=`取り込みました：行動 新規${add}件・更新${upd}件／事業案 新規${ia}件・更新${iu}件`;toast('取り込みました');}
+/* AI提案は既存行動のtagsだけを変える。バックアップの上書きは使わない。 */
+function normalizeTagSuggestions(o){
+  const rows=new Map();let missing=0;
+  for(const suggestion of o.suggestions||[]){
+    if(!suggestion||typeof suggestion.id!=='string')continue;
+    const n=S.nodes.get(suggestion.id);
+    if(!n){missing++;continue;}
+    if(!rows.has(n.id))rows.set(n.id,{id:n.id,text:n.text,path:pathOf(n.id).slice(0,-1).map(p=>p.text).join(' › '),tags:[]});
+    const row=rows.get(n.id);
+    const already=new Set(Array.isArray(n.tags)?n.tags:[]);
+    for(const v of Array.isArray(suggestion.tags)?suggestion.tags:[]){
+      if(typeof v!=='string')continue;
+      const tag=v.trim().slice(0,30);
+      if(!tag||already.has(tag)||row.tags.includes(tag))continue;
+      if(row.tags.length>=3)break;
+      row.tags.push(tag);
+    }
+  }
+  return {rows:[...rows.values()],missing};
+}
+function reviewTagSuggestions(o){
+  S.pendingImport=null;
+  const {rows,missing}=normalizeTagSuggestions(o);
+  const existingTags=new Set(tagIndex().keys());
+  const area=$('#imResult');
+  const selected=new Map(rows.map(r=>[r.id,new Set()]));
+  area.innerHTML=`<div class="import-review tag-review">
+    <strong>本質の提案を確認</strong>
+    <p class="muted">付けたい本質をタップして選んでください。初期状態はすべて未選択です。</p>
+    ${missing?`<p class="muted">見つからない行動 ${missing}件はスキップしました</p>`:''}
+    ${rows.length?rows.map((r,i)=>`<div class="tag-review-node">
+      <strong>${esc(r.text)}</strong>
+      <small class="tag-review-path">${esc(r.path)}</small>
+      <div class="tag-review-chips">${r.tags.map(tag=>`<button class="tag-suggestion-chip" type="button" data-tag-row="${i}" data-tag-value="${esc(tag)}" aria-pressed="false">
+        ${esc(tag)}${existingTags.has(tag)?'<small>既存</small>':''}</button>`).join('')||'<span class="muted">提案なし</span>'}</div>
+      <input class="tag-custom-input" data-tag-custom="${i}" type="text" maxlength="30" aria-label="${esc(r.text)}の本質を自分で入力" placeholder="自分の言葉で追加（任意）">
+    </div>`).join(''):'<p class="muted">追加できる行動がありません。</p>'}
+    <div class="btnrow">
+      <button class="btn pri" id="tagApply" type="button" ${rows.length?'':'disabled'}>選んだ本質を付ける</button>
+      <button class="btn" id="tagCancel" type="button">キャンセル</button>
+    </div>
+  </div>`;
+  area.querySelectorAll('[data-tag-row]').forEach(b=>b.onclick=()=>{
+    const row=rows[Number(b.dataset.tagRow)];if(!row)return;
+    const picked=selected.get(row.id);const tag=b.dataset.tagValue;
+    if(picked.has(tag)){picked.delete(tag);b.setAttribute('aria-pressed','false');}
+    else{picked.add(tag);b.setAttribute('aria-pressed','true');}
+  });
+  const apply=$('#tagApply');if(apply)apply.onclick=()=>{
+    let updated=0;
+    rows.forEach((row,i)=>{
+      const n=S.nodes.get(row.id);if(!n)return;
+      const input=area.querySelector(`[data-tag-custom="${i}"]`);
+      const manual=(input?.value||'').trim().slice(0,30);
+      const chosen=[...selected.get(row.id),...(manual?[manual]:[])];
+      if(!chosen.length)return;
+      const original=Array.isArray(n.tags)?n.tags:[];
+      const merged=[...new Set([...original,...chosen])];
+      if(merged.length===original.length)return;
+      n.tags=merged;updated++;
+    });
+    if(!updated){toast('付ける本質を選んでください');return;}
+    saveNow();render();toast(`本質を付けました（${updated}件）`);
+  };
+  $('#tagCancel').onclick=()=>{area.textContent='取り込みを中止しました';};
+}
 function reviewImport(d){
+  if(d&&(d.kind==='tag-suggestions'||Array.isArray(d.suggestions)))return reviewTagSuggestions(d);
   S.pendingImport=d;
   const nc=d.nodes.filter(n=>!S.nodes.has(n.id)).length,nu=d.nodes.length-nc;
   const ic=d.ideas.filter(x=>!S.ideas.has(x.id)).length,iu=d.ideas.length-ic;
@@ -1449,6 +1583,7 @@ function renderIdeaEditor(m,x){const id=x.id;
 }
 
 /* ---------- AIと対話 ---------- */
+const PROMPT_TAG="あなたは「市場のタネ帳」の相棒です。わたしが観察した人の行動に、「本質」を提案してください。\n\n# 本質とは\n- その行動が「何の一種か」を表す短い言い方です。「何のためにやるか」（目的）ではありません。\n  - 良い例：協定価額を決める → モノの価値を決める\n  - 良い例：通勤する → 移動する（「職場で働く」は目的なので本質ではありません）\n  - 良い例：入居審査を受ける → 支払い能力を証明する\n- 車の、家の、保険の、など場面の言葉は外し、ほかの業界や場面でも同じ行為として見つけられる言い方にします。\n- 「〜する」で終わる、15文字程度の短い言い方にします。\n- existingTags に当てはまるものがあれば、言い換えずにそのまま使ってください。テーマをまたいでつながることが一番大事です。\n\n# やること\n- nodes の各行動に、本質を1〜3個提案します。path と reasons は、行動の意味を読み取るための手がかりです。\n- 自信がない行動は1個だけにします。無理に3個にしないでください。\n\n# 出力\n説明は付けず、次の形のJSONだけを1つのコードブロックで出力してください。id は渡されたものをそのまま使います。\n{\"app\":\"tane\",\"kind\":\"tag-suggestions\",\"version\":1,\"suggestions\":[{\"id\":\"行動のid\",\"tags\":[\"本質1\",\"本質2\"]}]}";
 const PROMPT_SEED="あなたは「市場のタネ帳」の相棒です。わたしが日常や仕事で観察した人の行動を一緒に分解し、新しい市場のタネを探します。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「広げる」段階です。判断を急がず、小さな違和感や、当たり前すぎて誰も気にしていない行動も拾います。事業として成り立つかの厳しい評価はしません（それは事業化の段階でやります）。\n- わたしの観察を引き出し、整理し、問いを投げる相棒です。答えを決めるのはわたしです。\n- 解像度は、頭の中だけでなく、現場で見た事実から上がります。わたしの答えが推測だけのときは、「実際に見たり聞いたりしたことは？」と事実を聞き返してください。\n- わたしが見たこと（事実）と、あなたの推測（仮説）をはっきり分けてください。あなたの推測を書くときは、文頭に「仮説：」と付けます。\n- わたしが言っていない行動や事実を、勝手に足さないでください。候補を出すのは歓迎ですが、採用するかはわたしが決めます。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n次の順に進めます。わたしが別の順を望んだら、それに合わせてください。\n\n1. 始める\n   最初に「起点となる新しい行動から始めますか？それとも、タネ帳から書き出したJSONを貼りますか？」と聞いてください。\n   - JSONが貼られたら、中身を読み取り、起点の行動（L0）とその下の行動を短くまとめて見せてから続けます。\n   - 新しく始めるなら、起点の行動（例：家を借りる）を聞き、L0に置きます。\n\n2. 行動を書き出す\n   その起点の行動に関わる、人がしている具体的な行動を思いつくまま挙げてもらいます。違和感がなくても、普通にやっている行動で構いません。\n   書き出しが終わったら、番号付きの一覧にして見せます。\n\n3. 上下に動かす（抽象化・具体化）\n   気になる行動を1つ選んでもらい、次の2つの問いで上下に動かします。\n   - 抽象化：「それは何のためにやっている？」（答えを1段上に置く）\n   - 具体化：「具体的にはどうやっている？」（答えを1段下に置く）\n   複数の当事者が関わる、書類や情報を人が手で集めて渡す、お金が動く、といった行動は、具体化して掘る価値が高いと伝えてください。\n   深く掘りすぎて話が細かくなりすぎたら、一度上に戻ることを提案してください。\n\n4. 解像度を上げる\n   掘った行動について、「なぜこの行動をしているのか」を、次の4つの視点で構造化します。1回に1つずつ聞いてください。\n   - 深さ：なぜこのやり方をしているのか。答えに対して「なぜそうなっている？」を重ね、症状ではなく根本の理由まで掘ります。理由はいくつあっても構いません。\n   - 広さ：この行動に関わる当事者は誰か。それぞれ何を望み、何に困っているか。当たり前だと思っている前提は何か。ほかのやり方（他業界のやり方も）はないか。\n   - 構造：理由を種類で分けます（目的・必要／技術／規制・ルール／慣習・文化／コスト／情報の偏り／信頼・責任／物理・時間）。どの理由が一番強くこの行動を縛っているかを、一緒に1つ選びます。摩擦のサイン（複数の当事者／書類・情報の手渡し／お金が動く／待ち時間／手作業／毎回やり直し）も確認します。\n   - 時間：いつから、どんな経緯でこうなったか。それぞれの理由は今もあるか（まだある／薄れている／もう無い／未確認）と、その根拠。この先どう変わりそうか。\n   ほかの行動で出てきた理由と同じものがあれば、同じ言い方にそろえて、そのつながりを指摘してください。\n   「理由が消えた・薄れているのに、行動だけが残っている」ものが見つかったら、市場のタネの典型として強調してください。\n   4つのうち、まだ薄い視点があれば、そこを掘ることを提案してください。\n   最後に、掘り出した理由の中から「一番深く、一番強くこの行動を縛っている理由」を1つ選びます。表面の症状ではなく、そこを解けば行動そのものが変わる理由を選ぶよう、わたしに問いかけてください。\n   完璧を目指さず、「一番効いている理由が1つ選べて、それが今もあるかを判定できた」ら、その行動の掘り下げは十分です。次の行動か、次の段階へ進むことを提案してください。\n\n5. 本質を書く\n   それぞれの行動が「本質的には何をしているか」を短く言い表します（例：協定価額を決める → モノの価値を決める）。\n   場面の言葉（車の、家の、など）を外した言い方にして、別の起点の行動ともつながるようにします。すでに使っている本質の言い方があれば、それを優先して使います。\n   同じ本質が別の行動や別の起点の行動の下にも出てきたら、そのつながりを指摘してください。\n\n6. タネとして評価する\n   わたしが「これはタネかも」と言った行動は、次の5つを0〜2点で一緒に採点します。点の理由も一言添えてください。\n   - alt：代わりの手段で無理やり済ませている\n   - now：「なぜ今」がある（技術・規制・コストの変化）\n   - money：お金がすでに別の名目で使われている\n   - repeat：繰り返し起こり、広がっている\n   - gap：大手がやりたがらない理由がある\n   有望なタネが出てきたら、「アプリのタネ候補で『事業案にする』を押し、事業化用のプロンプトで詰めましょう」と伝えてください。\n\n# わたしが使う合図\n- 「まとめ」：今のツリーを、字下げした一覧で見せてください（各行に、本質・一番効いている理由・その理由が今もあるか・タネの点数があれば添える）。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n- 「戻る」：1つ前の段階に戻ります。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- nodes には、この会話で新しく作った行動と、内容を変えた行動だけを入れます。変えていない既存の行動は入れません。\n- 既存の行動（最初に貼られたJSONにあったもの）を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しい行動の id は、他と重ならないように「t」＋今日の日付8桁＋「-」＋3桁の連番にします（例：t20261010-001）。理由と当事者の id も同じ考え方です。日付が分からなければ、最初にわたしに聞いてください。\n- parent には親の行動の id を入れます。起点の行動（L0）だけ null にします。既存の行動の下に足すときは、その既存の id を parent に入れます。\n- order は、同じ親の中での並び順です（0から）。\n- frictions は次の英語のキーだけを使います：parties（複数の当事者）、docs（書類・情報の手渡し）、money（お金が動く）、wait（待ち時間）、manual（手作業）、repeat（毎回やり直し）。\n- reasons には、この行動をしている理由を入れます。各理由は id, text, kind, who, status, evidence, star, parent を持ちます。\n  - id は「r」＋今日の日付8桁＋「-」＋3桁の連番にします（例：r20261010-001）。\n  - kind は need（目的・必要）、tech（技術）、rule（規制・ルール）、custom（慣習・文化）、cost（コスト）、info（情報の偏り）、trust（信頼・責任）、phys（物理・時間）、\"\"（未分類）のどれかです。\n  - who は、その理由が誰の都合かを、actors の name で入れます。分からなければ \"\" にします。\n  - status は still（まだある）、fading（薄れている）、gone（もう無い）、unknown（未確認）、\"\"（未記入）のどれかです。evidence に、その根拠を一言入れます。\n  - star は、一番強くこの行動を縛っている理由だけ true にします（行動ごとに1つまで）。\n  - parent は、「なぜそうなっている？」で掘った元の理由の id です。いちばん上の理由は null にします。\n- actors には当事者を入れます。各当事者は id（「a」＋日付8桁＋「-」＋連番）, name, wants（望んでいること）, pains（困っていること）を持ちます。\n- assume（当たり前だと思っている前提）、alts（ほかのやり方）、since（いつから・どんな経緯で）、future（この先の変化）は文章で入れます。\n- 既存の行動の reasons や actors を変えたときは、その行動の reasons と actors を全部出し直します（アプリは行動ごと上書きします）。\n- 理由・当事者・前提は、わたしが同意した内容だけを入れます。あなたの仮説のままのものは、文頭に「仮説：」を付けます。\n- 行動が多くて1回で出し切れないときは、「続く」と書いて分割し、わたしが「続き」と言ったら残りを出します。分割したそれぞれが、単独で正しいJSONになるようにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 3,\n  \"exportedAt\": 0,\n  \"nodes\": [\n    {\n      \"id\": \"t20261010-001\",\n      \"text\": \"家を借りる\",\n      \"parent\": null,\n      \"order\": 0,\n      \"frictions\": [],\n      \"reasons\": [],\n      \"actors\": [],\n      \"assume\": \"\",\n      \"alts\": \"\",\n      \"since\": \"\",\n      \"future\": \"\",\n      \"tags\": [],\n      \"seed\": false,\n      \"scores\": {},\n      \"memo\": \"\"\n    },\n    {\n      \"id\": \"t20261010-002\",\n      \"text\": \"入居審査を受ける\",\n      \"parent\": \"t20261010-001\",\n      \"order\": 0,\n      \"frictions\": [\n        \"parties\",\n        \"docs\",\n        \"wait\"\n      ],\n      \"reasons\": [\n        {\n          \"id\": \"r20261010-001\",\n          \"text\": \"貸主が、家賃を払い続けられる人かを事前に確かめたい\",\n          \"kind\": \"need\",\n          \"who\": \"貸主\",\n          \"status\": \"still\",\n          \"evidence\": \"\",\n          \"star\": false,\n          \"parent\": null\n        },\n        {\n          \"id\": \"r20261010-002\",\n          \"text\": \"借り手の支払い能力を示す共通の情報がない\",\n          \"kind\": \"info\",\n          \"who\": \"保証会社\",\n          \"status\": \"fading\",\n          \"evidence\": \"仮説：給与や口座の情報を本人同意で連携する仕組みが広がっている\",\n          \"star\": true,\n          \"parent\": \"r20261010-001\"\n        },\n        {\n          \"id\": \"r20261010-003\",\n          \"text\": \"審査の結果を他社に渡せない\",\n          \"kind\": \"rule\",\n          \"who\": \"保証会社\",\n          \"status\": \"unknown\",\n          \"evidence\": \"\",\n          \"star\": false,\n          \"parent\": \"r20261010-002\"\n        }\n      ],\n      \"actors\": [\n        {\n          \"id\": \"a20261010-001\",\n          \"name\": \"貸主\",\n          \"wants\": \"家賃を確実に受け取りたい\",\n          \"pains\": \"滞納のリスク\"\n        },\n        {\n          \"id\": \"a20261010-002\",\n          \"name\": \"保証会社\",\n          \"wants\": \"審査を早く安く済ませたい\",\n          \"pains\": \"書類の確認に人手がかかる\"\n        }\n      ],\n      \"assume\": \"支払い能力は書類で証明するもの\",\n      \"alts\": \"仮説：海外では信用スコアで即日審査\",\n      \"since\": \"保証会社の利用が当たり前になってから、会社ごとに審査するようになった\",\n      \"future\": \"仮説：本人同意のデータ連携で、審査は数分になる\",\n      \"tags\": [\n        \"支払い能力を証明する\"\n      ],\n      \"seed\": true,\n      \"scores\": {\n        \"alt\": 2,\n        \"now\": 1,\n        \"money\": 1,\n        \"repeat\": 2,\n        \"gap\": 1\n      },\n      \"memo\": \"\"\n    }\n  ]\n}\n```\n\nでは、始めてください。\n";
 const PROMPT_BIZ="あなたは、わたしの事業案を一緒に詰める相棒であり、厳しめの審査役です。わたしは「市場のタネ帳」というノートで、人の行動を観察・分解して市場のタネを探しています。この会話では、そのタネから生まれた事業案を、「進める／形を変える／保留／やめる」のどれかを判断できるところまで詰めます。最後に、タネ帳アプリに読み込めるJSONを出力します。\n\n# あなたの役割\n- この会話は「絞る」段階です。甘い評価はしません。根拠のない楽観には「その根拠は？」と聞き返してください。\n- 弱い点は、遠慮せずに具体的に指摘してください。×なら×と言います。やめる判断も前進です。\n- ただし、否定だけで終わらせず、「どう変えれば成り立つか」も一緒に考えてください。\n- わたしが言ったこと（事実）と、あなたの推測をはっきり分けます。推測には文頭に「仮説：」を付けます。\n- 数字は、粗くても桁が合っていることを重視します。分からない数字は、わたしに聞くか、置いた前提を明示して概算します。\n\n# 話し方\n- 日本語で、スマホで読みやすいように短く話してください。1回の返事は、長くても画面1枚分までにします。\n- 質問は1回に1つだけにします。\n- 前置きや褒め言葉は省き、すぐ本題に入ります。\n\n# 進め方\n次の順に進めます。各段階で、わたしの答えが薄いときは、問いを変えて深掘りしてください。\n\n1. 解く理由を決める\n   最初に、「今回の事業案」にある事業案と元になったタネを3行で要約します。元のタネの reasons（理由の構造）を読み、この事業案が「どの理由を解くための打ち手か」をはっきりさせます。star が付いた理由があれば、それが第一候補です。\n   - その理由は、表面の症状ではなく根本の理由か\n   - その理由は今もあるか、消えかけているか（消えかけているなら、それが「なぜ今」になります）\n   どの理由を解くのかが曖昧な事業案は、まずそこを決めます。決まらなければ、この事業案は弱いとはっきり伝えてください。\n\n2. 打ち手を広げてから選ぶ\n   選んだ理由に対して、打ち手をすぐ1つに決めず、まず3〜5個並べます。製品やサービスだけでなく、仕組みの作り替え、他業界のやり方の持ち込み、当事者の組み替え、ルール側への働きかけなども含めます。\n   並べた打ち手を、効き目（その理由がどれだけ解けるか）、始めやすさ、真似されにくさ、わたしの強みとの相性で比べ、1つ選びます。選ばなかった打ち手も記録に残します。\n\n3. 事業として詰める\n   選んだ打ち手について、次を1つずつ詰めます。\n   - 顧客：具体的な1人（1社）を思い描けるか。話を聞ける知り合いはいるか\n   - 困りごと：どのくらいの頻度で、どのくらい痛いか。今いくら、何時間を使っているか\n   - 代わりの手段：今はどう済ませているか。それで困っていない人は誰か\n   - なぜ今：何が変わったからできるのか。5年前にできなかった理由は何か\n   - 誰がお金を払うか：どの予算名目のお金か。1件あたりいくらか\n   - 市場の大きさ：顧客数×単価で桁を出す。国内と海外の両方\n   - 競合と代替：同じことをしている会社、似たことをしている会社、「何もしない」という選択\n   - 勝てる理由：わたしの実際の経験や強みとどうつながるか。真似されにくいか\n   - 15年計画との相性：次の4つを ○／△／× で判定し、理由を一言添えます\n     - margin：利益率30%以上を狙えるか\n     - national：全国・海外に売れるか\n     - stage1：最初は受託で稼ぎながら検証できるか\n     - campus：将来の自社拠点構想と噛み合うか。構想が未定なら未判定にする\n\n4. 仮説を立てて、行動を決める\n   考え続けるのではなく、確かめに行く形にします。\n   - 検証する仮説：確かめられる形で1〜3個書きます（例：「保証会社の審査担当は、1件あたり30分以上を書類集めに使っている」）。いちばん外れたら困る仮説から順に並べます。\n   - いちばん小さな試し方：作るより先に、人に話を聞く、手作業で代行してみる、などの方法を優先します。1週間以内にできることにします。\n   - 聞く質問：意見ではなく事実を聞く質問を3〜5個作ります。「欲しいですか？」「使いますか？」ではなく、「最後にそれで困ったのはいつで、そのときどうしましたか？」「そのために今いくら払っていますか？」の形にします。\n   - 判断の基準：どんな答えが何人から返ってきたら進め、どんな答えならやめるかを、先に決めます。\n\n5. 判断する\n   一通り詰めたら、「進める／形を変える／保留／やめる」のどれがよいか、理由を添えて提案してください。決めるのはわたしです。\n   形を変える場合は、新しい事業案として分けるか、今の事業案を書き換えるかをわたしに聞いてください。\n   完璧を目指さず、「解く理由・打ち手・確かめる仮説・次の行動」が決まったら、詰めるのをやめて動くことを勧めてください。\n\n# わたしが使う合図\n- 「まとめ」：今の事業案を、項目ごとに短く一覧で見せてください。\n- 「保存」または「JSON」：下の形式でJSONを出力してください。\n\n# JSONの出力ルール\n「保存」と言われたら、説明を最小限にして、次の形式のJSONを1つのコードブロックで出力します。\n\n- JSONとして正しい形にします。コメント、末尾のカンマ、全角の引用符は使いません。\n- 出力するのは ideas だけです。この会話で変えた事業案と、新しく分けた事業案を入れます。\n- 渡された事業案を変えたときは、その id をそのまま使います。アプリは同じ id を上書きします。\n- 新しく分けた事業案の id は「i」＋今日の日付8桁＋「-」＋3桁の連番にします（例：i20261010-001）。日付が分からなければ、わたしに聞いてください。sources は元の事業案のものを引き継ぎます。\n- 各項目の入れ先は次のとおりです：customer（顧客）、pain（困りごと）、alt（代わりの手段）、whyNow（なぜ今）、solution（解く理由と、選んだ打ち手。最初に「解く理由：〜」、次に「打ち手：〜」の形で書きます）、payer（誰がお金を払うか。1件あたりの金額も）、edge（勝てる理由）、next（いちばん小さな試し方、聞く質問、進める・やめる基準）。\n- memo には、「選ばなかった打ち手：〜」「検証する仮説：〜」「市場：〜」「競合：〜」の形で入れます。元の memo にあった内容は消さずに残します。\n- fit は margin, national, stage1, campus のそれぞれに \"ok\"（○）、\"mid\"（△）、\"ng\"（×）、\"\"（未判定）のどれかを入れます。理由は fitNote にまとめます。\n- status は \"idea\"（アイデア）、\"testing\"（検証中）、\"hold\"（保留）、\"dropped\"（やめた）のどれかです。やめた場合は dropReason に理由を入れます。\n- わたしが同意していない推測をどこかの項目に入れるときは、文頭の「仮説：」を付けたままにします。\n\n形式の例：\n```json\n{\n  \"app\": \"tane\",\n  \"version\": 2,\n  \"ideas\": [\n    {\n      \"id\": \"i20261010-001\",\n      \"title\": \"支払い能力をまとめて証明できる仕組み\",\n      \"status\": \"testing\",\n      \"sources\": [\n        {\n          \"type\": \"node\",\n          \"id\": \"t20261010-002\"\n        },\n        {\n          \"type\": \"tag\",\n          \"name\": \"支払い能力を証明する\"\n        }\n      ],\n      \"customer\": \"都市部で賃貸物件を探す20〜30代の会社員と、その審査をする保証会社\",\n      \"pain\": \"物件ごと、保証会社ごとに同じ書類を出して審査をやり直している。引っ越しのたびに数日かかる\",\n      \"alt\": \"源泉徴収票や在籍証明を毎回集めて、紙や画像で提出している\",\n      \"whyNow\": \"仮説：給与や口座の情報を本人同意で連携できる仕組みが広がってきた\",\n      \"solution\": \"解く理由：借り手の支払い能力を示す共通の情報がない。打ち手：一度の確認で、複数の審査先に支払い能力を証明できるサービス。まずは保証会社1社の審査書類チェックを受託する\",\n      \"payer\": \"保証会社。審査1件あたりの人件費の一部（仮説：1件数百円〜千円台）\",\n      \"edge\": \"会計の知識で、収入や支払い能力の見方を設計できる\",\n      \"fit\": {\n        \"margin\": \"mid\",\n        \"national\": \"ok\",\n        \"stage1\": \"ok\",\n        \"campus\": \"\"\n      },\n      \"fitNote\": \"審査書類チェックの受託から始めれば、稼ぎながら検証できる\",\n      \"next\": \"試し方：保証会社の審査担当5人に話を聞く。質問：最後に審査が詰まったのはいつで、何の書類待ちだったか／1件に何分かかっているか。基準：3人以上が1件30分以上を書類集めに使っていれば進める。1人以下ならやめる\",\n      \"dropReason\": \"\",\n      \"memo\": \"選ばなかった打ち手：保証会社向けの審査AI、不動産会社向けの書類回収代行。検証する仮説：審査担当は1件あたり30分以上を書類集めに使っている。市場：仮説：国内の賃貸契約は年間数百万件。競合：大手保証会社の自社システム、何もしない\"\n    }\n  ]\n}\n```\n\n# 今回の事業案\n（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）\n\nでは、始めてください。\n";
 const BIZ_SLOT='（アプリから、ここに事業案と元になったタネが入ります。入っていなければ、どの事業案を詰めるか、わたしに聞いてください）';
@@ -1688,7 +1823,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=29',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=30',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
