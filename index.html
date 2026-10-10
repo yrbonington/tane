@@ -743,18 +743,18 @@ body.idea-menu-open{overflow:hidden}
 .tag-custom-input:focus{outline:2px solid var(--accent);outline-offset:0}
 .tag-review .btnrow{display:flex;gap:8px;flex-wrap:wrap}
 
-/* 現在位置はタブで示し、重複する画面見出しを省いて中身を上へ。 */
-.bar{padding-top:calc(5px + env(safe-area-inset-top));padding-bottom:4px}
-.bar-top.bar-compact{min-height:0;justify-content:flex-end;gap:0;padding-bottom:2px}
-.bar-compact .status{font-size:10px;line-height:1.25;padding:5px 9px;max-width:100%}
-.bar .subnav{margin:3px 0 2px}
+/* 上部はタネ探しの切替だけ。画面名・保存状態・区切り線を省く。 */
+.bar{border-bottom:0;padding-top:calc(5px + env(safe-area-inset-top));padding-bottom:0}
+.bar .subnav{margin:0 0 2px}
 .grid{margin-top:12px}
+/* 事業化・データではタブバーがないため、iPhoneのセーフエリアを確保。 */
+.bar[hidden]+.grid{margin-top:calc(12px + env(safe-area-inset-top))}
+.backup-hint{color:var(--warn);font-size:13px;line-height:1.5;margin:0}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="bar">
-    <div class="bar-top bar-compact"><span class="status" id="status"></span></div>
+  <header class="bar" id="topBar">
     <div class="subnav" id="subnav" role="tablist">
       <button data-tab="tree">ツリー</button>
       <button data-tab="same">つながり<span class="n" id="n-same"></span></button>
@@ -931,9 +931,6 @@ function openSheet(on){$('#sheet').classList.toggle('open',on);$('#scrim').hidde
 function daysSinceExport(){const t=Number(ls.get(KEY_EXPORT)||0);return t?Math.floor((Date.now()-t)/864e5):null;}
 function render(){
   const act=document.activeElement; const keep=act&&act.id==='addIn'?{v:act.value}:null;
-  const d=daysSinceExport(); const st=$('#status');
-  if(S.nodes.size && (d===null||d>=7)){ st.textContent=d===null?'バックアップ未作成':`バックアップ ${d}日前`; st.className='status alert'; }
-  else { st.textContent='この端末に保存'; st.className='status'; }
   if(S.theme&&!S.nodes.has(S.theme))S.theme=null;
   if(!S.theme){const sv=ls.get(KEY_THEME);S.theme=(sv&&S.nodes.has(sv)&&!S.nodes.get(sv).parent)?sv:(roots()[0]?.id||null);}
   if(S.sel&&!S.nodes.has(S.sel))S.sel=null; if(S.focus&&!S.nodes.has(S.focus))S.focus=null;
@@ -948,7 +945,6 @@ function renderThemes(){const el=$('#themes');if(!el)return;
   $('#themeForm').onsubmit=e=>{e.preventDefault();const v=$('#themeInput').value;$('#themeInput').value='';$('#themeForm').hidden=true;addTheme(v);};
   $('#themeCancel').onclick=()=>{$('#themeForm').hidden=true;};
 }
-$('#status').onclick=()=>{S.tab='data';render();};
 document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const a=b.dataset.area,cur=AREA_OF[S.tab];
   S.themeStart=false;
   if(a==='seed')S.tab=cur==='seed'?'tree':(S.lastSeed||'tree');
@@ -957,7 +953,7 @@ document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const
   openSheet(false);render();window.scrollTo({top:0});});
 const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data'};
 function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
-  $('#subnav').hidden=area!=='seed';
+  $('#topBar').hidden=area!=='seed';$('#subnav').hidden=area!=='seed';
   document.querySelectorAll('#subnav [data-tab]').forEach(t=>{t.setAttribute('aria-pressed',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
   document.querySelectorAll('.bottom [data-area]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.area===area)));
   $('#n-same').textContent=[...tagIndex().values()].filter(a=>a.length>=2).length||'';
@@ -1253,7 +1249,8 @@ function renderData(m){
   const d=daysSinceExport(); const themes=roots().length;
   m.innerHTML=`<div class="list">
     <div class="card"><h4>この端末のデータ</h4><div class="stat"><span><b>${themes}</b>起点の行動</span><span><b>${S.nodes.size-themes}</b>下位の行動</span><span><b>${S.ideas.size}</b>事業案</span><span><b>${d===null?'—':d+'日前'}</b>最後のバックアップ</span></div>
-      <p class="muted" style="margin:0">データはこの端末に保存されます。消失に備えてバックアップしてください。</p></div>
+      <p class="muted" style="margin:0">データはこの端末に保存されます。消失に備えてバックアップしてください。</p>
+      ${S.nodes.size&&(d===null||d>=7)?`<p class="backup-hint" role="status">${d===null?'バックアップ未作成':`最後のバックアップから${d}日経過しています`}。下の「バックアップを取る」から保存できます。</p>`:''}</div>
     <div class="card"><h4>バックアップを取る</h4>
       <p class="muted" style="margin:0">ファイル保存、またはコピーできます。</p>
       <div class="btnrow"><button class="btn pri" id="exShare">ファイルに保存</button><button class="btn" id="exCopy">コピー</button></div></div>
@@ -1829,7 +1826,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=33',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=34',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
