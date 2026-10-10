@@ -587,6 +587,7 @@ body{background:var(--paper)}
   width:100%;flex:none;background:transparent;border:0;
   border-radius:0;box-shadow:none;
 }
+.item.sel .row > .caret{align-self:flex-start;height:56px;}
 .item.sel .node-stack > .actions{
   display:flex;flex-direction:column;gap:0;
   margin:0;padding:0 12px 4px;
@@ -1301,7 +1302,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=20',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=21',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
