@@ -959,7 +959,7 @@ body.idea-menu-open{overflow:hidden}
     </button>
     <div class="subnav" id="subnav" role="tablist">
       <button data-tab="tree">ツリー</button>
-      <button data-tab="same">つながり<span class="n" id="n-same"></span></button>
+      <button data-tab="same">つながり</button>
       <button data-tab="seed">タネ候補<span class="n" id="n-seed"></span></button>
     </div>
   </header>
@@ -1159,7 +1159,6 @@ function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastS
   $('#subnav').hidden=area!=='seed';
   document.querySelectorAll('#subnav [data-tab]').forEach(t=>{t.setAttribute('aria-pressed',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
   document.querySelectorAll('.bottom [data-area]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.area===area)));
-  $('#n-same').textContent=[...tagIndex().values()].filter(a=>a.length>=2).length||'';
   $('#n-seed').textContent=[...S.nodes.values()].filter(n=>n.seed).length||'';
 }
 function badges(n){const o=[];const fr=(n.frictions||[]).length;
@@ -1326,7 +1325,7 @@ function sameViewNow(){const s=ls.get('tane.sameView');return ['network','rankin
 
 function netOptions(){try{const x=JSON.parse(ls.get('tane.net')||'{}');return {actions:!!x.actions,reasons:!!x.reasons};}catch(e){return {actions:false,reasons:false};}}
 
-function sameViewNav(v){return `<div class="same-view-nav" role="group" aria-label="つながりの見方">${[['network','ネットワーク'],['ranking','ランキング'],['list','一覧']].map(([k,t])=>`<button type="button" class="same-view-btn" data-same-view="${k}" aria-pressed="${k===v}">${t}</button>`).join('')}</div>`;}
+function sameViewNav(v){return `<div class="same-view-nav" role="group" aria-label="つながりの見方">${[['network','ネットワーク'],['ranking','ランキング'],['list','本質の整理']].map(([k,t])=>`<button type="button" class="same-view-btn" data-same-view="${k}" aria-pressed="${k===v}">${t}</button>`).join('')}</div>`;}
 
 function sameBindNav(m){m.querySelectorAll('[data-same-view]').forEach(b=>b.onclick=()=>{const v=b.dataset.sameView;if(v===sameViewNow())return;ls.set('tane.sameView',v);if(v!=='network')netStop();renderMain();});}
 
@@ -1818,7 +1817,7 @@ function renderSameList(m){
   const groups=[...tagIndex().entries()].map(([t,ns])=>({t,ns,themes:new Set(ns.map(n=>rootOf(n.id))).size})).sort((a,b)=>b.themes-a.themes||b.ns.length-a.ns.length);
   const cross=groups.filter(g=>g.themes>=2),within=groups.filter(g=>g.themes<2&&g.ns.length>=2),single=groups.filter(g=>g.ns.length<2);const cand=similarGroups();
   const rgroups=[...reasonIndex().values()].filter(g=>g.items.length>=2).map(g=>({...g,themes:new Set(g.items.map(x=>rootOf(x.n.id))).size})).sort((a,b)=>b.themes-a.themes||b.items.length-a.items.length);
-  const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}つの起点・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-mkidea-tag="${esc(g.t)}">事業案にする</button><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
+  const card=g=>`<div class="card"><h4><span class="${g.ns.length>=2?'mark':''}">${esc(g.t)}</span><span class="b ${g.themes>=2?'b-gone':'b-tag'}">${g.themes>=2?`${g.themes}つの起点・`:''}${g.ns.length}か所</span><span class="sp"></span><button class="linkbtn" data-rename="${esc(g.t)}">名前を変える</button></h4>
     ${S.renaming===g.t?`<form class="inline" data-renform="${esc(g.t)}"><input value="${esc(g.t)}" aria-label="新しい名前"><button class="btn pri sm" type="submit">変更</button></form>`:''}${g.ns.map(hitBtn).join('')}</div>`;
   const tagCard=untagged.length?`<div class="card ai-flow tag-ai-workflow">
     <h4>本質をまとめて付ける</h4>
@@ -1850,7 +1849,7 @@ function renderSameList(m){
     ${cand.length?cand.map((ns,i)=>`<div class="card"><h4>${esc(ns[0].text)}<span class="b b-tag">${ns.length}か所</span></h4>${ns.map(hitBtn).join('')}<form class="inline" data-candform="${i}"><input placeholder="共通の本質（例：審査を受ける）" aria-label="共通の本質"><button class="btn sm" type="submit">この本質でまとめる</button></form></div>`).join(''):`<div class="muted">文言が似ている行動が見つかると、ここに候補として出ます。</div>`}
     ${single.length?`<p class="h2">1か所だけの本質</p><div class="card">${single.map(g=>`<div class="tags"><span class="b b-tag">${esc(g.t)}</span></div>${g.ns.map(hitBtn).join('')}`).join('')}</div>`:''}
   </div>`;
-  bindGo(m); bindMkIdea(m);
+  bindGo(m);
   const tagCopy=$('#tagCopyPrompt');
   if(tagCopy)tagCopy.onclick=async()=>{
     await copyText(buildTagPrompt());
@@ -2558,7 +2557,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=44',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=45',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
