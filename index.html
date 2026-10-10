@@ -508,6 +508,17 @@ body{background:var(--paper)}
 .seed-ai-shortcut > div{width:auto}
 .biz-ai-workflow{display:flex;flex-direction:column;gap:15px}
 @media(max-width:380px){.ai-provider-links .btn.ai-provider{font-size:12px}}
+
+/* 操作カード：スマホでも縦一列、説明は右側に一行 */
+.actions{grid-template-columns:minmax(0,1fr);gap:8px}
+.act{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:12px 14px}
+.act b{flex:0 0 auto;font-size:14px;line-height:1.35;white-space:nowrap}
+.act small{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;font-size:12px;line-height:1.4}
+@media(max-width:360px){
+  .act{padding:11px 10px;gap:6px}
+  .act b{font-size:13px}
+  .act small{font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -730,11 +741,11 @@ function renderTree(m){
 }
 function actionBar(n,rel){const isRoot=!n.parent;const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;const pad=Math.min(rel,6)*16+32;
   return `<div class="actions" style="padding-left:${pad}px">
-    <button class="act ${a==='up'?'main':''}" data-add="up"><b><i>↑</i>抽象化する</b><small>何のためにやっているかを、1段上に追加</small></button>
-    <button class="act ${a==='down'?'main':''}" data-add="down"><b><i>↓</i>具体化する</b><small>具体的にどうやっているかを、1段下に追加</small></button>
-    ${isRoot?'':`<button class="act ${a==='sib'?'main':''}" data-add="sib"><b><i>→</i>同じ段に追加</b><small>この行動と並ぶ、別の行動を追加</small></button>`}
-    <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>摩擦・背景・制約・本質・タネ評価</small></button>
-    ${S.focus===n.id||!kids(n.id).length?'':`<button class="act" id="zoomHere"><b><i>⌕</i>この下だけ表示</b><small>ほかの行動を隠して、ここに集中する</small></button>`}
+    <button class="act ${a==='up'?'main':''}" data-add="up"><b><i>↑</i>抽象化する</b><small>目的を1段上へ</small></button>
+    <button class="act ${a==='down'?'main':''}" data-add="down"><b><i>↓</i>具体化する</b><small>やり方を1段下へ</small></button>
+    ${isRoot?'':`<button class="act ${a==='sib'?'main':''}" data-add="sib"><b><i>→</i>同じ段に追加</b><small>並ぶ行動を追加</small></button>`}
+    <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>摩擦・制約などを整理</small></button>
+    ${S.focus===n.id||!kids(n.id).length?'':`<button class="act" id="zoomHere"><b><i>⌕</i>この下だけ表示</b><small>この行動に集中</small></button>`}
   </div>${a?`<div class="addbox" style="padding-left:${pad}px"><span class="hint">${esc(addHint(n,a))}</span>
     <form class="inline" id="addForm"><input id="addIn" enterkeyhint="done" autocomplete="off" aria-label="${esc(addHint(n,a))}"><button class="btn pri" type="submit">追加</button><button class="btn icon" type="button" id="addX" aria-label="閉じる">✕</button></form></div>`:''}`;}
 function startAdd(id,mode){S.adding={id,mode};renderMain();const i=$('#addIn');if(i)i.focus();}
@@ -1086,7 +1097,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=12',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=13',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
