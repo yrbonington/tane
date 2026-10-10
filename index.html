@@ -1296,7 +1296,7 @@ function netMatchOpacity(n){
  if(n.type==='reason'){
    const group=reasonIndex().get(n.source);
    if(!group)return .12;
-   return Math.max(.12,...group.items.map(({n:item})=>graphMatchOpacity({type:'action',source:item.id})));
+   return Math.max(.12,...group.items.map(({n:item})=>netMatchOpacity({type:'action',source:item.id})));
  }
  const kind=netMatchKind(n);
  if(netFilters.root&&netFilters.tag)return kind==='both'?1:kind?.23:.10;
@@ -1605,20 +1605,22 @@ function netSchedule(){
   if(netLive.media.matches){
     const g=netGraph;if(!g)return;
     if(g.camTarget){g.cam=g.camTarget;g.camTarget=null;}
-    const neighbors=g.selected?netNeighbors(g.selected):g.hover?netNeighbors(g.hover):null;
+    const near=g.selected?netNeighbors(g.selected):g.hover?netNeighbors(g.hover):null;
     for(const n of netVisible()){
-      n.fade=!neighbors||neighbors.has(n.id)?1:.15;
-      n.labelFade=n.type==='theme'||n.type==='tag'&&n.themes>=2||neighbors?.has(n.id)||
-        n.type==='tag'&&g.cam.z>1.05||n.type==='action'&&g.cam.z>1.75||
-        n.type==='reason'&&g.cam.z>1.5?1:0;
+      n.fade=netMatchOpacity(n)*(!near||near.has(n.id)?1:.6);
+      n.labelFade=n.type==='reason'?(g.cam.z>1.4||near?.has(n.id)?1:0):
+        n.depth===0||netMatchKind(n)&&netMatchOpacity(n)>=.9||
+        near?.has(n.id)||g.cam.z>1.22+Math.min(.65,n.depth*.13)?1:0;
     }
-    for(const e of g.links)e.fade=!neighbors||(g.selected?e.a===g.selected||e.b===g.selected:e.a===g.hover||e.b===g.hover)?1:.15;
+    for(const e of g.links){
+      e.fade=Math.min(netMatchOpacity(g.nodes.get(e.a)),netMatchOpacity(g.nodes.get(e.b)))*
+        (!near||(near.has(e.a)&&near.has(e.b))?1:.5);
+    }
     netPaint();return;
   }
   if(netLive.raf)return;
   netLive.raf=requestAnimationFrame(netFrame);
 }
-
 function netFrame(){
  const live=netLive,g=netGraph;if(!live)return;
  live.raf=0;if(!live.canvas.isConnected)return;
@@ -2556,7 +2558,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=42',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=43',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
