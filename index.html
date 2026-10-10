@@ -874,6 +874,10 @@ body.idea-menu-open{overflow:hidden}
 .bar .subnav{margin:2px 0 0;padding:3px}
 .bar .subnav button{min-height:38px;padding:7px 4px}
 .grid{margin-top:10px}
+/* 新規導線は入れ子のカードを使わず、主見出しと選択肢を直接見せる。 */
+.welcome-single{gap:16px}
+.intro-single{gap:14px}
+.intro-single>h4{margin:0 0 2px;font-size:clamp(20px,5.7vw,25px)}
 </style>
 </head>
 <body>
@@ -1106,10 +1110,8 @@ function addHint(n,mode){
 }
 function renderTree(m){
   if(S.themeStart){
-    m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ タネ探しに戻る</button></div>
-      <div class="card intro-choice intro-frame">
-      <div class="welcome-heading"><h3>新しい行動</h3><span class="frame-step">タネ探しを始める</span></div>
-      <div class="welcome-panel choice-panel"><h4>どうやって始めますか？</h4>
+    m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ 行動一覧に戻る</button></div>
+      <div class="welcome-panel choice-panel intro-single"><h4>どうやって始めますか？</h4>
         <div class="card ai-flow theme-ai-card">
           <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>AIと対話してタネを探す</small></button>
           <div class="seed-ai-actions" id="themeAIActions">
@@ -1130,7 +1132,7 @@ function renderTree(m){
         </div>
         <button class="btn entry-option" id="themeStartManual"><strong>自分で行動を入力 →</strong><small>起点の行動を入力する</small></button>
         <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="起点の行動" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
-      </div></div></div>`;
+      </div></div>`;
     $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
     $('#themeStartAI').onclick=()=>{
       $('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;
@@ -1147,12 +1149,11 @@ function renderTree(m){
     $('#startThemeForm').onsubmit=e=>{e.preventDefault();const v=$('#startThemeInput').value.trim();if(!v)return;S.themeStart=false;addTheme(v);};
     return;
   }
-  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="card welcome-frame">
-    <div class="welcome-heading"><h3>市場のタネ帳</h3><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-8M12 13c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/></svg></div>
-    <div class="welcome-panel"><h4>今日の観察から、<br>タネを探そう。</h4>
+  if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="welcome-panel welcome-single">
+    <h4>今日の観察から、<br>タネを探そう。</h4>
     <p>人の行動から、市場のタネを見つける。</p>
     <button class="btn pri big" id="startNewTheme">＋ 最初の行動を追加</button>
-    <p class="welcome-help">前のデータがある場合は「データ」から復元</p></div>
+    <p class="welcome-help">前のデータがある場合は「データ」から復元</p>
   </div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
   const top=S.focus||S.theme;const d0=depth(top);const rows=[];
   const walk=id=>{const n=S.nodes.get(id);const d=depth(id);const rel=d-d0;const ks=kids(id);const shut=S.collapsed.has(id);const sel=S.sel===id;
@@ -1955,7 +1956,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=36',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=37',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
