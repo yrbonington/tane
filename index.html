@@ -1474,7 +1474,7 @@ function netRender(m){
    if(!canvas.isConnected)return;
    const bottom=document.querySelector('.bottom')?.getBoundingClientRect(),rect=shell.getBoundingClientRect();
    const available=Math.max(380,Math.round((bottom?.top||innerHeight)-rect.top-10));
-   if(Math.abs(rect.height-available)>1){shell.style.height=available+'px';return;}
+   if(Math.abs(rect.height-available)>1)shell.style.height=available+'px';
    const box=shell.getBoundingClientRect(),w=Math.max(1,box.width),h=Math.max(1,box.height),dpr=Math.min(3,devicePixelRatio||1);
    const old=live.view;if(old&&old.w===w&&old.h===h&&old.dpr===dpr)return;
    live.view={w,h,dpr};canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
@@ -2558,7 +2558,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=43',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=44',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
