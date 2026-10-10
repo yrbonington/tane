@@ -902,7 +902,7 @@ body.idea-menu-open{overflow:hidden}
 .same-theme-names{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
 .same-theme-names span{padding:5px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--ink)}
 .same-rank-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.net-graph{position:relative;width:100%;height:calc(100dvh - 205px);min-height:380px;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--frame);touch-action:none;overscroll-behavior:contain}
+.net-graph{position:relative;width:100%;height:calc(100dvh - 205px);min-height:380px;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--frame);touch-action:auto;overscroll-behavior:contain}
 #netCanvas{display:block;position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
 #netCanvas:active{cursor:grabbing}
 .net-toolbar{position:absolute;top:12px;left:12px;right:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;pointer-events:none}
@@ -1336,7 +1336,7 @@ function netBuild(){
     const prior=old.get(id);const h=netHash(id),angle=(h%6283)/1000,dist=7+(h%29);
     nodes.set(id,{id,type,label,count:count||0,themes:themes||0,source,
       x:prior?.x??Math.cos(angle)*dist,y:prior?.y??Math.sin(angle)*dist,
-      vx:prior?.vx||0,vy:prior?.vy||0,fade:prior?.fade??1});
+      vx:prior?.vx||0,vy:prior?.vy||0,fade:prior?.fade??1,labelFade:prior?.labelFade??0});
   }
   function edge(a,b,type,weight=1){if(a!==b&&nodes.has(a)&&nodes.has(b))edges.push({a,b,type,weight,fade:1});}
   const allRoots=roots(),stats=sameStats();
@@ -1378,7 +1378,8 @@ function netBuild(){
   }}
   netGraph={nodes,edges,opts,alpha:previous?(newNodes.length?.9:Math.min(.12,previous.alpha||0)):1,
     selected:previous?.selected||null,focus:previous?.focus||null,cam:previous?.cam||{x:0,y:0,z:1},
-    camTarget:null,fitOnSettle:!previous,hover:null,hasCamera:!!previous?.hasCamera};
+    camTarget:null,fitOnSettle:!previous||newNodes.length>0,hover:null,hasCamera:!!previous?.hasCamera,
+    lastView:previous?.lastView||null};
   if(!nodes.has(netGraph.selected))netGraph.selected=null;
   if(!nodes.has(netGraph.focus))netGraph.focus=null;
   netActive();
@@ -1388,9 +1389,7 @@ function netActive(){
   if(!netGraph)return;
   const g=netGraph;
   if(!g.focus){g.active=new Set(g.nodes.keys());g.links=g.edges;return;}
-  const visible=new Set([g.focus]);for(let distance=0;distance<2;distance++)for(const e of g.edges)if(visible.has(e.a)||visible.has(e.b)){
-    // A single hop per round: take a snapshot of the visited nodes before expansion.
-  }
+  const visible=new Set([g.focus]);
   let frontier=new Set([g.focus]);
   for(let distance=0;distance<2;distance++){
     const next=new Set();
@@ -1443,7 +1442,10 @@ function netRender(m){
     const old=live.view;live.view={w,h,dpr:Math.min(3,devicePixelRatio||1)};
     canvas.width=Math.round(w*live.view.dpr);canvas.height=Math.round(h*live.view.dpr);
     if(!g.hasCamera){g.cam={x:w/2,y:h/2,z:1};g.hasCamera=true;live.fitPending=true;}
-    else if(old){g.cam.x+=(w-old.w)/2;g.cam.y+=(h-old.h)/2;}
+    else if(old||g.lastView){
+      const was=old||g.lastView;g.cam.x+=(w-was.w)/2;g.cam.y+=(h-was.h)/2;
+    }
+    g.lastView={w,h};
     netSchedule();
   }
   live.resize=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>resize()):null;
@@ -1476,7 +1478,12 @@ function netRender(m){
   $('#netFit').onclick=()=>netFit(true);
   $('#netLocalDismiss').onclick=()=>netLocal(false);
   resize();
-  if(media.matches){for(let i=0;i<200&&g.alpha>0;i++)netPhysics();g.alpha=0;netFit(false);netPaint();return;}
+  if(media.matches){
+    for(let i=0;i<240&&g.alpha>0;i++)netPhysics();
+    g.alpha=0;g.fitOnSettle=false;netFit(false);
+    if(live.raf){cancelAnimationFrame(live.raf);live.raf=0;}
+    netPaint();
+  }
   if(g.selected&&g.nodes.has(g.selected))netPanel();
   if(netJump&&g.nodes.has(netJump))netSelect(netJump,true);
   else if(live.fitPending)netSchedule();
@@ -1520,7 +1527,7 @@ function netPhysics(){
 }
 
 function netCamera(id){const g=netGraph,v=netLive?.view,n=g?.nodes.get(id);if(!n||!v)return;
-  const maxY=v.h*(g.selected?.59:.5),p=g.cam;
+  const maxY=v.h*(g.selected?.30:.5),p=g.cam;
   g.camTarget={x:v.w/2-n.x*p.z,y:maxY-n.y*p.z,z:p.z};netSchedule();
 }
 
@@ -1579,6 +1586,11 @@ function netFrame(){
     const target=!highlighted||highlighted.has(n.id)?1:.15;
     n.fade+=(target-n.fade)*.24;
     if(Math.abs(target-n.fade)>.008)fading=true;else n.fade=target;
+    const labelTarget=n.type==='theme'||n.type==='tag'&&n.themes>=2||
+      highlighted?.has(n.id)||n.type==='tag'&&g.cam.z>1.05||
+      n.type==='action'&&g.cam.z>1.75||n.type==='reason'&&g.cam.z>1.5?1:0;
+    n.labelFade+=(labelTarget-n.labelFade)*.2;
+    if(Math.abs(labelTarget-n.labelFade)>.015)fading=true;else n.labelFade=labelTarget;
   }
   for(const e of g.links){
     const target=!highlighted||(highlighted.has(e.a)&&highlighted.has(e.b)&&(g.selected?e.a===g.selected||e.b===g.selected:e.a===g.hover||e.b===g.hover))?1:.15;
@@ -1604,7 +1616,6 @@ function netPaint(){
   }
   ctx.setLineDash([]);
   const ns=netVisible().sort((a,b)=>a.type===b.type?0:(a.type==='theme'?-1:b.type==='theme'?1:0));
-  const connected=g.selected?netNeighbors(g.selected):g.hover?netNeighbors(g.hover):new Set();
   for(const n of ns){
     const p=project(n),r=Math.max(2.8,n.r*cam.z),selected=n.id===g.selected,hover=n.id===g.hover;
     ctx.globalAlpha=n.fade;
@@ -1620,8 +1631,8 @@ function netPaint(){
     ctx.shadowBlur=0;ctx.lineWidth=n.type==='theme'?Math.max(2,2.5*cam.z):1.5;
     if(n.type==='theme'){ctx.strokeStyle=c.ink;ctx.stroke();}
     if(n.type==='action'&&action&&['gone','fading'].includes(rstatus(action))){ctx.strokeStyle=c.green;ctx.beginPath();ctx.arc(p.x,p.y,r+4,0,Math.PI*2);ctx.stroke();}
-    const show=n.type==='theme'||n.type==='tag'&&n.themes>=2||connected.has(n.id)||n.type==='tag'&&cam.z>1.05||n.type==='action'&&cam.z>1.75||n.type==='reason'&&cam.z>1.5;
-    if(show){
+    if(n.labelFade>.025){
+      ctx.globalAlpha=n.fade*n.labelFade;
       const size=Math.max(10,Math.min(15,12/Math.sqrt(cam.z)));
       const txt=n.label.length>16?n.label.slice(0,16)+'…':n.label;
       ctx.font=`${n.type==='theme'||selected?'700':'500'} ${size}px -apple-system, "Hiragino Sans", sans-serif`;
@@ -1674,7 +1685,7 @@ function netPointerUp(e){
   const rect=live.canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top,drag=live.drag;
   live.points.delete(e.pointerId);
   if(live.canvas.hasPointerCapture(e.pointerId))live.canvas.releasePointerCapture(e.pointerId);
-  if(drag?.mode==='pinch'){if(live.points.size===0)live.drag=null;return;}
+  if(drag?.mode==='pinch'){if(live.points.size===0)live.drag=null;else{live.drag=null;}return;}
   if(live.points.size!==0)return;
   g.dragged=null;live.drag=null;
   if(!drag?.moved&&e.type==='pointerup'){
@@ -1695,7 +1706,7 @@ function netSelect(id,center){
   if(id&&g.selected===id){netCamera(id);return;}
   g.selected=id;g.hover=null;
   if(id){netPanel();const n=g.nodes.get(id);const v=netLive?.view;
-    if(v){const sy=g.cam.y+n.y*g.cam.z;if(center||sy>v.h*.59)netCamera(id);}
+    if(v){const sy=g.cam.y+n.y*g.cam.z;if(center||sy>v.h*.49)netCamera(id);}
   }else{const p=$('#netDetail');if(p){p.hidden=true;p.innerHTML='';}}
   netSchedule();
 }
@@ -2487,7 +2498,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=38',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=39',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
