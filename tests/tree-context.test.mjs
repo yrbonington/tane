@@ -52,7 +52,7 @@ test('accessibility, small screens, dark mode and reduced motion',()=>{
 test('PWA caches its newly split interface assets',()=>{
   assert.match(html,/href="assets\/tree-context\.css"/);
   assert.match(html,/src="assets\/tree-context\.js"/);
-  assert.match(worker,/tane-v58/);
+  assert.match(worker,/tane-v59/);
   assert.match(html,/sw\.js\?v=55/);
   assert.match(worker,/\.\/assets\/tree-context\.css/);
   assert.match(worker,/\.\/assets\/tree-context\.js/);
