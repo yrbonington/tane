@@ -30,15 +30,20 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   catch{res.writeHead(404);res.end();}
  });
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
- const port=server.address().port,debugPort=29297;
+ const port=server.address().port;
  const profile=mkdtempSync(join(tmpdir(),'tane-browser-'));
  const browser=spawn(chrome,['--headless=new','--no-sandbox','--disable-gpu',
-  '--disable-dev-shm-usage','--remote-allow-origins=*','--remote-debugging-port='+debugPort,
+  '--disable-dev-shm-usage','--remote-allow-origins=*','--remote-debugging-port=0',
   '--user-data-dir='+profile,'about:blank'],{stdio:'ignore'});
  let socket=null,seq=0;const pending=new Map(),exceptions=[];
  try{
   let target=null;
+  const activePort=join(profile,'DevToolsActivePort');
+  let debugPort;
   await waitFor(async()=>{
+   if(!existsSync(activePort))return false;
+   debugPort=Number(readFileSync(activePort,'utf8').split('\n')[0]);
+   if(!Number.isInteger(debugPort)||debugPort<1)return false;
    const res=await fetch('http://127.0.0.1:'+debugPort+'/json');
    target=(await res.json()).find(x=>x.type==='page');
    return !!target;
