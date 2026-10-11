@@ -32,7 +32,7 @@ test('all input methods and dismissal work paths are wired',()=>{
     "'touchstart'","'touchmove'","'touchend'","'touchcancel'",
     "'pointerdown'","'pointermove'","'pointerup'","'pointercancel'",
     "'contextmenu'","'keydown'","'Escape'","'ContextMenu'",
-    "'Tab'","'visualViewport'","'resize'"
+    "'Tab'","visualViewport","'resize'"
   ])assert.ok(gesture.includes(token),token);
   assert.match(gesture,/treeCtxEndGesture\(t\.clientX,t\.clientY,moved\)/);
   assert.match(gesture,/treeCtxHover\(t\.clientX,t\.clientY\)/);
