@@ -187,5 +187,5 @@ body.tree-ctx-open{overflow:hidden}
   86%{transform:translateY(-2px) scale(1.069)}
   100%{opacity:1;transform:translateY(-2px) scale(1.065)}
 }
-.tree-ctx-stage{animation-delay:.095s}
+.tree-ctx-stage{animation-delay:.29s}
 @media(prefers-reduced-motion:reduce){.tree-ctx-lift{animation:none;transform:none}.tree-ctx-stage{animation-delay:0s}}
