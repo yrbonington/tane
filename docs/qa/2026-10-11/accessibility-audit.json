@@ -1,0 +1,1274 @@
+[
+  {
+    "theme": "light",
+    "state": "empty",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "first",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "tree",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#n-seed"
+            ],
+            "html": "<span class=\"n\" id=\"n-seed\">1</span>",
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "button[data-caret=\"root\"]"
+            ],
+            "html": "<button class=\"caret\" data-caret=\"root\" aria-label=\"閉じる\">▼</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "button[data-caret=\"child\"]"
+            ],
+            "html": "<button class=\"caret\" data-caret=\"child\" aria-label=\"閉じる\">▼</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "menu",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "res",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 11.764849840564123
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "tag",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 11.764849840564123
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "seed",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".srow:nth-child(1) > span"
+            ],
+            "html": "<span>代わりの手段で無理やり済ませている</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".srow:nth-child(2) > span"
+            ],
+            "html": "<span>「なぜ今」がある（技術・規制・コストの変化）</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".srow:nth-child(3) > span"
+            ],
+            "html": "<span>お金がすでに別の名目で使われている</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 11.764849840564123
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 13.262366680618083
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 13.262366680618083
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 13.262366680618083
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 13.262366680618083
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 13.262366680618083
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "etc",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "#d-memo"
+            ],
+            "html": "<textarea id=\"d-memo\" rows=\"4\"></textarea>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.368439276707266
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 11.764849840564123
+      },
+      {
+        "target": "d-memo",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(250, 250, 247)",
+        "ratio": 5.133792879868537
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "same",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#n-seed"
+            ],
+            "html": "<span class=\"n\" id=\"n-seed\">1</span>",
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "span[aria-hidden=\"true\"]"
+            ],
+            "html": "<span aria-hidden=\"true\">⌄</span>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      }
+    ],
+    "graphContrast": [
+      {
+        "key": "blue",
+        "color": "#285C43",
+        "ratio": 7.771643254916795
+      },
+      {
+        "key": "green",
+        "color": "#24885E",
+        "ratio": 4.4133336705630155
+      },
+      {
+        "key": "gold",
+        "color": "#8A692A",
+        "ratio": 5.078943368345955
+      },
+      {
+        "key": "gray",
+        "color": "#606E64",
+        "ratio": 5.368439276707266
+      },
+      {
+        "key": "line",
+        "color": "#738479",
+        "ratio": 3.340006864761371
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "ranking",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#n-seed"
+            ],
+            "html": "<span class=\"n\" id=\"n-seed\">1</span>",
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              ".same-rank-arrow"
+            ],
+            "html": "<span class=\"same-rank-arrow\">⌄</span>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "same-rank-num is-hub",
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(40, 92, 67)",
+        "ratio": 7.771643254916795
+      },
+      {
+        "target": "same-rank-arrow",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "list",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#n-seed"
+            ],
+            "html": "<span class=\"n\" id=\"n-seed\">1</span>",
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              ".mark"
+            ],
+            "html": "<span class=\"mark\">選択肢を比べる</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(240, 242, 237)",
+        "ratio": 4.762263289021367
+      },
+      {
+        "target": "mark",
+        "foreground": "rgb(36, 51, 43)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 10.705324704190419
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "state": "idea",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": []
+  },
+  {
+    "theme": "light",
+    "state": "data",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": []
+  },
+  {
+    "theme": "light",
+    "state": "paste",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#imText"
+            ],
+            "html": "<textarea id=\"imText\" rows=\"5\" placeholder=\"バックアップやAIの結果を貼り付け\" aria-describedby=\"imResult\"></textarea>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "imText",
+        "foreground": "rgb(96, 110, 100)",
+        "background": "rgb(250, 250, 247)",
+        "ratio": 5.133792879868537
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "empty",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "first",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "tree",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "button[data-caret=\"root\"]"
+            ],
+            "html": "<button class=\"caret\" data-caret=\"root\" aria-label=\"閉じる\">▼</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "button[data-caret=\"child\"]"
+            ],
+            "html": "<button class=\"caret\" data-caret=\"child\" aria-label=\"閉じる\">▼</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "menu",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "res",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 13.280324226794002
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "tag",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 13.280324226794002
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "seed",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".srow:nth-child(1) > span"
+            ],
+            "html": "<span>代わりの手段で無理やり済ませている</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".srow:nth-child(2) > span"
+            ],
+            "html": "<span>「なぜ今」がある（技術・規制・コストの変化）</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".srow:nth-child(3) > span"
+            ],
+            "html": "<span>お金がすでに別の名目で使われている</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 13.280324226794002
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 14.402618090853773
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 14.402618090853773
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 14.402618090853773
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 14.402618090853773
+      },
+      {
+        "target": "SPAN",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 14.402618090853773
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "etc",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#d-close"
+            ],
+            "html": "<button class=\"close\" id=\"d-close\" aria-label=\"閉じる\">✕</button>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "#d-memo"
+            ],
+            "html": "<textarea id=\"d-memo\" rows=\"4\"></textarea>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "caret",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.19135805277392
+      },
+      {
+        "target": "d-close",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 13.280324226794002
+      },
+      {
+        "target": "d-memo",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(17, 23, 19)",
+        "ratio": 8.90913405483738
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "same",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              ".mark"
+            ],
+            "html": "<span class=\"mark\">選択肢を比べる</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "mark",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.306330609333752
+      }
+    ],
+    "graphContrast": [
+      {
+        "key": "blue",
+        "color": "#A9D8B5",
+        "ratio": 10.481953126162052
+      },
+      {
+        "key": "green",
+        "color": "#55BB88",
+        "ratio": 7.040082216363589
+      },
+      {
+        "key": "gold",
+        "color": "#D8B56B",
+        "ratio": 8.544957603116668
+      },
+      {
+        "key": "gray",
+        "color": "#ACB9AD",
+        "ratio": 8.19135805277392
+      },
+      {
+        "key": "line",
+        "color": "#829989",
+        "ratio": 4.687819049359491
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "ranking",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              ".same-rank-arrow"
+            ],
+            "html": "<span class=\"same-rank-arrow\">⌄</span>",
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "same-rank-num is-hub",
+        "foreground": "rgb(21, 41, 29)",
+        "background": "rgb(169, 216, 181)",
+        "ratio": 9.640446251764045
+      },
+      {
+        "target": "same-rank-arrow",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "list",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              ".mark"
+            ],
+            "html": "<span class=\"mark\">選択肢を比べる</span>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "n-seed",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(29, 39, 32)",
+        "ratio": 7.553063624430872
+      },
+      {
+        "target": "mark",
+        "foreground": "rgb(234, 240, 230)",
+        "background": "rgb(23, 32, 25)",
+        "ratio": 8.306330609333752
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "state": "idea",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": []
+  },
+  {
+    "theme": "dark",
+    "state": "data",
+    "violations": [],
+    "incomplete": [],
+    "computedContrast": []
+  },
+  {
+    "theme": "dark",
+    "state": "paste",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": [
+          {
+            "target": [
+              "#imText"
+            ],
+            "html": "<textarea id=\"imText\" rows=\"5\" placeholder=\"バックアップやAIの結果を貼り付け\" aria-describedby=\"imResult\"></textarea>",
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "computedContrast": [
+      {
+        "target": "imText",
+        "foreground": "rgb(172, 185, 173)",
+        "background": "rgb(17, 23, 19)",
+        "ratio": 8.90913405483738
+      }
+    ]
+  }
+]
