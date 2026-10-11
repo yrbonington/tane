@@ -99,7 +99,7 @@ test('network settles faster, labels are interactive, filters and touch gestures
   assert.ok(await evaluate('netGraph.cam.z')>z,'pinch enlarges graph');
   const panX=await evaluate('netGraph.cam.x');
   await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:120,y:440,id:0},{x:230,y:440,id:1}]});
-  await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[{x:120,y:440,id:0}]});
+  await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[{x:230,y:440,id:1}]});
   await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:145,y:440,id:0}]});
   await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   assert.notEqual(await evaluate('netGraph.cam.x'),panX,'remaining finger continues panning');assert.equal(await evaluate('netGraph.selected'),null,'pinch release does not select a node');
@@ -132,5 +132,41 @@ test('backup preview, cancel, confirmed merge and file export preserve unrelated
   assert.equal(exported.app,'tane');assert.equal(exported.version,2);assert.equal(exported.nodes.length,8);assert.equal(exported.ideas.length,1);
   assert.equal(exported.nodes.find(n=>n.id==='root2').text,JSON.parse(initial).nodes.find(n=>n.id==='root2').text);
   await send('Page.reload');await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'reload');assert.equal(await evaluate('S.nodes.size'),8);assert.equal(await evaluate('S.ideas.size'),1);assert.deepEqual(h.errors,[]);
+ }finally{await h.close();}
+});
+
+test('press, lift, menu and return form one continuous anchored motion',{timeout:25000},async()=>{
+ const h=await browserHarness(root),{send,evaluate,wait}=h,dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
+ const shot=async name=>writeFileSync(resolve(dir,name+'.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+ try{
+  await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:1});
+  await send('Page.navigate',{url:h.url+'/index.html'});await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'load');
+  await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');loadAll();S.theme="root";render()');
+  const p=await evaluate('(()=>{const r=document.querySelector(\'[data-node="child"]\').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()');
+  await evaluate('window.qaMotion=[];window.qaMotionStart=performance.now();requestAnimationFrame(function sample(t){const menu=document.querySelector("#treeCtx"),lift=document.querySelector("#treeCtxLift"),el=menu&&!menu.hidden&&lift&&!lift.hidden?lift:document.querySelector(\'[data-node="child"]\'),r=el.getBoundingClientRect();qaMotion.push({t:t-qaMotionStart,x:r.left+r.width/2,y:r.top+r.height/2,width:r.width,phase:el===lift?"lift":"row"});if(t-qaMotionStart<1400)requestAnimationFrame(sample)})');
+  await send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:p.x,y:p.y,id:0}]});await sleep(180);await shot('motion-1-press');await sleep(260);await shot('motion-2-lift');await sleep(230);await shot('motion-3-menu');
+  await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await evaluate('treeCtxClose()');await sleep(70);await shot('motion-4-return');await sleep(170);await shot('motion-5-rest');await sleep(500);
+  const samples=await evaluate('qaMotion'),steps=samples.slice(1).map((b,i)=>({width:Math.abs(b.width-samples[i].width)/samples[i].width,position:Math.hypot(b.x-samples[i].x,b.y-samples[i].y)}));
+  writeFileSync(resolve(dir,'motion-samples.json'),JSON.stringify({samples,maxWidthStep:Math.max(...steps.map(x=>x.width)),maxPositionStep:Math.max(...steps.map(x=>x.position))},null,2));
+  assert.ok(samples.length>=20,'frame samples collected');assert.ok(samples.some(s=>s.phase==='lift'),'floating preview observed');
+  assert.ok(steps.every(s=>s.width<.05&&s.position<8),'no abrupt geometry jump between source and floating preview');assert.equal(await evaluate('document.querySelector("#treeCtx").hidden'),true);assert.deepEqual(h.errors,[]);
+ }finally{await h.close();}
+});
+
+test('an installed v61 worker upgrades to v67 and keeps saved data offline',{timeout:40000},async()=>{
+ const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
+ try{
+  h.setRootRevision('429845bdd3c91526e505a6f5b30760cb9bc6550d');
+  await send('Page.navigate',{url:h.url+'/index.html'});await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'old app');
+  await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');loadAll();S.theme="root";render();saveNow();navigator.serviceWorker.register("/sw.js?v=61",{updateViaCache:"none"})');
+  await wait(()=>evaluate('!!navigator.serviceWorker.controller'),'old worker controls page');assert.ok(await evaluate('caches.has("tane-v61")'));
+  const before=await evaluate('JSON.parse(localStorage.getItem("tane.v1"))');
+  h.setRootRevision(null);await send('Page.reload');await sleep(150);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'new app through old worker');
+  await evaluate('navigator.serviceWorker.register("/sw.js?v=67",{updateViaCache:"none"}).then(r=>r.update())');
+  await wait(()=>evaluate('navigator.serviceWorker.controller?.scriptURL.endsWith("v=67")'),'new worker controller');
+  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v67")&&!k.includes("tane-v61"))'),'old cache retired');
+  await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});await send('Page.reload');await sleep(250);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'upgraded offline app');
+  assert.deepEqual(await evaluate('[...S.nodes.values()]'),before.nodes);assert.deepEqual(await evaluate('[...S.ideas.values()]'),before.ideas);assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF7');
+  writeFileSync(resolve(dir,'upgraded-offline.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });

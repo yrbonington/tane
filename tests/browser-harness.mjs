@@ -8,13 +8,15 @@ export async function browserHarness(root){
  const chrome=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(x=>x&&existsSync(x))||spawnSync('which',['google-chrome'],{encoding:'utf8'}).stdout.trim();
  if(!chrome)throw Error('Chrome/Chromium is required; this is not a skipped test');
  const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
+ let rootRevision=null;
  const server=createServer((req,res)=>{
   let pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname),before=pathname.startsWith('/before/'),reference=pathname.startsWith('/reference/'),cleanup=pathname.startsWith('/cleanup/');
   if(before||reference||cleanup)pathname=pathname.slice(reference?10:cleanup?8:7);
   const filename=pathname==='/'?'index.html':pathname.slice(1);
   const file=resolve(root,filename);
   if(!file.startsWith(root+'/')){res.writeHead(403);res.end();return;}
-  try{const data=(before||reference||cleanup)?execFileSync('git',['show',(reference?'143b85421784c0fa0a83683df7fba1f854e82d00':cleanup?'e6206b0fe0e4a04613166ca84cfeb1802612d362':'429845bdd3c91526e505a6f5b30760cb9bc6550d')+':'+filename],{cwd:root,stdio:['ignore','pipe','ignore'],maxBuffer:5e6}):readFileSync(file);res.writeHead(200,{'content-type':mime[extname(file)]||'application/octet-stream'});res.end(data);}catch{res.writeHead(404);res.end();}
+  const revision=reference?'143b85421784c0fa0a83683df7fba1f854e82d00':cleanup?'e6206b0fe0e4a04613166ca84cfeb1802612d362':before?'429845bdd3c91526e505a6f5b30760cb9bc6550d':rootRevision;
+  try{const data=revision?execFileSync('git',['show',revision+':'+filename],{cwd:root,stdio:['ignore','pipe','ignore'],maxBuffer:5e6}):readFileSync(file);res.writeHead(200,{'content-type':mime[extname(file)]||'application/octet-stream','cache-control':'no-store'});res.end(data);}catch{res.writeHead(404);res.end();}
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const profile=mkdtempSync(join(tmpdir(),'tane-qa-'));
@@ -30,6 +32,6 @@ export async function browserHarness(root){
   const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};
   const wait=async(fn,label)=>{const stop=Date.now()+10000;while(Date.now()<stop){try{if(await fn())return;}catch{}await sleep(60);}throw Error('Timed out: '+label);};
   await send('Page.enable');await send('Runtime.enable');
-  return {send,evaluate,wait,errors,url:'http://127.0.0.1:'+server.address().port,close:async()=>{socket?.close();browserProcess.kill('SIGTERM');await sleep(300);rmSync(profile,{recursive:true,force:true,maxRetries:10,retryDelay:100});await new Promise(r=>server.close(r));}};
+  return {send,evaluate,wait,errors,setRootRevision:ref=>{rootRevision=ref;},url:'http://127.0.0.1:'+server.address().port,close:async()=>{socket?.close();browserProcess.kill('SIGTERM');await sleep(300);rmSync(profile,{recursive:true,force:true,maxRetries:10,retryDelay:100});await new Promise(r=>server.close(r));}};
  }catch(e){socket?.close();browserProcess.kill('SIGTERM');server.close();throw e;}
 }
