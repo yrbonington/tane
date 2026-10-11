@@ -115,9 +115,9 @@ test('analysis lenses, idea menus and offline PWA keep saved data',{timeout:6500
   await wait(()=>evaluate('!document.querySelector("#copyFallback").hidden'),'fallback');await shot('detail-320-copy-fallback');
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   assert.equal(await evaluate('document.querySelector("#copyFallback").hidden'),true);assert.equal(await evaluate('document.querySelector("#main").inert'),false);
-  await evaluate('saveNow();navigator.serviceWorker.register("/sw.js?v=64",{updateViaCache:"none"})');
+  await evaluate('saveNow();navigator.serviceWorker.register("/sw.js?v=65",{updateViaCache:"none"})');
   await wait(()=>evaluate('!!navigator.serviceWorker.controller'),'worker active');
-  assert.ok(await evaluate('caches.has("tane-v64")'),'current cache installed');
+  assert.ok(await evaluate('caches.has("tane-v65")'),'current cache installed');
   const snapshot=await evaluate('JSON.parse(localStorage.getItem("tane.v1"))');
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
   await send('Page.reload');await sleep(350);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'offline app');
@@ -126,5 +126,29 @@ test('analysis lenses, idea menus and offline PWA keep saved data',{timeout:6500
   assert.equal(await evaluate('S.ideas.size'),snapshot.ideas.length);
   assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF7','versioned CSS available offline');
   await shot('detail-320-offline');assert.deepEqual(h.errors,[]);
+ }finally{await h.close();}
+});
+
+test('removing superseded CSS preserves computed design across widths and themes',{timeout:90000},async()=>{
+ const h=await browserHarness(root),{send,evaluate,wait}=h;
+ const properties=['display','position','padding','margin','gap','color','background-color','border','border-radius','box-shadow','font-family','font-size','font-weight','line-height','letter-spacing','text-align','min-width','min-height','max-width','max-height','overflow-x','overflow-y','flex','grid-template-columns','width','height'];
+ const styleSnapshot=()=>evaluate('(()=>{const props='+JSON.stringify(properties)+';return [...document.querySelectorAll("#main *,#sheet *,#topBar *,.bottom *")].filter(e=>e.getClientRects().length).map(e=>({tag:e.tagName,cls:e.className,styles:Object.fromEntries(props.map(p=>[p,getComputedStyle(e).getPropertyValue(p)]))}));})()');
+ try{
+  await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  for(const width of [320,375,390,430,768,1440])for(const theme of ['light','dark']){
+   await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<900});
+   await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:theme},{name:'prefers-reduced-motion',value:'reduce'}]});
+   const sides=[];
+   for(const ref of ['reference','']){
+    await send('Page.navigate',{url:h.url+(ref?'/reference/index.html':'/index.html')});await sleep(100);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'reference load');await evaluate('document.fonts.ready');
+    await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');loadAll();S.theme="root";S.sel="child";S.detailFor=null;S.tab="tree";render();openSheet(true)');
+    const states=[];
+    for(const tab of ['res','tag','seed','etc']){await evaluate('document.querySelector(\'[data-st="'+tab+'"]\').click()');states.push(await styleSnapshot());}
+    for(const tab of ['idea','data']){await evaluate('openSheet(false);S.tab='+JSON.stringify(tab)+';render()');states.push(await styleSnapshot());}
+    sides.push(states);
+   }
+   const diffs=[];for(let s=0;s<sides[0].length;s++){const a=sides[0][s],b=sides[1][s];if(a.length!==b.length)diffs.push({state:s,expectedLength:a.length,actualLength:b.length});for(let i=0;i<Math.min(a.length,b.length);i++)if(JSON.stringify(a[i])!==JSON.stringify(b[i]))diffs.push({state:s,index:i,tag:a[i].tag,cls:a[i].cls,properties:Object.fromEntries(properties.filter(p=>a[i].styles[p]!==b[i].styles[p]).map(p=>[p,{expected:a[i].styles[p],actual:b[i].styles[p]}]))});}if(diffs.length){writeFileSync(resolve(root,'test-artifacts','css-equivalence-diffs.json'),JSON.stringify({width,theme,diffs},null,2));}assert.equal(diffs.length,0,'effective CSS differs at '+width+' '+theme+' '+JSON.stringify(diffs.slice(0,4)));
+  }
+  assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });
