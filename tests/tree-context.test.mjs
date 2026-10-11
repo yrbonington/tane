@@ -53,7 +53,7 @@ test('PWA caches its newly split interface assets',()=>{
   assert.match(html,/href="assets\/tree-context\.css\?v=65"/);
   assert.match(html,/href="assets\/ui-polish\.css\?v=65"/);
   assert.match(html,/src="assets\/tree-context\.js\?v=65"/);
-  assert.match(worker,/tane-v66/);
+  assert.match(worker,/tane-v67/);
   assert.match(html,/sw\.js\?v=65/);
   assert.match(worker,/\.\/assets\/tree-context\.css/);
   assert.match(worker,/\.\/assets\/tree-context\.js/);
