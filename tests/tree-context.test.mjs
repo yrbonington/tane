@@ -23,7 +23,7 @@ test('tree exposes context menu by long-press rather than injecting actions',()=
   assert.match(html,/data-node-menu=/);
   assert.match(html,/タップで分析 · 長押しで操作/);
   assert.match(gesture,/setTimeout\(\(\)=>\{/);
-  assert.match(gesture,/\,520\)/);
+  assert.match(gesture,/\,420\)/);
   assert.match(gesture,/treeCtxShow\(b\.dataset\.node,b\)/);
 });
 
