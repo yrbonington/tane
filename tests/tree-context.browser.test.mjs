@@ -9,10 +9,6 @@ import {fileURLToPath} from 'node:url';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const logPreview=(name,data)=>{
- for(let i=0;i<data.length;i+=20000)
-  console.log('TANE_VISUAL_'+name+'_PART_'+i+':'+data.slice(i,i+20000));
-};
 const chrome=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser']
  .find(x=>x&&existsSync(x))||spawnSync('which',['google-chrome'],{encoding:'utf8'}).stdout.trim();
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
@@ -92,9 +88,6 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   mkdirSync(join(root,'test-artifacts'),{recursive:true});
   writeFileSync(join(root,'test-artifacts','tree-default-mobile.png'),
    Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
-  logPreview('TREE',(
-   await send('Page.captureScreenshot',{format:'jpeg',quality:48})
-  ).data);
   await evaluate('document.querySelector("[data-node]").click()');
   assert.equal(await evaluate('treeCtxOpen()'),false);
   assert.equal(await evaluate('document.querySelector("#sheet").classList.contains("open")'),true);
@@ -109,9 +102,6 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   const dir=join(root,'test-artifacts');mkdirSync(dir,{recursive:true});
   let screenshot=await send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(dir,'tree-menu-mobile.png'),Buffer.from(screenshot.data,'base64'));
-  console.log('TANE_VISUAL_MOBILE_JPEG:'+(
-   await send('Page.captureScreenshot',{format:'jpeg',quality:44})
-  ).data);
   await evaluate('treeCtxClose()');
   const center=()=>evaluate('(()=>{const r=document.querySelector("[data-node]").getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()');
   const start=async()=>{const p=await center();await send('Input.dispatchTouchEvent',
@@ -130,11 +120,16 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   await sleep(80);await finish();await sleep(80);
   assert.equal(await evaluate('S.adding?.mode'),'choose','drag release selects an action');
   assert.equal(await evaluate('document.querySelector("#treeCtxCommands").classList.contains("is-submenu")'),true);
+  // Touch-initiated submenu should not show a large keyboard focus outline.
+  assert.equal(await evaluate('document.activeElement?.id'),'treeCtxStage');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector("#treeCtxStage")).outlineStyle'),'none');
   writeFileSync(join(dir,'tree-add-submenu.png'),
    Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
-  logPreview('SUBMENU',(
-   await send('Page.captureScreenshot',{format:'jpeg',quality:48})
-  ).data);
+  // Existing action-add workflow remains functional inside the floating menu.
+  await evaluate('document.querySelector(\'[data-add="down"]\').click()');
+  await evaluate('document.querySelector("#addIn").value="苗を植える";document.querySelector("#addForm").requestSubmit()');
+  assert.equal(await evaluate('S.nodes.size'),3,'adding a child works from context menu');
+  assert.equal(await evaluate('treeCtxOpen()'),true,'context remains open for repeated child entries');
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   assert.equal(await evaluate('treeCtxOpen()'),false);
@@ -147,9 +142,6 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   assert.ok(desktop[0]>=0&&desktop[1]>=0&&desktop[2]<=desktop[4]&&desktop[3]<=desktop[5]);
   screenshot=await send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(dir,'tree-menu-desktop.png'),Buffer.from(screenshot.data,'base64'));
-  console.log('TANE_VISUAL_DESKTOP_JPEG:'+(
-   await send('Page.captureScreenshot',{format:'jpeg',quality:44})
-  ).data);
   await evaluate('treeCtxClose()');
  }finally{
   if(socket)socket.close();
