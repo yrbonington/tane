@@ -12,6 +12,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -20,11 +22,11 @@ jobs:
       - name: Install Japanese test fonts for visual snapshots
         run: sudo apt-get update -qq && sudo apt-get install -y fonts-noto-cjk
       - name: Test gestures in real headless Chromium
-        run: node --test tests/tree-context.browser.test.mjs
+        run: node --test tests/tree-context.browser.test.mjs tests/qa-matrix.test.mjs
       - name: Save menu preview screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tree-context-visual-previews
-          path: test-artifacts/*.png
+          path: test-artifacts/
           if-no-files-found: ignore

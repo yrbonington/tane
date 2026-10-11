@@ -1,191 +1,47 @@
-/* Tree context menu — iOS-inspired tactile interaction, independent from idea menu. */
-/* Secondary action affordance for keyboard, VoiceOver and precise pointer input. */
-.tree-node-more{width:34px;min-width:34px;height:48px;align-self:center;
-  padding:0;border:0;border-radius:50%;background:transparent;
-  color:var(--ink-2);font-size:22px;font-weight:700;letter-spacing:1px;
-  display:flex;align-items:center;justify-content:center;
-  opacity:.66;transition:background .16s,opacity .16s,transform .16s}
-.tree-node-more:hover,.tree-node-more:focus-visible{background:var(--surface);opacity:1}
-.tree-node-more:active{transform:scale(.93);background:var(--line)}
-@media(pointer:coarse){.tree-node-more{opacity:.75}}
-#main [data-node] {
-  touch-action:pan-y;
-  -webkit-touch-callout:none;
-  -webkit-user-select:none;user-select:none;
-  transform-origin:center;
-  transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s,background-color .2s;
-}
-#main [data-node].is-pressing {
-  transform:scale(.964);
-  background:var(--surface);
-  box-shadow:0 5px 22px rgba(0,0,0,.12);
-}
-.tree-ctx {position:fixed;inset:0;z-index:70;isolation:isolate;
-  background:rgba(13,14,22,.38);
-  -webkit-backdrop-filter:blur(18px) saturate(1.12);
-  backdrop-filter:blur(18px) saturate(1.12);
-  overscroll-behavior:contain;touch-action:none;
-  animation:tree-ctx-shade .2s ease-out both}
-.tree-ctx[hidden]{display:none!important}
-body.tree-ctx-open{overflow:hidden}
-.tree-ctx-stage {position:fixed;left:16px;top:16px;
-  z-index:1;display:flex;flex-direction:column;gap:9px;
-  width:min(360px,calc(100vw - 32px));
-  max-height:calc(100dvh - 32px);
-  animation:tree-ctx-pop .3s cubic-bezier(.17,1.08,.3,1) both}
-.tree-ctx-stage.above{flex-direction:column-reverse}
-/* Dialog focus is managed programmatically; buttons retain their visible keyboard outlines. */
-.tree-ctx-stage:focus,.tree-ctx-stage:focus-visible{outline:none}
-.tree-ctx-preview{min-width:0;flex:none;max-height:25dvh;overflow:hidden;
-  padding:16px;background:rgba(250,250,252,.98);
-  color:#1c1c1e;border-radius:18px;border:1px solid rgba(255,255,255,.55);
-  box-shadow:0 12px 32px rgba(0,0,0,.17);pointer-events:none}
-.tree-ctx-name{font-size:17px;line-height:1.45;font-weight:650;
-  letter-spacing:-.02em;overflow-wrap:anywhere}
-.tree-ctx-level{display:inline-block;font-size:10px;line-height:1.4;
-  font-family:ui-monospace,Menlo,monospace;color:#62626c;
-  border-radius:6px;padding:3px 6px;background:rgba(118,118,128,.13);margin-bottom:8px}
-.tree-ctx-preview .meta{margin-top:9px}
-.tree-ctx-commands{flex:0 1 auto;min-height:0;overflow-y:auto;
-  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;
-  color:#1c1c1e;background:rgba(245,245,249,.975);
-  border:1px solid rgba(255,255,255,.45);border-radius:15px;
-  box-shadow:0 16px 43px rgba(0,0,0,.22)}
-.tree-ctx-commands .actions{display:flex;flex-direction:column;gap:0;
-  margin:0;padding:0;border:0;background:transparent}
-.tree-ctx-commands .actions .act{min-height:55px;width:100%;
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin:0;padding:12px 16px;background:transparent;color:inherit;
-  border:0;border-radius:0;box-shadow:none;text-align:left}
-.tree-ctx-commands .actions .act+.act{border-top:1px solid rgba(60,60,67,.15)}
-.tree-ctx-commands .actions .act b{flex:1;min-width:0;color:inherit;
-  font-size:16px;font-weight:470;line-height:1.45;white-space:normal}
-.tree-ctx-commands .actions .act b i,
-.tree-ctx-commands .actions .act small{display:none}
-.tree-ctx-commands .actions .act.main{background:transparent;color:inherit}
-.tree-ctx-icon{width:22px;height:22px;display:grid;place-items:center;
-  flex:none;color:#64646b}
-.tree-ctx-icon svg{width:22px;height:22px;display:block;fill:none;
-  stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tree-ctx-commands .actions .act:active,
-.tree-ctx-commands .actions .act.is-hovered,
-.tree-ctx-commands .add-mode:active,
-.tree-ctx-commands .add-mode.is-hovered{background:rgba(120,120,128,.2)}
-.tree-ctx-commands.is-submenu .actions{display:none}
-.tree-ctx-back{width:100%;min-height:47px;padding:10px 16px;
-  background:transparent;border:0;border-bottom:1px solid rgba(60,60,67,.15);
-  color:#007aff;text-align:left;font:inherit;font-size:15px}
-.tree-ctx-commands .addbox{margin:0;padding:14px 15px;gap:11px;background:transparent}
-.tree-ctx-commands .addbox .hint,
-.tree-ctx-commands .layer-box p{color:#676771}
-.tree-ctx-commands .add-mode{width:100%;min-height:57px;display:flex;
-  flex-direction:column;align-items:flex-start;justify-content:center;
-  padding:10px 12px;gap:4px;color:inherit;background:transparent;
-  border:0;border-radius:11px;text-align:left}
-.tree-ctx-commands .add-mode+.add-mode{border-top:1px solid rgba(60,60,67,.14);border-radius:0}
-.tree-ctx-commands .add-mode strong{font-weight:590;font-size:15px}
-.tree-ctx-commands .add-mode small{font-size:12px;color:#676771}
-.tree-ctx-commands .btn{border:0;color:inherit;background:rgba(118,118,128,.14)}
-.tree-ctx-commands .btn.pri{color:white;background:#007aff}
-.tree-ctx-commands .add-cancel,
-.tree-ctx-commands #layerCancel{display:none}
-.tree-ctx-commands input,.tree-ctx-commands select{color:#1c1c1e;
-  background:#fff;border:1px solid rgba(60,60,67,.2)}
-.tree-ctx-commands .layer-box{gap:15px}
-.tree-ctx-commands .layer-box .layer-section{gap:9px}
-.tree-ctx-commands .layer-form{gap:9px}
-.tree-ctx-commands .layer-form label{color:#676771}
-.tree-ctx-commands .inline{flex-wrap:wrap}
-@keyframes tree-ctx-shade{from{opacity:0}to{opacity:1}}
-@keyframes tree-ctx-pop{from{opacity:.4;transform:scale(.935) translateY(9px)}
-  to{opacity:1;transform:scale(1) translateY(0)}}
-@media(prefers-color-scheme:dark){
-  .tree-ctx-preview{color:#f2f2f7;background:rgba(45,45,49,.985);
-    border-color:rgba(255,255,255,.11)}
-  .tree-ctx-level{color:#dddde4;background:rgba(118,118,128,.33)}
-  .tree-ctx-commands{color:#f2f2f7;background:rgba(45,45,49,.985);
-    border-color:rgba(255,255,255,.1)}
-  .tree-ctx-commands .actions .act+.act,
-  .tree-ctx-commands .add-mode+.add-mode,
-  .tree-ctx-back{border-color:rgba(255,255,255,.16)}
-  .tree-ctx-icon{color:#d1d1d8}
-  .tree-ctx-commands .actions .act:active,
-  .tree-ctx-commands .actions .act.is-hovered,
-  .tree-ctx-commands .add-mode:active,
-  .tree-ctx-commands .add-mode.is-hovered{background:rgba(118,118,128,.34)}
-  .tree-ctx-commands .addbox .hint,
-  .tree-ctx-commands .layer-box p,
-  .tree-ctx-commands .add-mode small,
-  .tree-ctx-commands .layer-form label{color:#c6c6cf}
-  .tree-ctx-commands input,.tree-ctx-commands select{background:#38383b;color:#f2f2f7}
-  .tree-ctx-back{color:#0a84ff}
-}
-@media(prefers-reduced-motion:reduce){
- #main [data-node],.tree-ctx,.tree-ctx-stage{transition:none;animation:none}
-}
-
-/* iOS compact context menu refinement — no separate preview card. */
-.tree-ctx{background:rgba(0,0,0,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.tree-ctx-stage{width:min(320px,calc(100vw - 32px));gap:0;animation:tree-ctx-pop .24s cubic-bezier(.2,1,.28,1) both}
-.tree-ctx-preview{display:none!important}
-.tree-ctx-commands{background:rgba(242,242,247,.78);-webkit-backdrop-filter:blur(38px) saturate(1.8);backdrop-filter:blur(38px) saturate(1.8);border:1px solid rgba(255,255,255,.24);border-radius:22px;box-shadow:0 14px 42px rgba(0,0,0,.19);overflow:hidden}
-.tree-ctx-commands .actions .act{min-height:54px;padding:12px 17px}
-.tree-ctx-commands .actions .act b{font-size:17px;font-weight:450;letter-spacing:-.025em}
-.tree-ctx-commands .actions .act+.act{border-top:1px solid rgba(60,60,67,.18)}
-.tree-ctx-icon,.tree-ctx-icon svg{width:23px;height:23px}
-.tree-ctx-commands .addbox{max-height:65dvh;overflow:auto}
-@media(prefers-color-scheme:dark){
- .tree-ctx-commands{background:rgba(38,38,43,.8);border-color:rgba(255,255,255,.12);box-shadow:0 16px 45px rgba(0,0,0,.32)}
-}
-
-
-/* Final restrained presentation: one compact surface, no duplicate source card. */
-.tree-ctx{background:rgba(15,16,22,.14);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
-.tree-ctx-stage{width:min(286px,calc(100vw - 24px));animation:tree-ctx-pop .16s ease-out both}
-.tree-ctx-commands{border-radius:14px;background:rgba(248,248,250,.91);
-  -webkit-backdrop-filter:blur(28px) saturate(1.35);backdrop-filter:blur(28px) saturate(1.35);
-  box-shadow:0 9px 28px rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.48)}
-.tree-ctx-commands .actions .act{min-height:49px;padding:10px 15px}
-.tree-ctx-commands .actions .act b{font-size:15px;font-weight:480;line-height:1.35}
-.tree-ctx-icon,.tree-ctx-icon svg{width:20px;height:20px}
-@media(prefers-color-scheme:dark){
- .tree-ctx-commands{background:rgba(45,45,49,.91);border-color:rgba(255,255,255,.14)}
-}
-@media(prefers-reduced-motion:reduce){.tree-ctx-stage{animation:none}}
-
-/* Continuous gesture feedback: the row responds immediately, then the menu settles. */
-#main [data-node].is-pressing{transform:scale(.985);transition:transform .14s cubic-bezier(.2,.8,.2,1),background-color .14s ease,box-shadow .14s ease}
-.tree-ctx-stage{animation:tree-ctx-smooth-enter .22s cubic-bezier(.18,.82,.2,1) both;transform-origin:top left;will-change:transform,opacity}
-.tree-ctx-stage.above{transform-origin:bottom left}
-.tree-ctx-content-enter>.actions,.tree-ctx-content-enter>.tree-ctx-back,.tree-ctx-content-enter>.addbox{
- animation:tree-ctx-content-in .17s cubic-bezier(.2,.8,.2,1) both
-}
-@keyframes tree-ctx-smooth-enter{from{opacity:0;transform:translateY(5px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes tree-ctx-content-in{from{opacity:.4;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.tree-ctx-stage,.tree-ctx-content-enter>.actions,.tree-ctx-content-enter>.tree-ctx-back,.tree-ctx-content-enter>.addbox{animation:none}}
-
-/* Lift the actual pressed action visually; the original remains in layout. */
+/* One context surface, one continuous lift. Source stays in layout during flight. */
+.tree-node-more{width:44px;min-width:44px;height:48px;align-self:center;padding:0;border:0;border-radius:12px;background:transparent;color:var(--ink-2);font-size:22px;font-weight:650;letter-spacing:1px;display:grid;place-items:center}
+.tree-node-more:hover,.tree-node-more:focus-visible{background:var(--surface);color:var(--ink)}
+#main [data-node]{touch-action:pan-y;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;transform-origin:center;transition:transform 180ms var(--ui-ease),box-shadow 180ms ease,background-color 180ms ease}
+#main [data-node].is-pressing{transform:translateY(-2px) scale(1.025);background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.12)}
 #main [data-node].tree-ctx-original{visibility:hidden}
-.tree-ctx-lift{position:fixed;z-index:2;pointer-events:none;box-sizing:border-box;
-  border-radius:14px;background:var(--surface);color:var(--ink);
-  box-shadow:0 15px 38px rgba(0,0,0,.22);
-  transform-origin:center center;animation:tree-ctx-lift-in .56s cubic-bezier(.2,.7,.2,1) both}
-.tree-ctx-lift[hidden]{display:none!important}
-.tree-ctx-lifted-content{display:flex;flex-direction:column;justify-content:center;
-  width:100%;height:100%;min-height:0;box-sizing:border-box;padding:10px 12px;
-  border:1px solid var(--line);border-radius:14px;background:var(--surface);
-  color:var(--ink);font:inherit;text-align:left;gap:4px;overflow:hidden}
+.tree-ctx{position:fixed;inset:0;z-index:70;isolation:isolate;background:rgba(15,24,21,.14);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);overscroll-behavior:contain;touch-action:none;animation:tree-ctx-shade 160ms ease-out both}
+.tree-ctx.is-closing{pointer-events:none}
+.tree-ctx[hidden],.tree-ctx-lift[hidden]{display:none!important}
+body.tree-ctx-open{overflow:hidden}
+.tree-ctx-stage{position:fixed;left:16px;top:16px;z-index:1;display:flex;flex-direction:column;width:min(300px,calc(100vw - 24px));max-height:calc(100dvh - 32px);transform-origin:top left;animation:tree-ctx-enter 180ms var(--ui-ease) 60ms both}
+.tree-ctx-stage.above{transform-origin:bottom left}
+.tree-ctx-stage:focus,.tree-ctx-stage:focus-visible{outline:none}
+.tree-ctx-preview{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.tree-ctx-commands{flex:0 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;color:var(--ink);background:var(--frame);border:1px solid var(--line);border-radius:var(--ui-radius-md);box-shadow:0 12px 38px rgba(0,0,0,.17)}
+.tree-ctx-commands .actions{display:flex;flex-direction:column;gap:0;margin:0;padding:0;border:0;background:transparent}
+.tree-ctx-commands .actions .act{min-height:50px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0;padding:12px 16px;background:transparent;color:inherit;border:0;border-radius:0;box-shadow:none;text-align:left;transform:none}
+.tree-ctx-commands .actions .act+.act{border-top:1px solid var(--line)}
+.tree-ctx-commands .actions .act b{flex:1;min-width:0;color:inherit;font-size:15px;font-weight:550;line-height:1.45;white-space:normal}
+.tree-ctx-commands .actions .act b i,.tree-ctx-commands .actions .act small{display:none}
+.tree-ctx-icon{width:20px;height:20px;display:grid;place-items:center;flex:none;color:var(--ink-2)}
+.tree-ctx-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tree-ctx-commands .actions .act:is(:active,.is-hovered),.tree-ctx-commands .add-mode:is(:active,.is-hovered){background:var(--accent-soft)}
+.tree-ctx-commands.is-submenu .actions{display:none}
+.tree-ctx-back{width:100%;min-height:46px;padding:10px 16px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--accent);text-align:left;font:inherit;font-size:14px}
+.tree-ctx-commands .addbox{margin:0;padding:14px 16px!important;gap:12px;background:transparent;max-height:65dvh;overflow:auto}
+.tree-ctx-commands .add-mode{width:100%;min-height:60px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:10px 0;gap:4px;color:inherit;background:transparent;border:0;border-radius:0;text-align:left}
+.tree-ctx-commands .add-mode+.add-mode{border-top:1px solid var(--line)}
+.tree-ctx-commands .add-mode strong{font-weight:650;font-size:15px}
+.tree-ctx-commands .add-mode small{font-size:12px;color:var(--ink-2)}
+.tree-ctx-commands .add-cancel,.tree-ctx-commands #layerCancel{display:none}
+.tree-ctx-commands input,.tree-ctx-commands select{color:var(--ink);background:var(--paper);border:1px solid var(--line);font-size:16px}
+.tree-ctx-commands .layer-box{gap:15px}
+.tree-ctx-commands .layer-box .layer-section,.tree-ctx-commands .layer-form{gap:9px}
+.tree-ctx-commands .inline{flex-wrap:wrap}
+.tree-ctx-content-enter>.tree-ctx-back,.tree-ctx-content-enter>.addbox{animation:tree-ctx-content-in 130ms var(--ui-ease) both}
+.tree-ctx-lift{position:fixed;z-index:2;pointer-events:none;box-sizing:border-box;transform-origin:center;border-radius:14px;background:var(--surface);color:var(--ink);box-shadow:0 15px 38px rgba(0,0,0,.18)}
+.tree-ctx-lifted-content{display:flex;flex-direction:column;justify-content:center;width:100%;height:100%;min-height:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;gap:4px;overflow:hidden}
 .tree-ctx-lifted-content .line1{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
 .tree-ctx-lifted-content .t{flex:1;min-width:0;overflow-wrap:anywhere}
-.tree-ctx-lifted-content .lv{font-family:var(--f-mono);font-size:10px;color:var(--ink-2);
-  border:1px solid var(--line);border-radius:5px;padding:0 4px;flex:none}
+.tree-ctx-lifted-content.root .t{font-size:17px;font-weight:700}
 .tree-ctx-lifted-content .meta{display:flex;flex-wrap:wrap;gap:4px}
-@keyframes tree-ctx-lift-in{
-  0%{opacity:.9;transform:translateY(2px) scale(.985)}
-  38%{opacity:1;transform:translateY(-3px) scale(1.082)}
-  68%{transform:translateY(-2px) scale(1.057)}
-  86%{transform:translateY(-2px) scale(1.069)}
-  100%{opacity:1;transform:translateY(-2px) scale(1.065)}
-}
-.tree-ctx-stage{animation-delay:.29s}
-@media(prefers-reduced-motion:reduce){.tree-ctx-lift{animation:none;transform:none}.tree-ctx-stage{animation-delay:0s}}
+@keyframes tree-ctx-shade{from{opacity:0}to{opacity:1}}
+@keyframes tree-ctx-enter{from{opacity:0;transform:translateY(4px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes tree-ctx-content-in{from{opacity:.5;transform:translateY(2px)}to{opacity:1;transform:none}}
+@media(prefers-color-scheme:dark){.tree-ctx{background:rgba(0,0,0,.28)}.tree-ctx-commands{box-shadow:0 12px 38px rgba(0,0,0,.36)}}
+@media(prefers-reduced-motion:reduce){#main [data-node],.tree-ctx,.tree-ctx-stage,.tree-ctx-content-enter>*{transition:none;animation:none}#main [data-node].is-pressing{transform:none}}

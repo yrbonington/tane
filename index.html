@@ -17,20 +17,8 @@
 <title>市場のタネ帳</title>
 <style>
 /* 現場ノート：はしご（上が抽象、字下げするほど具体）を作業面にし、選んだ行動の場で操作する。分析シートは下からせり上がる。 */
-:root{
-  --paper:#EEF2F1; --surface:#FFFFFF; --ink:#16202A; --ink-2:#56626C; --line:#D5DDDB;
-  --accent:#2C47C4; --accent-soft:rgba(44,71,196,.10); --on-accent:#FFFFFF;
-  --seed:#B9DA4A; --seed-soft:rgba(185,218,74,.45); --seed-ink:#1F2A00;
-  --warn:#B86A1C; --warn-soft:rgba(184,106,28,.12);
-  --f-body:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
-  --f-mono:ui-monospace,"SF Mono",Menlo,monospace;
-  --r:10px; color-scheme:light;
-}
-@media (prefers-color-scheme: dark){ :root{
-  --paper:#111518; --surface:#192024; --ink:#E5ECEA; --ink-2:#9AA6A3; --line:#2A3338;
-  --accent:#8FA3FF; --accent-soft:rgba(143,163,255,.14); --on-accent:#0D1240;
-  --seed:#B3D34C; --seed-soft:rgba(179,211,76,.30); --seed-ink:#1A2300;
-  --warn:#E3A35A; --warn-soft:rgba(227,163,90,.14); color-scheme:dark } }
+
+@media (prefers-color-scheme: dark){  }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
@@ -221,40 +209,9 @@ a.btn{display:block;text-decoration:none;color:var(--ink)}
    タネ帳 UI v2 — ChatGPT-inspired minimal design language
    Independent product identity; no OpenAI trademarks/assets.
    ========================================================= */
-:root{
-  --paper:#FFFFFF;
-  --surface:#F7F7F8;
-  --ink:#202123;
-  --ink-2:#696B70;
-  --line:#E7E7EA;
-  --accent:#202123;
-  --accent-soft:#EBECEF;
-  --on-accent:#FFFFFF;
-  --seed:#E4F3E8;
-  --seed-soft:#EFF8F1;
-  --seed-ink:#22623F;
-  --warn:#A45B11;
-  --warn-soft:#FFF1DD;
-  --r:20px;
-  color-scheme:light;
-}
+
 @media (prefers-color-scheme:dark){
-  :root{
-    --paper:#202020;
-    --surface:#2B2B2B;
-    --ink:#F3F3F3;
-    --ink-2:#B8B8BC;
-    --line:#434343;
-    --accent:#F3F3F3;
-    --accent-soft:#393939;
-    --on-accent:#171717;
-    --seed:#244734;
-    --seed-soft:#213A2D;
-    --seed-ink:#D1F1DE;
-    --warn:#E8AD72;
-    --warn-soft:#493522;
-    color-scheme:dark;
-  }
+
 }
 body{font-size:15px;line-height:1.63;letter-spacing:.005em}
 .wrap{max-width:1100px;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));padding-bottom:calc(132px + env(safe-area-inset-bottom))}
@@ -392,35 +349,9 @@ label.f small{font-size:12px}
 
 
 /* ---- Reference-matched Tane design v3: blue CTA and nested cards ---- */
-:root{
-  --paper:#FFFFFF;
-  --surface:#F3F4F6;
-  --ink:#202123;
-  --ink-2:#747680;
-  --line:#E3E4E8;
-  --accent:#3151CB;
-  --accent-soft:#E7EBFC;
-  --on-accent:#FFFFFF;
-  --frame:#FFFFFF;
-  --panel:#F3F4F6;
-  --panel-line:#EDEEF1;
-  --blue-button:#304CC9;
-}
+
 @media(prefers-color-scheme:dark){
-  :root{
-    --paper:#0B0B0D;
-    --surface:#242426;
-    --ink:#F8F8FA;
-    --ink-2:#B3B4BC;
-    --line:#323236;
-    --accent:#5976EB;
-    --accent-soft:#252B41;
-    --on-accent:#FFFFFF;
-    --frame:#0B0B0D;
-    --panel:#242426;
-    --panel-line:#333336;
-    --blue-button:#304CC9;
-  }
+
 }
 body{background:var(--paper)}
 .bar{background:var(--paper)}
@@ -753,23 +684,23 @@ body.idea-menu-open{overflow:hidden}
    Source: https://github.com/fontsource/font-files/tree/main/fonts/google/reggae-one
    License text preserved here for the two offline wordmark-only subsets:
    Copyright 2020 The Reggae Project Authors (https://github.com/fontworks-fonts/Reggae/), all rights reserved.
-   
+
    This Font Software is licensed under the SIL Open Font License, Version 1.1.
    This license is copied below, and is also available with a FAQ at:
    http://scripts.sil.org/OFL
-   
-   
+
+
    -----------------------------------------------------------
    SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
    -----------------------------------------------------------
-   
+
    PREAMBLE
    The goals of the Open Font License (OFL) are to stimulate worldwide
    development of collaborative font projects, to support the font creation
    efforts of academic and linguistic communities, and to provide a free and
    open framework in which fonts may be shared and improved in partnership
    with others.
-   
+
    The OFL allows the licensed fonts to be used, studied, modified and
    redistributed freely as long as they are not sold by themselves. The
    fonts, including any derivative works, can be bundled, embedded,
@@ -778,63 +709,63 @@ body.idea-menu-open{overflow:hidden}
    however, cannot be released under any other type of license. The
    requirement for fonts to remain under this license does not apply
    to any document created using the fonts or their derivatives.
-   
+
    DEFINITIONS
    "Font Software" refers to the set of files released by the Copyright
    Holder(s) under this license and clearly marked as such. This may
    include source files, build scripts and documentation.
-   
+
    "Reserved Font Name" refers to any names specified as such after the
    copyright statement(s).
-   
+
    "Original Version" refers to the collection of Font Software components as
    distributed by the Copyright Holder(s).
-   
+
    "Modified Version" refers to any derivative made by adding to, deleting,
    or substituting -- in part or in whole -- any of the components of the
    Original Version, by changing formats or by porting the Font Software to a
    new environment.
-   
+
    "Author" refers to any designer, engineer, programmer, technical
    writer or other person who contributed to the Font Software.
-   
+
    PERMISSION & CONDITIONS
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of the Font Software, to use, study, copy, merge, embed, modify,
    redistribute, and sell modified and unmodified copies of the Font
    Software, subject to the following conditions:
-   
+
    1) Neither the Font Software nor any of its individual components,
    in Original or Modified Versions, may be sold by itself.
-   
+
    2) Original or Modified Versions of the Font Software may be bundled,
    redistributed and/or sold with any software, provided that each copy
    contains the above copyright notice and this license. These can be
    included either as stand-alone text files, human-readable headers or
    in the appropriate machine-readable metadata fields within text or
    binary files as long as those fields can be easily viewed by the user.
-   
+
    3) No Modified Version of the Font Software may use the Reserved Font
    Name(s) unless explicit written permission is granted by the corresponding
    Copyright Holder. This restriction only applies to the primary font name as
    presented to the users.
-   
+
    4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
    Software shall not be used to promote, endorse or advertise any
    Modified Version, except to acknowledge the contribution(s) of the
    Copyright Holder(s) and the Author(s) or with their explicit written
    permission.
-   
+
    5) The Font Software, modified or unmodified, in part or in whole,
    must be distributed entirely under this license, and must not be
    distributed under any other license. The requirement for fonts to
    remain under this license does not apply to any document created
    using the Font Software.
-   
+
    TERMINATION
    This license becomes null and void if any of the above conditions are
    not met.
-   
+
    DISCLAIMER
    THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
@@ -845,7 +776,7 @@ body.idea-menu-open{overflow:hidden}
    DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
    FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
    OTHER DEALINGS IN THE FONT SOFTWARE.
-   
+
 */
 @font-face{
   font-family:"Reggae One Tane";
@@ -985,8 +916,8 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/ui-polish.css?v=61">
-<link rel="stylesheet" href="assets/tree-context.css?v=61">
+<link rel="stylesheet" href="assets/ui-polish.css?v=62">
+<link rel="stylesheet" href="assets/tree-context.css?v=62">
 </head>
 <body>
 <div class="wrap">
@@ -995,7 +926,7 @@ body.idea-menu-open{overflow:hidden}
       <img class="site-brand-icon" src="assets/icon/tanecho-icon.svg" width="37" height="37" alt="">
       <span class="site-brand-name">タネ帳</span>
     </button>
-    <div class="subnav" id="subnav" role="tablist">
+    <div class="subnav" id="subnav" role="group" aria-label="タネ探しの表示">
       <button data-tab="tree">ツリー</button>
       <button data-tab="same">つながり</button>
       <button data-tab="seed">タネ候補<span class="n" id="n-seed"></span></button>
@@ -1003,7 +934,7 @@ body.idea-menu-open{overflow:hidden}
   </header>
   <div class="grid">
     <main id="main" style="min-width:0"></main>
-    <aside class="sheet" id="sheet" aria-label="選んだ行動の分析"></aside>
+    <aside class="sheet" id="sheet" aria-label="選んだ行動の分析" tabindex="-1"></aside>
   </div>
 </div>
 <nav class="bottom" aria-label="メインメニュー">
@@ -1012,7 +943,7 @@ body.idea-menu-open{overflow:hidden}
   <button data-area="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg><span>データ</span></button>
 </nav>
 <div class="scrim" id="scrim" hidden></div>
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
 <div class="idea-menu-overlay" id="ideaMenu" hidden>
   <div class="idea-menu-stage">
     <div class="idea-menu-preview card ideacard" id="ideaMenuPreview" aria-hidden="true"></div>
@@ -1045,7 +976,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=61"></script>
+<script src="assets/tree-context.js?v=62"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -1207,7 +1138,46 @@ function select(id,openDetail){
   S.tab='tree'; render(); if(openDetail) openSheet(true);
   if(id) requestAnimationFrame(()=>{const el=document.querySelector(`[data-item="${CSS.escape(id)}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<170||r.bottom>innerHeight-20)el.scrollIntoView({block:'center',behavior:'smooth'});}});
 }
-function openSheet(on){$('#sheet').classList.toggle('open',on);$('#scrim').hidden=!on||wide();}
+// Background siblings are inert while a modal is active; the sheet remains scrollable.
+const modalOwners=new Set();
+function modalBackground(owner,on){
+  if(on)modalOwners.add(owner);else modalOwners.delete(owner);
+  const blocked=modalOwners.size>0;
+  ['#main','#topBar','.bottom'].forEach(s=>$(s).inert=blocked);
+  if(owner==='tree')$('#sheet').inert=on||(!wide()&&!$('#sheet').classList.contains('open'));
+  document.body.classList.toggle('modal-open',blocked);
+}
+let sheetReturnNode=null;
+function syncSheetAccess(){
+  const sh=$('#sheet'),modal=!wide()&&sh.classList.contains('open');
+  sh.inert=modalOwners.has('tree')||(!wide()&&!modal);
+  sh.setAttribute('role',modal?'dialog':'complementary');
+  if(modal)sh.setAttribute('aria-modal','true');else sh.removeAttribute('aria-modal');
+  $('#scrim').hidden=!modal;
+  modalBackground('sheet',modal);
+}
+function openSheet(on){
+  const sh=$('#sheet'),wasOpen=sh.classList.contains('open');
+  if(on&&!wasOpen)sheetReturnNode=S.sel;
+  sh.classList.toggle('open',on);syncSheetAccess();
+  if(on&&!wide())sh.focus({preventScroll:true});
+  else if(!on&&wasOpen&&!wide()){
+    document.querySelector('[data-node="'+CSS.escape(sheetReturnNode||'')+'"]')?.focus({preventScroll:true});
+    sheetReturnNode=null;
+  }
+}
+window.addEventListener('resize',syncSheetAccess);
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Tab')return;
+  const modal=treeCtxOpen()?null:!$('#ideaMenu').hidden?$('#ideaMenu'):!$('#copyFallback').hidden?$('#copyFallback'):
+    !wide()&&$('#sheet').classList.contains('open')?$('#sheet'):null;
+  if(!modal)return;
+  const buttons=[...modal.querySelectorAll('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),a[href]')].filter(x=>x.getClientRects().length);
+  const first=buttons[0],last=buttons.at(-1);
+  if(!first)return;
+  if(e.shiftKey&&(document.activeElement===first||!buttons.includes(document.activeElement))){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&(document.activeElement===last||!buttons.includes(document.activeElement))){e.preventDefault();first.focus();}
+},true);
 
 /* ---------- 描画 ---------- */
 function daysSinceExport(){const t=Number(ls.get(KEY_EXPORT)||0);return t?Math.floor((Date.now()-t)/864e5):null;}
@@ -1216,7 +1186,7 @@ function render(){
   if(S.theme&&!S.nodes.has(S.theme))S.theme=null;
   if(!S.theme){const sv=ls.get(KEY_THEME);S.theme=(sv&&S.nodes.has(sv)&&!S.nodes.get(sv).parent)?sv:(roots()[0]?.id||null);}
   if(S.sel&&!S.nodes.has(S.sel))S.sel=null; if(S.focus&&!S.nodes.has(S.focus))S.focus=null;
-  renderTabs(); renderMain(); renderSheet();
+  renderTabs(); renderMain(); renderSheet();syncSheetAccess();
   if(keep){const i=$('#addIn');if(i){i.value=keep.v;i.focus();}}
 }
 const THEMES_HTML=`<div class="themes" id="themes"></div><form class="newtheme" id="themeForm" hidden><input id="themeInput" placeholder="起点の行動（例：家を借りる）" aria-label="起点の行動" autocomplete="off"><button class="btn pri" type="submit">作る</button><button class="btn icon" type="button" id="themeCancel" aria-label="やめる">✕</button></form>`;
@@ -1299,8 +1269,10 @@ function renderTree(m){
     return;
   }
   if(!S.theme){m.innerHTML=THEMES_HTML+`<div class="welcome-panel welcome-single">
+    <span class="welcome-kicker">OBSERVE. CONNECT. GROW.</span>
     <h4>今日の観察から、<br>タネを探そう。</h4>
     <p>人の行動から、市場のタネを見つける。</p>
+    <ol class="welcome-path"><li><span>01</span>行動を観察</li><li><span>02</span>理由を掘る</li><li><span>03</span>タネを育てる</li></ol>
     <button class="btn pri big" id="startNewTheme">＋ 最初の行動を追加</button>
     <p class="welcome-help">前のデータがある場合は「データ」から復元</p>
   </div>`;renderThemes();$('#startNewTheme').onclick=()=>{S.themeStart=true;renderMain();};return;}
@@ -1313,7 +1285,7 @@ function renderTree(m){
     if(!shut)for(const k of ks)walk(k.id);};
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button class="focus-reset" data-zoom="">← 全体表示</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
-  m.innerHTML=THEMES_HTML+fb+`<p class="tapnote">タップで分析 · 長押しで操作</p>`+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
+  m.innerHTML=THEMES_HTML+fb+`<div class="tree-heading"><span>行動のツリー</span><span class="tree-count">${rows.length} 行動</span></div><p class="tapnote">タップで分析 · 長押しで操作</p>`+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋ 行動を追加</button></div>`);
   renderThemes();
   bindTreeNodePress(m);
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
@@ -2244,6 +2216,7 @@ function openIdeaMenu(id,opener){
   $('#ideaMenuConfirm').hidden=true;
   ideaMenuOpenedAt=performance.now();
   document.body.classList.add('idea-menu-open');
+  modalBackground('idea',true);
   menu.hidden=false;
   menu.querySelector('.idea-menu').focus({preventScroll:true});
 }
@@ -2251,6 +2224,7 @@ function closeIdeaMenu(){
   const menu=$('#ideaMenu');
   menu.hidden=true;delete menu.dataset.idea;
   document.body.classList.remove('idea-menu-open');
+  modalBackground('idea',false);
   ideaPointerDrag=null;ideaMenuTouchGesture=null;ideaMenuClearHover();
   $('#ideaMenuPreview').replaceChildren();
   if(ideaMenuOpener?.isConnected)ideaMenuOpener.focus({preventScroll:true});
@@ -2510,7 +2484,7 @@ function updateMeter(n){const ls=lensScore(n);document.querySelectorAll('#d-res 
 function growAll(box){box.querySelectorAll('textarea').forEach(t=>{const g=()=>{t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';};g();t.addEventListener('input',g);});}
 function commitRes(n,re){n.updated=Date.now();saveSoon();renderMain();renderTabs();if(re)renderRes(n);else updateMeter(n);}
 function renderRes(n){const box=$('#d-res');if(!box)return;const ls=lensScore(n);const lens=S.lens||'depth';
-  const meter=`<div class="lens-meter" role="tablist" aria-label="解像度の4つの視点">${LENSES.map(([k,l,h])=>`<button class="lens-btn" role="tab" data-lens="${k}" aria-pressed="${k===lens}"><b>${l}</b><span class="ldots">${[1,2,3].map(i=>`<i class="${ls[k]>=i?'on':''}"></i>`).join('')}</span><small>${h}</small></button>`).join('')}</div>`;
+  const meter=`<div class="lens-meter" role="group" aria-label="解像度の4つの視点">${LENSES.map(([k,l,h])=>`<button class="lens-btn" data-lens="${k}" aria-pressed="${k===lens}"><b>${l}</b><span class="ldots" aria-hidden="true">${[1,2,3].map(i=>`<i class="${ls[k]>=i?'on':''}"></i>`).join('')}</span><small>${h}</small></button>`).join('')}</div>`;
   let body='';
   if(lens==='depth'){
     const card=(r,lvl)=>`<div class="rcard ${lvl?'child':''}" style="margin-left:${Math.min(lvl,4)*14}px" data-r="${esc(r.id)}">
@@ -2624,8 +2598,8 @@ function renderReferences(n){
 function renderSheet(){const sh=$('#sheet');const n=S.sel&&S.nodes.get(S.sel);
   if(!n){S.detailFor=null;sh.innerHTML=`<div class="sec"><h3>使い方</h3><ol class="muted" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
     <li>起点の行動（L0）を決め、その下に観察した行動を書き出す。</li>
-    <li>行動をタップして、「↑抽象化する」で何のためかを上に、「↓具体化する」で具体的なやり方を下に足す。</li>
-    <li>「分析する」→「解像度」で、なぜこの行動をしているのかを、深さ・広さ・構造・時間の4つの視点で掘る。</li>
+    <li>行動を長押し、または「···」から追加。「抽象化」で目的を上に、「具体化」でやり方を下に足す。</li>
+    <li>行動をタップして分析。深さ・広さ・構造・時間の4つの視点で、なぜを掘る。</li>
     <li>行動ごとに「本質的には何をしているか」を書く。同じ本質は別の起点の行動ともつながる。</li>
     <li>気になる行動はタネ候補にして、5つの要素で採点する。</li></ol></div>`;return;}
   if(S.detailFor!==n.id){buildSheet(n);S.detailFor=n.id;}else syncSheet(n);}
@@ -2695,7 +2669,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=61',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=62',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>

@@ -107,7 +107,7 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   const dir=join(root,'test-artifacts');mkdirSync(dir,{recursive:true});
   let screenshot=await send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(dir,'tree-menu-mobile.png'),Buffer.from(screenshot.data,'base64'));
-  await evaluate('treeCtxClose()');
+  await evaluate('treeCtxClose()');await sleep(220);
   const center=()=>evaluate('(()=>{const r=document.querySelector("[data-node]").getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()');
   const start=async()=>{const p=await center();await send('Input.dispatchTouchEvent',
    {type:'touchStart',touchPoints:[{x:p.x,y:p.y,id:1}]});return p;};
@@ -118,7 +118,7 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   await start();await sleep(670);
   assert.equal(await evaluate('treeCtxOpen()'),true,'hold opens menu');
   await finish();assert.equal(await evaluate('treeCtxOpen()'),true,'release retains menu');
-  await evaluate('treeCtxClose()');
+  await evaluate('treeCtxClose()');await sleep(220);
   await start();await sleep(650);
   const hit=await evaluate('(()=>{const r=document.querySelector("#chooseAdd").getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()');
   await send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:hit.x,y:hit.y,id:1}]});
@@ -147,7 +147,7 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   assert.ok(desktop[0]>=0&&desktop[1]>=0&&desktop[2]<=desktop[4]&&desktop[3]<=desktop[5]);
   screenshot=await send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(dir,'tree-menu-desktop.png'),Buffer.from(screenshot.data,'base64'));
-  await evaluate('treeCtxClose()');
+  await evaluate('treeCtxClose()');await sleep(220);
  }finally{
   if(socket)socket.close();
   browser.kill('SIGTERM');
