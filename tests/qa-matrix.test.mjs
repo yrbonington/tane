@@ -117,7 +117,7 @@ test('analysis lenses, idea menus and offline PWA keep saved data',{timeout:6500
   assert.equal(await evaluate('document.querySelector("#copyFallback").hidden'),true);assert.equal(await evaluate('document.querySelector("#main").inert'),false);
   await evaluate('saveNow();navigator.serviceWorker.register("/sw.js?v=65",{updateViaCache:"none"})');
   await wait(()=>evaluate('!!navigator.serviceWorker.controller'),'worker active');
-  assert.ok(await evaluate('caches.has("tane-v67")'),'current cache installed');
+  assert.ok(await evaluate('caches.has("tane-v68")'),'current cache installed');
   const snapshot=await evaluate('JSON.parse(localStorage.getItem("tane.v1"))');
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
   await send('Page.reload');await sleep(350);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'offline app');

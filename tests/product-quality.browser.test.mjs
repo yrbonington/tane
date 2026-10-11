@@ -35,6 +35,19 @@ test('WCAG automated audit of both themes, screens and analysis states',{timeout
     if(['ranking','list'].includes(state))await evaluate('document.querySelector(\'[data-same-view="'+state+'"]\').click()');
     await sleep(80);
     const result=await evaluate('axe.run(document,{runOnly:{type:"tag",values:["wcag2a","wcag2aa","wcag21a","wcag21aa","wcag22aa"]}}).then(r=>({violations:r.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.map(n=>({target:n.target,html:n.html,summary:n.failureSummary}))})),incomplete:r.incomplete.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,html:n.html,summary:n.failureSummary}))}))}))');findings.push({theme,state,...result});
+    // Resolve the audit's short-text, symbol, clipped-field and simple gradient
+    // cases using their actual computed foreground and surface colors.
+    const contrast=await evaluate(`(()=>{
+      const rgb=s=>(s.match(/[\\d.]+/g)||[]).map(Number).slice(0,3),lum=c=>c.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0),ratio=(a,b)=>{const x=lum(rgb(a)),y=lum(rgb(b));return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+      return [...document.querySelectorAll('#n-seed,[data-caret],#d-close,.srow>span,#d-memo,#imText,.same-rank-num,.same-rank-arrow,.mark')].filter(e=>e.getClientRects().length).map(e=>{
+        let p=e,bg='';while(p){const c=getComputedStyle(p).backgroundColor;if(c!=='transparent'&&c!=='rgba(0, 0, 0, 0)'){bg=c;break;}p=p.parentElement;}bg=bg||getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+        const fg=getComputedStyle(e).color,colors=[bg];if(e.classList.contains('mark'))colors.push(getComputedStyle(document.documentElement).getPropertyValue('--seed').trim());
+        const parse=s=>s.startsWith('#')?'rgb('+[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)).join(',')+')':s;
+        const ratios=colors.map(b=>ratio(fg,parse(b)));if(e.hasAttribute('placeholder'))ratios.push(ratio(getComputedStyle(e,'::placeholder').color,parse(bg)));
+        return {target:e.id||e.className||e.tagName,foreground:fg,background:bg,ratio:Math.min(...ratios)};
+      });})()`);
+    findings[findings.length-1].computedContrast=contrast;
+    assert.ok(contrast.every(x=>x.ratio>=4.5),theme+' '+state+' low contrast '+JSON.stringify(contrast.filter(x=>x.ratio<4.5)));
    }
   }
   const failures=findings.filter(x=>x.violations.length);assert.equal(failures.length,0,'accessibility findings: '+JSON.stringify(failures.slice(0,2)));
@@ -104,7 +117,13 @@ test('network settles faster, labels are interactive, filters and touch gestures
   await send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
   assert.notEqual(await evaluate('netGraph.cam.x'),panX,'remaining finger continues panning');assert.equal(await evaluate('netGraph.selected'),null,'pinch release does not select a node');
   await evaluate('document.querySelector("#netFit").click()');await wait(()=>evaluate('!netGraph.camTarget'),'fit');
-  await evaluate('netSelect("action:child",false);document.querySelector("#netAnalyze").click()');assert.equal(await evaluate('S.tab'),'tree');assert.equal(await evaluate('S.sel'),'child');
+  await evaluate('netSelect(null,false);document.querySelector("#netCanvas").focus()');
+  const key=async(k,code,v)=>send('Input.dispatchKeyEvent',{type:'keyDown',key:k,code,windowsVirtualKeyCode:v});
+  await key('ArrowRight','ArrowRight',39);assert.equal(await evaluate('netGraph.selected'),'action:root');
+  await key('ArrowRight','ArrowRight',39);assert.equal(await evaluate('netGraph.selected'),'action:child');
+  const kz=await evaluate('netGraph.cam.z');await key('+','Equal',187);assert.ok(await evaluate('netGraph.cam.z')>kz,'keyboard zoom');
+  assert.ok(await evaluate('document.querySelector("#netKeyboardStatus").textContent.includes("暮らしに合う部屋を探す")'));
+  await key('Enter','Enter',13);assert.equal(await evaluate('S.tab'),'tree');assert.equal(await evaluate('S.sel'),'child');assert.equal(await evaluate('document.querySelector("#sheet").classList.contains("open")'),true);
   await evaluate('openSheet(false);S.tab="same";render();document.querySelector(\'[data-same-view="ranking"]\').click();document.querySelector("[data-rank-open]").click()');await shot('graph-after-ranking');
   await evaluate('document.querySelector(\'[data-same-view="list"]\').click()');await shot('graph-after-list');assert.deepEqual(h.errors,[]);
  }finally{writeFileSync(resolve(dir,'network-timings.json'),JSON.stringify(timings,null,2));await h.close();}
@@ -153,7 +172,7 @@ test('press, lift, menu and return form one continuous anchored motion',{timeout
  }finally{await h.close();}
 });
 
-test('an installed v61 worker upgrades to v67 and keeps saved data offline',{timeout:40000},async()=>{
+test('an installed v61 worker upgrades to v68 and keeps saved data offline',{timeout:40000},async()=>{
  const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
  try{
   h.setRootRevision('429845bdd3c91526e505a6f5b30760cb9bc6550d');
@@ -164,7 +183,7 @@ test('an installed v61 worker upgrades to v67 and keeps saved data offline',{tim
   h.setRootRevision(null);await send('Page.reload');await sleep(150);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'new app through old worker');
   await evaluate('navigator.serviceWorker.register("/sw.js?v=67",{updateViaCache:"none"}).then(r=>r.update())');
   await wait(()=>evaluate('navigator.serviceWorker.controller?.scriptURL.endsWith("v=67")'),'new worker controller');
-  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v67")&&!k.includes("tane-v61"))'),'old cache retired');
+  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v68")&&!k.includes("tane-v61"))'),'old cache retired');
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});await send('Page.reload');await sleep(250);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'upgraded offline app');
   assert.deepEqual(await evaluate('[...S.nodes.values()]'),before.nodes);assert.deepEqual(await evaluate('[...S.ideas.values()]'),before.ideas);assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF7');
   writeFileSync(resolve(dir,'upgraded-offline.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));assert.deepEqual(h.errors,[]);
