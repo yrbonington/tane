@@ -16,10 +16,10 @@ const fixture={version:2,nodes:[
 ],ideas:[{id:'idea1',title:'暮らしの条件から部屋を選ぶ',status:'idea',sources:[{type:'node',id:'child'}],customer:'引っ越しを考える人',pain:'写真だけでは暮らしが想像できない',next:'引っ越したばかりの3人に話を聞く',fit:{}}]};
 
 test('six widths × two themes × empty, populated, dense, context and analysis; before/after evidence',{timeout:180000},async()=>{
- const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});const results=[];
+ const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});const results=[],failures=[];
  const shot=async name=>writeFileSync(resolve(dir,name+'.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
  const seed=async dense=>{const f=structuredClone(fixture);if(dense)for(let i=0;i<35;i++)f.nodes.push({id:'dense'+i,parent:i<7?'child':'dense'+(i-7),order:i,text:'候補の情報を集め、暮らしの条件に合わせて比較しながら次の行動を考える '+i,tags:['選択肢を比べる','暮らしの条件を整理する','情報を集める'],seed:i%3===0});await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(f))+');loadAll();S.theme="root";S.sel=null;S.detailFor=null;S.tab="tree";render()');};
- const overflow=()=>evaluate('({width:innerWidth,document:document.documentElement.scrollWidth})');
+ const overflow=()=>evaluate('({width:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll("#main>*")].filter(e=>e.getBoundingClientRect().right>document.documentElement.clientWidth+1).map(e=>({class:e.className,right:e.getBoundingClientRect().right}))})');
  try{for(const phase of ['before','after']){
   await send('Page.navigate',{url:h.url+(phase==='before'?'/before/index.html':'/index.html')});await wait(()=>evaluate("document.readyState==='complete'&&typeof S!=='undefined'"),'app load');
   for(const width of [320,375,390,430,768,1440])for(const theme of ['light','dark']){
@@ -31,16 +31,16 @@ test('six widths × two themes × empty, populated, dense, context and analysis;
    await shot(prefix+'-empty');await seed(false);await shot(prefix+'-tree');
    await evaluate('document.querySelector(\'[data-node-menu="child"]\').click()');await sleep(620);await shot(prefix+'-menu');
    const box=await evaluate('(()=>{const r=document.querySelector("#treeCtxStage").getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom}})()');
-   if(phase==='after')assert.ok(box.left>=0&&box.top>=0&&box.right<=width+1&&box.bottom<=height+1,'menu fits '+prefix);
+   if(phase==='after'&&!(box.left>=0&&box.top>=0&&box.right<=width+1&&box.bottom<=height+1))failures.push('menu fits '+prefix);
    await evaluate('treeCtxClose()');await sleep(220);
    await evaluate('document.querySelector(\'[data-node="child"]\').click()');await sleep(330);await shot(prefix+'-sheet');await evaluate('openSheet(false)');await sleep(330);
-   if(width===390||width===1440)for(const tab of ['same','seed','idea','data']){await evaluate('S.tab='+JSON.stringify(tab)+';render()');await sleep(tab==='same'?450:30);await shot(prefix+'-'+tab);if(phase==='after'){const o=await overflow();assert.ok(o.document<=width+1,'no overflow in '+tab+' '+prefix);}}
+   for(const tab of ['same','seed','idea','data']){await evaluate('S.tab='+JSON.stringify(tab)+';render()');await sleep(tab==='same'?450:30);await shot(prefix+'-'+tab);if(phase==='after'){const o=await overflow();if(o.document>width+1)failures.push('overflow in '+tab+' '+prefix+' '+JSON.stringify(o));}}
    await seed(true);await shot(prefix+'-dense');const layout=await overflow();results.push({phase,width,theme,layout,box});
-   if(phase==='after')assert.ok(layout.document<=width+1,'dense tree fits '+prefix);
+   if(phase==='after'&&layout.document>width+1)failures.push('dense tree fits '+prefix+' '+JSON.stringify(layout));
   }
  }
- assert.deepEqual(h.errors,[],'no uncaught exceptions');
- }finally{writeFileSync(resolve(dir,'qa-matrix.json'),JSON.stringify({results,errors:h.errors},null,2));await h.close();}
+ assert.deepEqual(failures,[],'responsive regressions');assert.deepEqual(h.errors,[],'no uncaught exceptions');
+ }finally{writeFileSync(resolve(dir,'qa-matrix.json'),JSON.stringify({results,failures,errors:h.errors},null,2));await h.close();}
 });
 
 test('keyboard modal boundaries, input workflows, persistence and reduced motion',{timeout:60000},async()=>{
@@ -54,7 +54,10 @@ test('keyboard modal boundaries, input workflows, persistence and reduced motion
   assert.equal(await evaluate('document.querySelector("#main").inert'),true);
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
   assert.equal(await evaluate('document.activeElement.id'),'d-close');
-  await evaluate('document.querySelector(\'[data-st="tag"]\').click();document.querySelector("#d-tag-in").value="暮らしを想像する";document.querySelector("#d-tagf").requestSubmit()');
+  await evaluate('document.querySelector(\'[data-st="res"]\').focus()');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});
+  assert.equal(await evaluate('document.activeElement.dataset.st'),'tag');
+  await evaluate('document.querySelector("#d-tag-in").value="暮らしを想像する";document.querySelector("#d-tagf").requestSubmit()');
   assert.ok(await evaluate('S.nodes.get("child").tags.includes("暮らしを想像する")'));
   await evaluate('document.querySelector(\'[data-st="seed"]\').click();document.querySelector(\'[data-sk="gap"][data-sv="2"]\').click()');
   assert.equal(await evaluate('S.nodes.get("child").scores.gap'),2);

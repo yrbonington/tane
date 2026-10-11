@@ -28,7 +28,7 @@ export async function browserHarness(root){
   socket.addEventListener('message',e=>{const m=JSON.parse(String(e.data));if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails?.exception?.description||m.params.exceptionDetails?.text);if(!m.id)return;const p=pending.get(m.id);if(!p)return;pending.delete(m.id);m.error?p.reject(Error(JSON.stringify(m.error))):p.resolve(m.result);});
   const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});socket.send(JSON.stringify({id,method,params}));});
   const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};
-  const wait=async(fn,label)=>{const stop=Date.now()+10000;while(Date.now()<stop){if(await fn())return;await sleep(60);}throw Error('Timed out: '+label);};
+  const wait=async(fn,label)=>{const stop=Date.now()+10000;while(Date.now()<stop){try{if(await fn())return;}catch{}await sleep(60);}throw Error('Timed out: '+label);};
   await send('Page.enable');await send('Runtime.enable');
   return {send,evaluate,wait,errors,url:'http://127.0.0.1:'+server.address().port,close:async()=>{socket?.close();browserProcess.kill('SIGTERM');await sleep(300);rmSync(profile,{recursive:true,force:true,maxRetries:10,retryDelay:100});await new Promise(r=>server.close(r));}};
  }catch(e){socket?.close();browserProcess.kill('SIGTERM');server.close();throw e;}

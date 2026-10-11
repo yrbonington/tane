@@ -82,6 +82,6 @@ textarea,.inline input,.newtheme input,.layer-form select,.layer-box .layer-form
 :where(button,input,textarea,select,a):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(min-width:900px){.grid{grid-template-columns:minmax(0,1fr) 400px;gap:32px}.sheet{top:146px;max-height:calc(100dvh - 240px)}.bottom{bottom:16px;border:1px solid var(--line);border-radius:20px;width:480px;box-shadow:var(--ui-shadow-up)}}
 @media(max-width:899px){.sheet{border-radius:24px 24px 0 0;max-height:88dvh;transition:transform .28s var(--ui-ease);box-shadow:0 -12px 42px rgba(0,0,0,.14)}.grab{width:36px;height:5px;border-radius:999px}.bottom{border-top:1px solid var(--line)}}
-@media(max-width:380px){.wrap{padding-inline:14px}.welcome-panel{padding:24px 18px}.indent i{width:8px;margin-left:3px}.rows{padding-inline:2px}.node{padding:10px 8px}.node .line1{gap:5px}.sheet{padding:16px}.tree-node-more{min-width:44px}}
+@media(max-width:380px){.wrap{padding-inline:14px}.themes{margin-inline:-14px;padding-inline:14px}.welcome-panel{padding:24px 18px}.indent i{width:8px;margin-left:3px}.rows{padding-inline:2px}.node{padding:10px 8px}.node .line1{gap:5px}.sheet{padding:16px}.tree-node-more{min-width:44px}}
 @media(hover:hover) and (pointer:fine){.node:hover:not(.is-pressing),.same-rank-row:hover{background:var(--accent-soft)}.btn:hover:not(:disabled){border-color:var(--ink-2)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}

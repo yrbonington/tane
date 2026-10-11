@@ -9,8 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="タネ帳">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B0B0D" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111713" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="assets/icon/tanecho-icon.svg" type="image/svg+xml">
@@ -18,7 +18,7 @@
 <style>
 /* 現場ノート：はしご（上が抽象、字下げするほど具体）を作業面にし、選んだ行動の場で操作する。分析シートは下からせり上がる。 */
 
-@media (prefers-color-scheme: dark){  }
+
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
@@ -210,9 +210,7 @@ a.btn{display:block;text-decoration:none;color:var(--ink)}
    Independent product identity; no OpenAI trademarks/assets.
    ========================================================= */
 
-@media (prefers-color-scheme:dark){
 
-}
 body{font-size:15px;line-height:1.63;letter-spacing:.005em}
 .wrap{max-width:1100px;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));padding-bottom:calc(132px + env(safe-area-inset-bottom))}
 .bar{padding-top:calc(16px + env(safe-area-inset-top));padding-bottom:8px;border-bottom:1px solid var(--line)}
@@ -350,9 +348,7 @@ label.f small{font-size:12px}
 
 /* ---- Reference-matched Tane design v3: blue CTA and nested cards ---- */
 
-@media(prefers-color-scheme:dark){
 
-}
 body{background:var(--paper)}
 .bar{background:var(--paper)}
 .card{background:var(--frame);border:1px solid var(--line);border-radius:22px;padding:18px}
@@ -916,8 +912,8 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/ui-polish.css?v=62">
-<link rel="stylesheet" href="assets/tree-context.css?v=62">
+<link rel="stylesheet" href="assets/ui-polish.css?v=63">
+<link rel="stylesheet" href="assets/tree-context.css?v=63">
 </head>
 <body>
 <div class="wrap">
@@ -976,7 +972,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=62"></script>
+<script src="assets/tree-context.js?v=63"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -1190,7 +1186,7 @@ function render(){
   if(keep){const i=$('#addIn');if(i){i.value=keep.v;i.focus();}}
 }
 const THEMES_HTML=`<div class="themes" id="themes"></div><form class="newtheme" id="themeForm" hidden><input id="themeInput" placeholder="起点の行動（例：家を借りる）" aria-label="起点の行動" autocomplete="off"><button class="btn pri" type="submit">作る</button><button class="btn icon" type="button" id="themeCancel" aria-label="やめる">✕</button></form>`;
-function renderThemes(){const el=$('#themes');if(!el)return;
+function renderThemes(){const el=$('#themes');if(!el)return;el.hidden=!roots().length;
   el.innerHTML=roots().map(r=>`<button class="chip" data-theme-id="${esc(r.id)}" aria-pressed="${r.id===S.theme}">${esc(r.text)}</button>`).join('')+`<button class="chip ghost" id="themeNew">＋ 新しい行動</button>`;
   el.querySelectorAll('[data-theme-id]').forEach(b=>b.onclick=()=>{S.theme=b.dataset.themeId;S.focus=null;ls.set(KEY_THEME,S.theme);S.sel=null;S.adding=null;S.tab='tree';render();openSheet(false);});
   $('#themeNew').onclick=()=>{S.themeStart=true;renderMain();window.scrollTo({top:0});};
@@ -2608,25 +2604,25 @@ function buildSheet(n){const id=n.id;const sh=$('#sheet');S.whyFor=null;
   sh.innerHTML=`<div class="grab" aria-hidden="true"></div>
   <div class="sheet-h"><div style="min-width:0;flex:1"><div class="crumb" id="d-crumb"></div></div><button class="close" id="d-close" aria-label="閉じる">✕</button></div>
   <input class="title-in" id="d-text" aria-label="行動" autocomplete="off">
-  <div class="stabs" role="tablist">${STABS.map(([k,l])=>`<button role="tab" data-st="${k}">${l}</button>`).join('')}</div>
-  <div class="panel" data-panel="res"><div id="d-res" class="lens-body"></div><div id="d-references"></div></div>
-  <div class="panel" data-panel="tag" hidden>
+  <div class="stabs" role="tablist">${STABS.map(([k,l])=>`<button role="tab" id="sheet-tab-${k}" aria-controls="sheet-panel-${k}" data-st="${k}">${l}</button>`).join('')}</div>
+  <div class="panel" role="tabpanel" tabindex="0" data-panel="res"><div id="d-res" class="lens-body"></div><div id="d-references"></div></div>
+  <div class="panel" role="tabpanel" tabindex="0" data-panel="tag" hidden>
     <div class="sec"><h3>この行動は、本質的には何をしている？</h3><div class="tags" id="d-tags"></div>
     <form class="inline" id="d-tagf"><input id="d-tag-in" list="d-taglist" placeholder="例：モノの価値を決める" aria-label="本質" autocomplete="off"><datalist id="d-taglist"></datalist><button class="btn" type="submit">追加</button></form>
     <div class="tags" id="d-tagq"></div></div>
     <div class="sec"><h3>同じ本質を持つ行動</h3><div id="d-same"></div></div>
   </div>
-  <div class="panel" data-panel="seed" hidden>
+  <div class="panel" role="tabpanel" tabindex="0" data-panel="seed" hidden>
     <button class="tg seedtg" id="d-seed">タネ候補にする</button>
     <div class="score" id="d-score">${ELEMENTS.map(([k,l])=>`<div class="srow"><span>${l}</span><div class="dots">${[0,1,2].map(v=>`<button data-sk="${k}" data-sv="${v}" aria-label="${l} ${v}">${v}</button>`).join('')}</div></div>`).join('')}<div class="total" id="d-total"></div></div>
     <button class="btn" id="d-mkidea">この行動から事業案を作る</button>
   </div>
-  <div class="panel" data-panel="etc" hidden>
+  <div class="panel" role="tabpanel" tabindex="0" data-panel="etc" hidden>
     <label class="f">メモ<textarea id="d-memo" rows="4"></textarea></label>
     <div class="sec"><h3>並び順</h3><div class="inline"><button class="btn sm" id="d-mu">▲ 上へ</button><button class="btn sm" id="d-md">▼ 下へ</button></div></div>
     <div class="sec"><h3>削除</h3><div><button class="btn sm danger" id="d-del">この行動を削除</button></div></div>
   </div>`;
-  sh.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{S.sheetTab=b.dataset.st;showSheetTab();});
+  sh.querySelectorAll('[data-st]').forEach(b=>{b.onclick=()=>{S.sheetTab=b.dataset.st;showSheetTab();};b.onkeydown=e=>{const tabs=[...sh.querySelectorAll('[data-st]')],i=tabs.indexOf(b);const j=e.key==='ArrowRight'?(i+1)%tabs.length:e.key==='ArrowLeft'?(i+tabs.length-1)%tabs.length:e.key==='Home'?0:e.key==='End'?tabs.length-1:null;if(j!==null){e.preventDefault();tabs[j].click();tabs[j].focus();}};});
   $('#d-close').onclick=()=>openSheet(false);
   $('#d-text').oninput=e=>patchLater(id,'text',e.target.value);
   $('#d-memo').oninput=e=>patchLater(id,'memo',e.target.value);
@@ -2641,7 +2637,7 @@ function buildSheet(n){const id=n.id;const sh=$('#sheet');S.whyFor=null;
   const del=$('#d-del');let armed=false;
   del.onclick=()=>{if(!armed){armed=true;const c=descendants(id).length;del.textContent=c?`下の${c}件もまとめて削除する`:'本当に削除する';setTimeout(()=>{armed=false;if(del.isConnected)del.textContent='この行動を削除';},3500);return;}openSheet(false);delNode(id);};
   showSheetTab();syncSheet(n,true);renderReferences(n);}
-function showSheetTab(){document.querySelectorAll('#sheet [data-st]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.st===S.sheetTab)));document.querySelectorAll('#sheet [data-panel]').forEach(p=>p.hidden=p.dataset.panel!==S.sheetTab);}
+function showSheetTab(){document.querySelectorAll('#sheet [data-st]').forEach(b=>{const selected=b.dataset.st===S.sheetTab;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;});document.querySelectorAll('#sheet [data-panel]').forEach(p=>{p.hidden=p.dataset.panel!==S.sheetTab;p.id='sheet-panel-'+p.dataset.panel;p.setAttribute('aria-labelledby','sheet-tab-'+p.dataset.panel);});}
 function syncSheet(n,first){
   const setVal=(sel,v)=>{const el=$(sel);if(el&&(first||document.activeElement!==el))el.value=v||'';};
   const cr=pathOf(n.id).slice(0,-1).map(p=>p.text).join(' › ');
@@ -2669,7 +2665,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=62',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=63',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
