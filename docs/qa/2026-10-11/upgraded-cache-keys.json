@@ -1,12 +1,12 @@
 [
-  "http://127.0.0.1:40673/",
-  "http://127.0.0.1:40673/index.html",
-  "http://127.0.0.1:40673/manifest.webmanifest",
-  "http://127.0.0.1:40673/icon-180.png",
-  "http://127.0.0.1:40673/icon-192.png",
-  "http://127.0.0.1:40673/icon-512.png",
-  "http://127.0.0.1:40673/assets/icon/tanecho-icon.svg",
-  "http://127.0.0.1:40673/assets/ui-polish.css?v=72",
-  "http://127.0.0.1:40673/assets/tree-context.css?v=72",
-  "http://127.0.0.1:40673/assets/tree-context.js?v=72"
+  "http://127.0.0.1:44947/",
+  "http://127.0.0.1:44947/index.html",
+  "http://127.0.0.1:44947/manifest.webmanifest",
+  "http://127.0.0.1:44947/icon-180.png",
+  "http://127.0.0.1:44947/icon-192.png",
+  "http://127.0.0.1:44947/icon-512.png",
+  "http://127.0.0.1:44947/assets/icon/tanecho-icon.svg",
+  "http://127.0.0.1:44947/assets/ui-polish.css?v=73",
+  "http://127.0.0.1:44947/assets/tree-context.css?v=73",
+  "http://127.0.0.1:44947/assets/tree-context.js?v=73"
 ]
