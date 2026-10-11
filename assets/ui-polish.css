@@ -3,6 +3,7 @@
  --paper:#FAFAF7;--surface:#F0F2ED;--frame:#FFFFFF;--panel:#F0F2ED;--panel-line:#E4E8DF;
  --ink:#24332B;--ink-2:#606E64;--line:#DAE1D6;
  --accent:#285C43;--accent-soft:#E8F0E7;--on-accent:#FFFFFF;--blue-button:var(--accent);
+ --growth:#24885E;--gold:#8A692A;--graph-line:#738479;
  --seed:#E2EBC8;--seed-soft:#EFF3E4;--seed-ink:#334B20;
  --warn:#925B24;--warn-soft:#F4EADB;
  --f-body:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
@@ -15,6 +16,7 @@
  --paper:#111713;--surface:#1D2720;--frame:#172019;--panel:#1D2720;--panel-line:#2C382E;
  --ink:#EAF0E6;--ink-2:#ACB9AD;--line:#344137;
  --accent:#A9D8B5;--accent-soft:#293F30;--on-accent:#15291D;
+ --growth:#55BB88;--gold:#D8B56B;--graph-line:#829989;
  --seed:#384A29;--seed-soft:#2A3722;--seed-ink:#D7E9B5;
  --warn:#E2B583;--warn-soft:#3C3023;
  --ui-shadow:0 3px 16px rgba(0,0,0,.13);--ui-shadow-up:0 8px 26px rgba(0,0,0,.25);color-scheme:dark;

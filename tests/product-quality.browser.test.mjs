@@ -48,6 +48,10 @@ test('WCAG automated audit of both themes, screens and analysis states',{timeout
       });})()`);
     findings[findings.length-1].computedContrast=contrast;
     assert.ok(contrast.every(x=>x.ratio>=4.5),theme+' '+state+' low contrast '+JSON.stringify(contrast.filter(x=>x.ratio<4.5)));
+    if(state==='same'){
+     const palette=await evaluate(`(()=>{const c=netColors(),rgb=s=>s.startsWith('#')?[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)):(s.match(/[\\d.]+/g)||[]).map(Number).slice(0,3),lum=c=>c.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0),ratio=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)},bg=rgb(c.frame);return ['blue','green','gold','gray','line'].map(key=>{const fg=rgb(c[key]),composited=key==='line'?fg.map((v,i)=>v*.9+bg[i]*.1):fg;return {key,color:c[key],ratio:ratio(composited,bg)}});})()`);
+     findings[findings.length-1].graphContrast=palette;assert.ok(palette.every(x=>x.ratio>=3),theme+' graph contrast '+JSON.stringify(palette));
+    }
    }
   }
   const failures=findings.filter(x=>x.violations.length);assert.equal(failures.length,0,'accessibility findings: '+JSON.stringify(failures.slice(0,2)));
@@ -172,7 +176,7 @@ test('press, lift, menu and return form one continuous anchored motion',{timeout
  }finally{await h.close();}
 });
 
-test('an installed v61 worker upgrades to v68 and keeps saved data offline',{timeout:40000},async()=>{
+test('an installed v61 worker upgrades to v69 and keeps saved data offline',{timeout:40000},async()=>{
  const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
  try{
   h.setRootRevision('429845bdd3c91526e505a6f5b30760cb9bc6550d');
@@ -183,9 +187,26 @@ test('an installed v61 worker upgrades to v68 and keeps saved data offline',{tim
   h.setRootRevision(null);await send('Page.reload');await sleep(150);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'new app through old worker');
   await evaluate('navigator.serviceWorker.register("/sw.js?v=67",{updateViaCache:"none"}).then(r=>r.update())');
   await wait(()=>evaluate('navigator.serviceWorker.controller?.scriptURL.endsWith("v=67")'),'new worker controller');
-  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v68")&&!k.includes("tane-v61"))'),'old cache retired');
+  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v69")&&!k.includes("tane-v61"))'),'old cache retired');
+  assert.ok(await evaluate('caches.open("tane-v69").then(c=>c.keys()).then(k=>["ui-polish.css","tree-context.css","tree-context.js"].every(f=>k.some(r=>r.url.endsWith(f+"?v=69"))))'),'versioned assets are precached');
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});await send('Page.reload');await sleep(250);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'upgraded offline app');
   assert.deepEqual(await evaluate('[...S.nodes.values()]'),before.nodes);assert.deepEqual(await evaluate('[...S.ideas.values()]'),before.ideas);assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF7');
   writeFileSync(resolve(dir,'upgraded-offline.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));assert.deepEqual(h.errors,[]);
+ }finally{await h.close();}
+});
+
+test('150-action graph fits a small screen, filters and details remain usable',{timeout:30000},async()=>{
+ const h=await browserHarness(root),{send,evaluate,wait}=h,dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
+ const dense=structuredClone(fixture);for(let i=0;i<143;i++)dense.nodes.push({id:'dense'+i,parent:i<12?'root':'dense'+(i-12),order:i,text:'暮らしの条件を確認し、候補の情報を比較して判断する '+i,tags:[i%2?'情報を集める':'選択肢を比べる']});
+ try{
+  await send('Emulation.setDeviceMetricsOverride',{width:320,height:844,deviceScaleFactor:1,mobile:true});await send('Page.navigate',{url:h.url+'/index.html'});await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'load');
+  await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(dense))+');loadAll();S.tab="same";netGraph=null;window.qaDenseStart=performance.now();render()');
+  await wait(()=>evaluate('!netGraph.fitOnSettle&&!netGraph.camTarget'),'dense settle');
+  const settleMs=await evaluate('performance.now()-qaDenseStart');assert.equal(await evaluate('netGraph.nodes.size'),150);
+  assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'dense graph fits 320px');
+  writeFileSync(resolve(dir,'dense-150-network.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+  await evaluate('netSetFilters(null,"選択肢を比べる");netSelect("action:dense142",true)');assert.ok(await evaluate('!document.querySelector("#netDetail").hidden'));
+  const frameMs=await evaluate('(()=>{const samples=[];for(let i=0;i<6;i++){netGraph.alpha=.1;const t=performance.now();netPhysics();netPaint();samples.push(performance.now()-t);}return samples})()');
+  writeFileSync(resolve(dir,'dense-network-timings.json'),JSON.stringify({nodes:150,settleMs,physicsAndPaintMs:frameMs},null,2));assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });

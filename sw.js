@@ -1,10 +1,10 @@
 // アプリの画面はオンライン時に最新を優先。オフライン時だけ保存済み画面を表示します。
 // 書いた内容はここでは一切扱わず、端末の localStorage にのみ保存します。
-const VERSION = 'tane-v68';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg', './assets/ui-polish.css', './assets/tree-context.css', './assets/tree-context.js'];
+const VERSION = 'tane-v69';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg', './assets/ui-polish.css?v=68', './assets/tree-context.css?v=68', './assets/tree-context.js?v=68'];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES.map(file => new Request(file, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('tane-') && key !== VERSION).map(key => caches.delete(key)))).then(() => self.clients.claim()));
