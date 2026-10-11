@@ -1,0 +1,98 @@
+[
+  {
+    "phase": "before",
+    "width": 320,
+    "leftError": 7.000003113055504,
+    "widthError": 10.999995552777856,
+    "sourcePadding": "10px 8px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "before",
+    "width": 375,
+    "leftError": 7.000006489650635,
+    "widthError": 10.999985398286082,
+    "sourcePadding": "10px 8px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "before",
+    "width": 390,
+    "leftError": 0.000009734476714040596,
+    "widthError": 0.000039531472497467135,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "before",
+    "width": 430,
+    "leftError": 0.0000018379777692589805,
+    "widthError": 0.000023076831966228895,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "before",
+    "width": 768,
+    "leftError": 0.0000039312304265237685,
+    "widthError": 0.00006177647814098464,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "before",
+    "width": 1440,
+    "leftError": 0.000005608605222584551,
+    "widthError": 0.00005956725548594832,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "after",
+    "width": 320,
+    "leftError": 4.4472221658042876e-7,
+    "widthError": 2.964814813655181e-7,
+    "sourcePadding": "10px 8px",
+    "previewPadding": "10px 8px"
+  },
+  {
+    "phase": "after",
+    "width": 375,
+    "leftError": 0.000003244825319437261,
+    "widthError": 0.000011356888593549996,
+    "sourcePadding": "10px 8px",
+    "previewPadding": "10px 8px"
+  },
+  {
+    "phase": "after",
+    "width": 390,
+    "leftError": 0.000009734476714040596,
+    "widthError": 0.000039531472497467135,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "after",
+    "width": 430,
+    "leftError": 0.0000018379777692589805,
+    "widthError": 0.000023076831966228895,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "after",
+    "width": 768,
+    "leftError": 0.0000039312304265237685,
+    "widthError": 0.00006177647814098464,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  },
+  {
+    "phase": "after",
+    "width": 1440,
+    "leftError": 0.000005608605222584551,
+    "widthError": 0.00005956725548594832,
+    "sourcePadding": "10px 12px",
+    "previewPadding": "10px 12px"
+  }
+]

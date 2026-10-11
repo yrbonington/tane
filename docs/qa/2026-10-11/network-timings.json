@@ -1,12 +1,12 @@
 [
   {
     "phase": "before",
-    "settleMs": 2754.800000000003,
+    "settleMs": 2698.600000000006,
     "labels": 0
   },
   {
     "phase": "after",
-    "settleMs": 1221.5,
+    "settleMs": 1237.5,
     "labels": 6
   }
 ]
