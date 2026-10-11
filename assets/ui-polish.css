@@ -33,6 +33,8 @@ body.modal-open{overflow:hidden}
 .bar .subnav button[aria-pressed="true"]{background:var(--frame);color:var(--ink);box-shadow:0 1px 5px rgba(23,31,28,.08)}
 body:not([data-view="tree"]) .grid{grid-template-columns:minmax(0,1fr)}
 body:not([data-view="tree"]) #main{max-width:900px;width:100%;margin-inline:auto}
+body:is([data-tree-state="entry"],[data-tree-state="empty"]) .grid{grid-template-columns:minmax(0,1fr)}
+body:is([data-tree-state="entry"],[data-tree-state="empty"]) #main{max-width:720px;width:100%;margin-inline:auto}
 .back{min-height:44px;display:inline-flex;align-items:center}
 .grid{margin-top:20px;row-gap:24px}
 .h2,.sec h3{letter-spacing:.07em;line-height:1.5}

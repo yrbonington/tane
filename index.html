@@ -863,8 +863,8 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/ui-polish.css?v=70">
-<link rel="stylesheet" href="assets/tree-context.css?v=70">
+<link rel="stylesheet" href="assets/ui-polish.css?v=71">
+<link rel="stylesheet" href="assets/tree-context.css?v=71">
 </head>
 <body>
 <div class="wrap">
@@ -923,7 +923,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=70"></script>
+<script src="assets/tree-context.js?v=71"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -1096,7 +1096,7 @@ function modalBackground(owner,on){
 }
 let sheetReturnNode=null;
 function syncSheetAccess(){
-  const sh=$('#sheet'),modal=!wide()&&sh.classList.contains('open');
+  const sh=$('#sheet'),modal=!wide()&&!sh.hidden&&sh.classList.contains('open');
   sh.inert=modalOwners.has('tree')||(!wide()&&!modal);
   sh.setAttribute('role',modal?'dialog':'complementary');
   if(modal)sh.setAttribute('aria-modal','true');else sh.removeAttribute('aria-modal');
@@ -1152,7 +1152,7 @@ document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const
   else S.tab='data';
   openSheet(false);render();window.scrollTo({top:0});});
 const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data'};
-function renderTabs(){document.body.dataset.view=S.tab;$('#sheet').hidden=S.tab!=='tree';const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
+function renderTabs(){document.body.dataset.view=S.tab;const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
   $('#subnav').hidden=area!=='seed';
   document.querySelectorAll('#subnav [data-tab]').forEach(t=>{t.setAttribute('aria-pressed',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
   document.querySelectorAll('.bottom [data-area]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.area===area)));
@@ -1166,7 +1166,11 @@ function badges(n){const o=[];const fr=(n.frictions||[]).length;
   for(const t of(n.tags||[]))o.push(`<span class="b b-tag">本質：${esc(t)}</span>`);
   if(n.seed)o.push(`<span class="b b-seed">タネ ${scoreOf(n)}点</span>`);
   return o.join('');}
-function renderMain(){if(S.tab!=='same')netStop();const m=$('#main');if(S.tab==='tree')return renderTree(m);if(S.tab==='same')return renderSame(m);if(S.tab==='seed')return renderSeeds(m);if(S.tab==='idea')return renderIdeas(m);return renderData(m);}
+function renderMain(){
+ const state=S.tab!=='tree'?'other':S.themeStart?'entry':S.theme?'populated':'empty';
+ document.body.dataset.treeState=state;$('#sheet').hidden=state!=='populated';syncSheetAccess();
+ if(S.tab!=='same')netStop();const m=$('#main');if(S.tab==='tree')return renderTree(m);if(S.tab==='same')return renderSame(m);if(S.tab==='seed')return renderSeeds(m);if(S.tab==='idea')return renderIdeas(m);return renderData(m);
+}
 
 /* ---------- ツリー ---------- */
 function addHint(n,mode){
@@ -2668,7 +2672,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=70',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=71',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>

@@ -82,7 +82,13 @@ test('first observation needs no extra choice; AI remains optional; scoring has 
   const sizes=await evaluate('[...document.querySelectorAll("#d-score button")].map(e=>({w:e.getBoundingClientRect().width,h:e.getBoundingClientRect().height}))');
   assert.ok(sizes.every(x=>x.w>=44&&x.h>=44),'all scoring choices are 44×44');
   assert.ok(await evaluate('document.querySelector("#sheet").scrollWidth<=document.querySelector("#sheet").clientWidth+1'),'scores fit 320px');
-  await shot('flow-320-touch-scores');assert.deepEqual(h.errors,[]);
+  await shot('flow-320-touch-scores');
+  await evaluate('openSheet(false)');await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
+  await evaluate('document.querySelector("#themeNew").click()');
+  assert.equal(await evaluate('document.querySelector("#sheet").hidden'),true,'entry hides unrelated analysis');
+  assert.ok(await evaluate('document.querySelector("#main").getBoundingClientRect().width<=720'),'desktop entry keeps a readable line length');
+  await shot('flow-1440-first-input');await evaluate('document.querySelector("#themeStartBack").click()');
+  assert.equal(await evaluate('document.querySelector("#sheet").hidden'),false,'return restores analysis sidebar');assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });
 
