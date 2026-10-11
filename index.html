@@ -1371,7 +1371,9 @@ function startAdd(id,mode){
  if(treeCtxOpen())treeCtxRender();
  else renderMain();
  const target=mode==='choose'?'[data-add]':mode==='layer'?'#layerWrapText':'#addIn';
- const el=document.querySelector(target);if(el)el.focus({preventScroll:true});
+ const el=mode==='choose'&&treeCtxOpen()?
+   document.querySelector('#treeCtxStage'):document.querySelector(target);
+ if(el)el.focus({preventScroll:true});
 }
 function bindActionBar(){
  if(!S.sel)return;
