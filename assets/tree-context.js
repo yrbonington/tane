@@ -141,6 +141,8 @@ function treeCtxShow(id,opener){
   treeCtxPreviousFocus=document.activeElement;
   treeCtxOrigin=id;treeCtxOpenedAt=performance.now();
   S.sel=id;S.adding=null;
+  // Keep the analysis panel in sync, without replacing the pressed tree row.
+  renderSheet();openSheet(false);
   document.querySelector('#treeCtxPreview').innerHTML='<span class="tree-ctx-level">L'+depth(id)+'</span>'+
     '<div class="tree-ctx-name" id="treeCtxHeading">'+esc(n.text)+'</div>'+
     (badges(n)?'<div class="meta">'+badges(n)+'</div>':'');
