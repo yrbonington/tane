@@ -98,7 +98,8 @@ function treeCtxPosition(){
   const vw=vv?.width||innerWidth, vh=vv?.height||innerHeight;
   const ox=vv?.offsetLeft||0, oy=vv?.offsetTop||0;
   stage.style.maxHeight=Math.max(120,vh-32)+'px';
-  const w=stage.getBoundingClientRect().width,h=stage.getBoundingClientRect().height;
+  // Layout dimensions remain stable during the spring-scale entrance animation.
+  const w=stage.offsetWidth,h=stage.offsetHeight;
   const left=Math.max(ox+16,Math.min(ox+vw-w-16,anchor.left+anchor.width*.5-w*.5));
   // Keep the lifted preview adjacent to its source whenever screen space allows.
   const above=(anchor.top>oy+vh*.57 && anchor.top>oy+h*.5);
