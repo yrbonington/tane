@@ -22,7 +22,9 @@ jobs:
       - name: Install Japanese test fonts for visual snapshots
         run: sudo apt-get update -qq && sudo apt-get install -y fonts-noto-cjk
       - name: Test gestures in real headless Chromium
-        run: node --test tests/tree-context.browser.test.mjs tests/qa-matrix.test.mjs
+        run: |
+          npm install --prefix "$RUNNER_TEMP/tane-qa" --no-audit --no-fund axe-core@4.10.3
+          TANE_AXE_PATH="$RUNNER_TEMP/tane-qa/node_modules/axe-core/axe.min.js" node --test tests/tree-context.browser.test.mjs tests/qa-matrix.test.mjs tests/product-quality.browser.test.mjs
       - name: Save menu preview screenshots
         if: always()
         uses: actions/upload-artifact@v4

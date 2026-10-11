@@ -112,7 +112,7 @@ textarea{width:100%;resize:vertical}
 .score{display:flex;flex-direction:column;gap:8px}
 .srow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px}
 .dots{display:flex;gap:3px}
-.dots button{width:34px;height:32px;border:1px solid var(--line);background:none;border-radius:6px;font-family:var(--f-mono);font-size:12px}
+.dots button{width:44px;height:44px;border:1px solid var(--line);background:none;border-radius:9px;font-family:var(--f-mono);font-size:12px}
 .dots button[aria-pressed="true"]{background:var(--seed);border-color:var(--seed);color:var(--seed-ink);font-weight:700}
 .total{font-family:var(--f-mono);font-size:13px}
 .linkbtn{border:0;background:none;color:var(--accent);padding:0;font-size:13px;text-align:left}
@@ -1178,10 +1178,12 @@ function addHint(n,mode){
 function renderTree(m){
   if(S.themeStart){
     m.innerHTML=`<div class="list"><div><button class="back" id="themeStartBack">‹ 行動一覧に戻る</button></div>
-      <div class="welcome-panel choice-panel intro-single"><h4>どうやって始めますか？</h4>
+      <div class="welcome-panel choice-panel intro-single"><h4>起点の行動を記録</h4>
+        <p class="muted">いま気になっている、人の行動をひとつ。<br>ここから「なぜ？」「どうやって？」を広げます。</p>
+        <form class="newtheme" id="startThemeForm"><label class="f" for="startThemeInput">観察した行動<input id="startThemeInput" placeholder="例：家を借りる" autocomplete="off" required></label><button class="btn pri" type="submit">記録する</button></form>
         <div class="card ai-flow theme-ai-card">
-          <button class="btn entry-option" id="themeStartAI" aria-expanded="true" aria-controls="themeAIActions"><strong>AIと一緒に考える</strong><small>AIと対話してタネを探す</small></button>
-          <div class="seed-ai-actions" id="themeAIActions">
+          <button class="btn entry-option" id="themeStartAI" aria-expanded="false" aria-controls="themeAIActions"><strong>AIと一緒に考える ⌄</strong><small>行動がまだ思い浮かばないときに</small></button>
+          <div class="seed-ai-actions" id="themeAIActions" hidden>
           <div class="ai-flow-choice">
             <strong>① AIを開く</strong>
             ${S.nodes.size?'<label class="ai-data-choice"><input type="checkbox" id="themeIncludeData">保存済みの行動も共有</label>':''}
@@ -1197,19 +1199,12 @@ function renderTree(m){
           </div>
         </div>
         </div>
-        <button class="btn entry-option" id="themeStartManual"><strong>自分で行動を入力 →</strong><small>起点の行動を入力する</small></button>
-        <form class="newtheme" id="startThemeForm" hidden><input id="startThemeInput" aria-label="起点の行動" placeholder="例：家を借りる" autocomplete="off" required><button class="btn pri" type="submit">作る</button></form>
       </div></div>`;
     $('#themeStartBack').onclick=()=>{S.themeStart=false;renderMain();};
     $('#themeStartAI').onclick=()=>{
-      $('#themeAIActions').hidden=false;$('#startThemeForm').hidden=true;
-      $('#themeStartAI').setAttribute('aria-expanded','true');
-      $('#themeAIActions [data-ai-provider]').focus();
-    };
-    $('#themeStartManual').onclick=()=>{
-      $('#themeAIActions').hidden=true;$('#startThemeForm').hidden=false;
-      $('#themeStartAI').setAttribute('aria-expanded','false');
-      $('#startThemeInput').focus();
+      const expanded=$('#themeAIActions').hidden;
+      $('#themeAIActions').hidden=!expanded;
+      $('#themeStartAI').setAttribute('aria-expanded',String(expanded));
     };
     bindAIPromptLinks($('#themeAIActions'),()=>buildSeedPrompt(!!$('#themeIncludeData')?.checked));
     $('#themeGoImport').onclick=()=>openImport();
@@ -1379,7 +1374,7 @@ function netSetFilters(root,tag){
      const b=!netFilters.tag||(n.tags||[]).includes(netFilters.tag);
      return a&&b;
    }).length;
-   status.textContent=has?`${count}行動が一致${netFilters.root&&netFilters.tag?' · 金色の輪は両方に一致':''}`:'すべての行動を表示';
+   status.textContent=has?`${count}行動が一致${netFilters.root&&netFilters.tag?' · 金色の輪は両方に一致':''}`:`${count}行動 · ${roots().length}つの起点 · 点や名前をタップして詳しく`;
  }
  const clear=$('#netFilterClear');if(clear)clear.disabled=!netFilters.root&&!netFilters.tag;
  netSchedule();
@@ -1533,7 +1528,7 @@ function netRender(m){
  <div class="net-detail" id="netDetail" hidden></div></div>`;
  const shell=$('#netShell'),canvas=$('#netCanvas'),ctx=canvas.getContext('2d');if(!ctx)return;
  const media=matchMedia('(prefers-reduced-motion: reduce)'),dark=matchMedia('(prefers-color-scheme: dark)');
- const live={shell,canvas,ctx,raf:0,points:new Map(),drag:null,view:null,resize:null,cleanup:null,media,colors:netColors()};
+ const live={shell,canvas,ctx,raf:0,points:new Map(),labels:[],drag:null,view:null,resize:null,cleanup:null,media,colors:netColors()};
  netLive=live;
  function resize(){
    if(!canvas.isConnected)return;
@@ -1638,7 +1633,7 @@ function netFit(smooth){
  const pad=58,h=g.selected?v.h*.53:v.h-40;
  const xs=nodes.map(n=>n.x),ys=nodes.map(n=>n.y);
  const loX=Math.min(...xs)-25,hiX=Math.max(...xs)+25,loY=Math.min(...ys)-25,hiY=Math.max(...ys)+25;
- const z=Math.max(.24,Math.min(1.8,(v.w-pad*2)/Math.max(1,hiX-loX),(h-pad*2)/Math.max(1,hiY-loY)));
+ const z=Math.max(.24,Math.min(2.2,(v.w-pad*2)/Math.max(1,hiX-loX),(h-pad*2)/Math.max(1,hiY-loY)));
  const target={x:v.w/2-(loX+hiX)/2*z,y:h/2-(loY+hiY)/2*z,z};
  g.fitOnSettle=false;
  if(smooth&&!netLive.media.matches){g.camTarget=target;netSchedule();}
@@ -1662,7 +1657,9 @@ function netHit(x,y){
     const sx=cam.x+n.x*cam.z,sy=cam.y+n.y*cam.z,d=Math.hypot(x-sx,y-sy);
     const radius=Math.max(19,n.r*cam.z+10);
     if(d<radius&&d<score){best=n.id;score=d;}
-  }return best;
+  }
+  if(best)return best;
+  return netLive?.labels.find(b=>x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)?.id||null;
 }
 
 function netSchedule(){
@@ -1674,7 +1671,7 @@ function netSchedule(){
     for(const n of netVisible()){
       n.fade=netMatchOpacity(n)*(!near||near.has(n.id)?1:.6);
       n.labelFade=n.type==='reason'?(g.cam.z>1.4||near?.has(n.id)?1:0):
-        n.depth===0||netMatchKind(n)&&netMatchOpacity(n)>=.9||
+        g.active.size<=12||n.depth===0||netMatchKind(n)&&netMatchOpacity(n)>=.9||
         near?.has(n.id)||g.cam.z>1.22+Math.min(.65,n.depth*.13)?1:0;
     }
     for(const e of g.links){
@@ -1689,7 +1686,11 @@ function netSchedule(){
 function netFrame(){
  const live=netLive,g=netGraph;if(!live)return;
  live.raf=0;if(!live.canvas.isConnected)return;
- if(g.alpha>0&&!document.hidden)netPhysics();
+ if(g.alpha>0&&!document.hidden){
+   // Small graphs settle promptly; large graphs keep one O(n²) pass per frame.
+   const steps=g.active.size<=60&&!g.dragged?3:1;
+   for(let i=0;i<steps&&g.alpha>0;i++)netPhysics();
+ }
  if(g.fitOnSettle&&g.alpha<.075){g.fitOnSettle=false;netFit(true);}
  let moving=false;
  if(g.camTarget){
@@ -1703,7 +1704,7 @@ function netFrame(){
    const base=netMatchOpacity(n),target=base*(!neighboring||neighboring.has(n.id)?1:.6);
    n.fade+=(target-n.fade)*.23;if(Math.abs(target-n.fade)>.008)fading=true;else n.fade=target;
    const labelTarget=n.type==='reason'?g.cam.z>1.4||neighboring?.has(n.id)?1:0:
-     n.depth===0||netMatchKind(n)&&base>=.9||neighboring?.has(n.id)||g.cam.z>1.22+Math.min(.65,n.depth*.13)?1:0;
+     g.active.size<=12||n.depth===0||netMatchKind(n)&&base>=.9||neighboring?.has(n.id)||g.cam.z>1.22+Math.min(.65,n.depth*.13)?1:0;
    n.labelFade+=(labelTarget-n.labelFade)*.2;
    if(Math.abs(labelTarget-n.labelFade)>.015)fading=true;else n.labelFade=labelTarget;
  }
@@ -1753,13 +1754,31 @@ function netPaint(){
        ctx.strokeStyle=c.green;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(p.x,p.y,radius+2,0,2*Math.PI);ctx.stroke();
      }
    }
-   if(n.labelFade>.03){
-     ctx.globalAlpha=n.fade*n.labelFade;
-     const sz=Math.max(10,Math.min(15,12/Math.sqrt(cam.z))),label=n.label.length>16?n.label.slice(0,16)+'…':n.label;
-     ctx.font=`${n.depth===0||selected?'700':'500'} ${sz}px -apple-system,"Hiragino Sans",sans-serif`;
-     ctx.textAlign='center';ctx.textBaseline='top';ctx.lineJoin='round';ctx.lineWidth=3.5;
-     ctx.strokeStyle=c.frame;ctx.strokeText(label,p.x,p.y+radius+6);ctx.fillStyle=c.ink;ctx.fillText(label,p.x,p.y+radius+6);
+ }
+ // Labels share hit targets with their points. Lay them out after all points so
+ // a name never obscures a neighbouring point or another visible name.
+ live.labels=[];
+ const visible=netVisible(),boxes=visible.map(n=>{const p=pos(n),r=Math.max(3,n.r*cam.z)+4;return {x:p.x-r,y:p.y-r,w:r*2,h:r*2};});
+ const overlap=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+ const ordered=visible.filter(n=>n.labelFade>.03).sort((a,b)=>(b.id===g.selected)-(a.id===g.selected)||a.depth-b.depth);
+ for(const n of ordered){
+   const p=pos(n),r=Math.max(3,n.r*cam.z),selected=n.id===g.selected;
+   const sz=n.depth===0?13:12,lineHeight=sz+5,maxWidth=Math.min(128,w*.4);
+   ctx.font=`${n.depth===0||selected?'700':'500'} ${sz}px -apple-system,"Hiragino Sans","Noto Sans CJK JP",sans-serif`;
+   const lines=[''];
+   for(const ch of Array.from(n.label)){
+     const k=lines.length-1;
+     if(ctx.measureText(lines[k]+ch).width<=maxWidth){lines[k]+=ch;continue;}
+     if(lines.length<2){lines.push(ch);continue;}
+     lines[k]=lines[k].slice(0,-1)+'…';break;
    }
+   const bw=Math.max(...lines.map(s=>ctx.measureText(s).width))+8,bh=lines.length*lineHeight+4;
+   const candidates=[{x:p.x-bw/2,y:p.y+r+6},{x:p.x-bw/2,y:p.y-r-bh-6},{x:p.x+r+8,y:p.y-bh/2},{x:p.x-r-bw-8,y:p.y-bh/2}];
+   const box=candidates.map(b=>({...b,w:bw,h:bh,id:n.id})).find(b=>b.x>=6&&b.x+b.w<=w-6&&b.y>=52&&b.y+b.h<=h-62&&!boxes.some(q=>overlap(b,q))&&!live.labels.some(q=>overlap(b,q)));
+   if(!box)continue;
+   live.labels.push(box);ctx.globalAlpha=n.fade*n.labelFade;
+   ctx.textAlign='center';ctx.textBaseline='top';ctx.lineJoin='round';ctx.lineWidth=4;
+   lines.forEach((line,i)=>{const x=box.x+box.w/2,y=box.y+2+i*lineHeight;ctx.strokeStyle=c.frame;ctx.strokeText(line,x,y);ctx.fillStyle=c.ink;ctx.fillText(line,x,y);});
  }
  ctx.globalAlpha=1;
 }

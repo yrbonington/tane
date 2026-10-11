@@ -117,7 +117,7 @@ test('analysis lenses, idea menus and offline PWA keep saved data',{timeout:6500
   assert.equal(await evaluate('document.querySelector("#copyFallback").hidden'),true);assert.equal(await evaluate('document.querySelector("#main").inert'),false);
   await evaluate('saveNow();navigator.serviceWorker.register("/sw.js?v=65",{updateViaCache:"none"})');
   await wait(()=>evaluate('!!navigator.serviceWorker.controller'),'worker active');
-  assert.ok(await evaluate('caches.has("tane-v65")'),'current cache installed');
+  assert.ok(await evaluate('caches.has("tane-v66")'),'current cache installed');
   const snapshot=await evaluate('JSON.parse(localStorage.getItem("tane.v1"))');
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
   await send('Page.reload');await sleep(350);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'offline app');
@@ -139,7 +139,7 @@ test('removing superseded CSS preserves computed design across widths and themes
    await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<900});
    await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:theme},{name:'prefers-reduced-motion',value:'reduce'}]});
    const sides=[];
-   for(const ref of ['reference','']){
+   for(const ref of ['reference','cleanup']){
     await send('Page.navigate',{url:h.url+(ref?'/reference/index.html':'/index.html')});await sleep(100);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'reference load');await evaluate('document.fonts.ready');
     await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');loadAll();S.theme="root";S.sel="child";S.detailFor=null;S.tab="tree";render();openSheet(true)');
     const states=[];

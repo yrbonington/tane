@@ -67,6 +67,7 @@ textarea,.inline input,.newtheme input,.layer-form select,.layer-box .layer-form
 .welcome-single>p{font-size:14px;color:var(--ink-2)}
 .welcome-path{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);list-style:none;font-size:12px}
 .welcome-path li{display:flex;align-items:center;gap:7px}.welcome-path span{font-family:var(--f-mono);font-size:10px;color:var(--accent)}
+#startThemeForm{flex-direction:column;margin:0;gap:12px}#startThemeForm label{gap:8px;font-weight:600}#startThemeForm input{width:100%}#startThemeForm .btn{width:100%}
 .sheet{background:var(--frame);box-shadow:var(--ui-shadow);overscroll-behavior:contain;scroll-padding:20px}
 .sheet .close{width:44px;height:44px;flex:none}
 .stabs button,.tg,.tri button,.seg button{min-height:44px}

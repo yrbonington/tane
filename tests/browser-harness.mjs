@@ -9,12 +9,12 @@ export async function browserHarness(root){
  if(!chrome)throw Error('Chrome/Chromium is required; this is not a skipped test');
  const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
  const server=createServer((req,res)=>{
-  let pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname),before=pathname.startsWith('/before/'),reference=pathname.startsWith('/reference/');
-  if(before||reference)pathname=pathname.slice(reference?10:7);
+  let pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname),before=pathname.startsWith('/before/'),reference=pathname.startsWith('/reference/'),cleanup=pathname.startsWith('/cleanup/');
+  if(before||reference||cleanup)pathname=pathname.slice(reference?10:cleanup?8:7);
   const filename=pathname==='/'?'index.html':pathname.slice(1);
   const file=resolve(root,filename);
   if(!file.startsWith(root+'/')){res.writeHead(403);res.end();return;}
-  try{const data=(before||reference)?execFileSync('git',['show',(reference?'143b85421784c0fa0a83683df7fba1f854e82d00':'429845bdd3c91526e505a6f5b30760cb9bc6550d')+':'+filename],{cwd:root,stdio:['ignore','pipe','ignore'],maxBuffer:5e6}):readFileSync(file);res.writeHead(200,{'content-type':mime[extname(file)]||'application/octet-stream'});res.end(data);}catch{res.writeHead(404);res.end();}
+  try{const data=(before||reference||cleanup)?execFileSync('git',['show',(reference?'143b85421784c0fa0a83683df7fba1f854e82d00':cleanup?'e6206b0fe0e4a04613166ca84cfeb1802612d362':'429845bdd3c91526e505a6f5b30760cb9bc6550d')+':'+filename],{cwd:root,stdio:['ignore','pipe','ignore'],maxBuffer:5e6}):readFileSync(file);res.writeHead(200,{'content-type':mime[extname(file)]||'application/octet-stream'});res.end(data);}catch{res.writeHead(404);res.end();}
  });
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const profile=mkdtempSync(join(tmpdir(),'tane-qa-'));
