@@ -1,0 +1,19 @@
+name: Tree context UI checks
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature/tree-ios-context-menu
+jobs:
+  static-gestures:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify browser scripts, interactions and offline assets
+        run: node --test tests/tree-context.test.mjs
