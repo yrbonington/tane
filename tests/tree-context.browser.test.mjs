@@ -99,6 +99,9 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   const dir=join(root,'test-artifacts');mkdirSync(dir,{recursive:true});
   let screenshot=await send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(dir,'tree-menu-mobile.png'),Buffer.from(screenshot.data,'base64'));
+  console.log('TANE_VISUAL_MOBILE_JPEG:'+(
+   await send('Page.captureScreenshot',{format:'jpeg',quality:44})
+  ).data);
   await evaluate('treeCtxClose()');
   const center=()=>evaluate('(()=>{const r=document.querySelector("[data-node]").getBoundingClientRect();return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)}})()');
   const start=async()=>{const p=await center();await send('Input.dispatchTouchEvent',
@@ -129,6 +132,9 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   assert.ok(desktop[0]>=0&&desktop[1]>=0&&desktop[2]<=desktop[4]&&desktop[3]<=desktop[5]);
   screenshot=await send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(dir,'tree-menu-desktop.png'),Buffer.from(screenshot.data,'base64'));
+  console.log('TANE_VISUAL_DESKTOP_JPEG:'+(
+   await send('Page.captureScreenshot',{format:'jpeg',quality:44})
+  ).data);
   await evaluate('treeCtxClose()');
  }finally{
   if(socket)socket.close();
