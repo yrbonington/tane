@@ -985,6 +985,7 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
+<link rel="stylesheet" href="assets/tree-context.css">
 </head>
 <body>
 <div class="wrap">
@@ -1043,6 +1044,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
+<script src="assets/tree-context.js"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -1305,18 +1307,17 @@ function renderTree(m){
   const walk=id=>{const n=S.nodes.get(id);const d=depth(id);const rel=d-d0;const ks=kids(id);const shut=S.collapsed.has(id);const sel=S.sel===id;
     rows.push(`<div class="item ${sel?'sel':''}" data-item="${esc(id)}"><div class="row"><span class="indent">${'<i></i>'.repeat(Math.min(rel,6))}</span>
       <button class="caret" data-caret="${esc(id)}" ${ks.length?'':'disabled'} aria-label="${shut?'開く':'閉じる'}">${ks.length?(shut?'▶':'▼'):''}</button>
-      ${sel?'<div class="node-stack">':''}<button class="node ${d===0?'root':''}" data-node="${esc(id)}"><span class="line1"><span class="lv">L${d}</span><span class="t">${esc(n.text)}${ks.length&&shut?` <span class="muted">（下に${descendants(id).length}件）</span>`:''}</span></span>${badges(n)?`<span class="meta">${badges(n)}</span>`:''}</button>${sel?`${actionBar(n)}</div>`:''}
+      <button class="node ${d===0?'root':''}" data-node="${esc(id)}" aria-haspopup="dialog" aria-label="${esc(n.text)}。タップで分析、長押しで操作"><span class="line1"><span class="lv">L${d}</span><span class="t">${esc(n.text)}${ks.length&&shut?` <span class="muted">（下に${descendants(id).length}件）</span>`:''}</span></span>${badges(n)?`<span class="meta">${badges(n)}</span>`:''}</button><button class="tree-node-more" type="button" data-node-menu="${esc(id)}" aria-haspopup="dialog" aria-label="${esc(n.text)}の操作を表示">···</button>
       </div></div>`);
     if(!shut)for(const k of ks)walk(k.id);};
   walk(top);
   const fb=S.focus?`<div class="focusbar"><button class="focus-reset" data-zoom="">← 全体表示</button>${pathOf(S.focus).map(p=>`› <button data-zoom="${esc(p.id)}">${esc(p.text)}</button>`).join('')}</div>`:'';
-  m.innerHTML=THEMES_HTML+fb+(S.sel?'':`<p class="tapnote">行動をタップして操作</p>`)+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
+  m.innerHTML=THEMES_HTML+fb+`<p class="tapnote">タップで分析 · 長押しで操作</p>`+`<div class="rows">${rows.join('')}</div>`+(S.sel?'':`<div class="quick"><button class="btn" id="quickAdd">＋「${esc(S.nodes.get(top).text)}」の下に行動を追加</button></div>`);
   renderThemes();
-  m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
+  bindTreeNodePress(m);
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
   m.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{S.focus=b.dataset.zoom||null;render();});
-  const q=$('#quickAdd');if(q)q.onclick=()=>{select(top,false);startAdd(top,'choose');};
-  bindActionBar();
+  const q=$('#quickAdd');if(q)q.onclick=()=>{treeCtxShow(top,q);startAdd(top,'choose');};
 }
 function actionBar(n){
  const isRoot=!n.parent;
@@ -1366,14 +1367,18 @@ function actionBar(n){
  </div>${choice}${layer}${editing}`;
 }
 function startAdd(id,mode){
- S.adding={id,mode};renderMain();
+ S.adding={id,mode};
+ if(treeCtxOpen())treeCtxRender();
+ else renderMain();
  const target=mode==='choose'?'[data-add]':mode==='layer'?'#layerWrapText':'#addIn';
- const el=document.querySelector(target);if(el)el.focus();
+ const el=mode==='choose'&&treeCtxOpen()?
+   document.querySelector('#treeCtxStage'):document.querySelector(target);
+ if(el)el.focus({preventScroll:true});
 }
 function bindActionBar(){
  if(!S.sel)return;
  const id=S.sel;
- const close=()=>{S.adding=null;renderMain();};
+ const close=()=>{S.adding=null;if(treeCtxOpen())treeCtxRender();else renderMain();};
  const current=()=>S.adding?.id===id?S.adding.mode:null;
  const toggle=mode=>current()===mode?close():startAdd(id,mode);
  const c=$('#chooseAdd');if(c)c.onclick=()=>toggle('choose');
@@ -1384,24 +1389,24 @@ function bindActionBar(){
  const wrapForm=$('#layerWrapForm');
  if(wrapForm)wrapForm.onsubmit=e=>{
    e.preventDefault();const title=$('#layerWrapText')?.value.trim();
-   if(title)wrapAtNewLayer(id,title);
+   if(title){if(treeCtxOpen())treeCtxClose(false);wrapAtNewLayer(id,title);}
  };
  const layerForm=$('#layerForm');
  if(layerForm)layerForm.onsubmit=e=>{
    e.preventDefault();const target=$('#layerTarget')?.value;
-   if(target)moveLayer(id,target);
+   if(target){if(treeCtxOpen())treeCtxClose(false);moveLayer(id,target);}
  };
- const z=$('#zoomHere');if(z)z.onclick=()=>{S.focus=id;render();};
- const all=$('#zoomAll');if(all)all.onclick=()=>{S.focus=null;render();};
- const o=$('#openSheet');if(o)o.onclick=()=>{renderSheet();openSheet(true);};
+ const z=$('#zoomHere');if(z)z.onclick=()=>{if(treeCtxOpen())treeCtxClose(false);S.focus=id;render();};
+ const all=$('#zoomAll');if(all)all.onclick=()=>{if(treeCtxOpen())treeCtxClose(false);S.focus=null;render();};
+ const o=$('#openSheet');if(o)o.onclick=()=>{if(treeCtxOpen()){treeCtxClose(false);select(id,true);}else{renderSheet();openSheet(true);}};
  const f=$('#addForm');if(!f)return;
  f.onsubmit=e=>{
    e.preventDefault();const field=$('#addIn'),v=field.value.trim(),mode=S.adding?.mode;
    if(!v){close();return;}
    field.value='';
-   if(mode==='down'){addChild(id,v);const next=$('#addIn');if(next){next.value='';next.focus();}}
-   else if(mode==='up'){const pid=addParent(id,v);S.adding=null;if(pid)select(pid,false);}
-   else if(mode==='sib'){const nid=addSibling(id,v);S.adding=null;if(nid){select(nid,false);startAdd(nid,'sib');}}
+   if(mode==='down'){addChild(id,v);if(treeCtxOpen())treeCtxRender();const next=$('#addIn');if(next){next.value='';next.focus();}}
+   else if(mode==='up'){const pid=addParent(id,v);S.adding=null;if(treeCtxOpen())treeCtxClose(false);if(pid)select(pid,false);}
+   else if(mode==='sib'){const nid=addSibling(id,v);S.adding=null;if(treeCtxOpen())treeCtxClose(false);if(nid){select(nid,false);treeCtxShow(nid,null);startAdd(nid,'sib');}}
  };
  const cancel=$('#addX');if(cancel)cancel.onclick=close;
 }
@@ -2684,12 +2689,12 @@ function syncSheet(n,first){
 /* ---------- 起動 ---------- */
 $('#scrim').onclick=()=>openSheet(false);
 $('#copyFallbackClose').onclick=()=>{$('#copyFallback').hidden=true;};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.adding){S.adding=null;renderMain();}else openSheet(false);}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!treeCtxOpen()){if(S.adding){S.adding=null;renderMain();}else openSheet(false);}});
 loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=51',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=52',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
