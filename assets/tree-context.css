@@ -34,6 +34,8 @@ body.tree-ctx-open{overflow:hidden}
   max-height:calc(100dvh - 32px);
   animation:tree-ctx-pop .3s cubic-bezier(.17,1.08,.3,1) both}
 .tree-ctx-stage.above{flex-direction:column-reverse}
+/* Dialog focus is managed programmatically; buttons retain their visible keyboard outlines. */
+.tree-ctx-stage:focus,.tree-ctx-stage:focus-visible{outline:none}
 .tree-ctx-preview{min-width:0;flex:none;max-height:25dvh;overflow:hidden;
   padding:16px;background:rgba(250,250,252,.98);
   color:#1c1c1e;border-radius:18px;border:1px solid rgba(255,255,255,.55);
