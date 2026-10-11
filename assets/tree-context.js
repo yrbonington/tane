@@ -101,10 +101,12 @@ function treeCtxPosition(){
   // Layout dimensions remain stable during the spring-scale entrance animation.
   const w=stage.offsetWidth,h=stage.offsetHeight;
   const left=Math.max(ox+16,Math.min(ox+vw-w-16,anchor.left+anchor.width*.5-w*.5));
-  // Keep the lifted preview adjacent to its source whenever screen space allows.
-  const above=(anchor.top>oy+vh*.57 && anchor.top>oy+h*.5);
+  // iOS-like compact menu: float adjacent to the pressed row, not over it.
+  const belowSpace=oy+vh-anchor.bottom;
+  const aboveSpace=anchor.top-oy;
+  const above=belowSpace<h+18 && aboveSpace>belowSpace;
   stage.classList.toggle('above',above);
-  const wantedTop=above?anchor.bottom-h:anchor.top-4;
+  const wantedTop=above?anchor.top-h-8:anchor.bottom+8;
   stage.style.left=left+'px';
   stage.style.top=Math.max(oy+16,Math.min(oy+vh-h-16,wantedTop))+'px';
 }
