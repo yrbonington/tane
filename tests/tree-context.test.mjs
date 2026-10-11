@@ -50,11 +50,11 @@ test('accessibility, small screens, dark mode and reduced motion',()=>{
 });
 
 test('PWA caches its newly split interface assets',()=>{
-  assert.match(html,/href="assets\/tree-context\.css\?v=63"/);
-  assert.match(html,/href="assets\/ui-polish\.css\?v=63"/);
-  assert.match(html,/src="assets\/tree-context\.js\?v=63"/);
-  assert.match(worker,/tane-v63/);
-  assert.match(html,/sw\.js\?v=63/);
+  assert.match(html,/href="assets\/tree-context\.css\?v=64"/);
+  assert.match(html,/href="assets\/ui-polish\.css\?v=64"/);
+  assert.match(html,/src="assets\/tree-context\.js\?v=64"/);
+  assert.match(worker,/tane-v64/);
+  assert.match(html,/sw\.js\?v=64/);
   assert.match(worker,/\.\/assets\/tree-context\.css/);
   assert.match(worker,/\.\/assets\/tree-context\.js/);
 });

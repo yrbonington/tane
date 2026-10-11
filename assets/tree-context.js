@@ -22,7 +22,7 @@ function treeCtxEnsure(){
   el.innerHTML='<div id="treeCtxStage" class="tree-ctx-stage" role="dialog" aria-modal="true" aria-labelledby="treeCtxHeading" tabindex="-1">'+
     '<div class="tree-ctx-preview" id="treeCtxPreview"><div id="treeCtxHeading"></div></div>'+
     '<div class="tree-ctx-commands" id="treeCtxCommands"></div></div>'+ 
-    '<div class="tree-ctx-lift" id="treeCtxLift" aria-hidden="true"></div>';
+    '<div class="tree-ctx-lift" id="treeCtxLift" aria-hidden="true" inert></div>';
   document.body.appendChild(el);
   el.addEventListener('click',e=>{
     if(e.target===el && performance.now()-treeCtxOpenedAt>250)treeCtxClose();
@@ -31,7 +31,7 @@ function treeCtxEnsure(){
     if(!treeCtxOpen())return;
     if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();treeCtxClose();return;}
     if(e.key==='Tab'){
-      const all=[...el.querySelectorAll('button:not([disabled]):not([hidden]),input:not([disabled]),select:not([disabled])')]
+      const all=[...el.querySelector('#treeCtxStage').querySelectorAll('button:not([disabled]):not([hidden]),input:not([disabled]),select:not([disabled])')]
         .filter(x=>x.getClientRects().length>0);
       if(!all.length)return;
       const first=all[0],last=all[all.length-1];
@@ -159,7 +159,7 @@ function treeCtxShow(id,opener){
   if(treeCtxLiftedRow){
     const clone=treeCtxLiftedRow.cloneNode(true);
     clone.removeAttribute('id');clone.removeAttribute('data-node');
-    clone.removeAttribute('tabindex');clone.removeAttribute('aria-haspopup');
+    clone.tabIndex=-1;clone.removeAttribute('aria-haspopup');
     clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
     clone.classList.remove('is-pressing');clone.classList.add('tree-ctx-lifted-content');
     lift.appendChild(clone);

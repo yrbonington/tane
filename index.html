@@ -912,8 +912,8 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/ui-polish.css?v=63">
-<link rel="stylesheet" href="assets/tree-context.css?v=63">
+<link rel="stylesheet" href="assets/ui-polish.css?v=64">
+<link rel="stylesheet" href="assets/tree-context.css?v=64">
 </head>
 <body>
 <div class="wrap">
@@ -972,7 +972,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=63"></script>
+<script src="assets/tree-context.js?v=64"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -1132,7 +1132,7 @@ function select(id,openDetail){
   if(S.sel!==id){S.adding=null;}
   S.sel=id; if(id){const r=rootOf(id);if(r&&r!==S.theme){S.theme=r;S.focus=null;ls.set(KEY_THEME,r);}}
   S.tab='tree'; render(); if(openDetail) openSheet(true);
-  if(id) requestAnimationFrame(()=>{const el=document.querySelector(`[data-item="${CSS.escape(id)}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<170||r.bottom>innerHeight-20)el.scrollIntoView({block:'center',behavior:'smooth'});}});
+  if(id) requestAnimationFrame(()=>{const el=document.querySelector(`[data-item="${CSS.escape(id)}"]`);if(el){const r=el.getBoundingClientRect();if(r.top<170||r.bottom>innerHeight-20)el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}});
 }
 // Background siblings are inert while a modal is active; the sheet remains scrollable.
 const modalOwners=new Set();
@@ -1201,7 +1201,7 @@ document.querySelectorAll('.bottom [data-area]').forEach(b=>b.onclick=()=>{const
   else S.tab='data';
   openSheet(false);render();window.scrollTo({top:0});});
 const AREA_OF={tree:'seed',same:'seed',seed:'seed',idea:'biz',data:'data'};
-function renderTabs(){const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
+function renderTabs(){document.body.dataset.view=S.tab;$('#sheet').hidden=S.tab!=='tree';const area=AREA_OF[S.tab]||'seed';if(area==='seed')S.lastSeed=S.tab;
   $('#subnav').hidden=area!=='seed';
   document.querySelectorAll('#subnav [data-tab]').forEach(t=>{t.setAttribute('aria-pressed',String(t.dataset.tab===S.tab));t.onclick=()=>{S.tab=t.dataset.tab;if(S.tab!=='tree')openSheet(false);render();window.scrollTo({top:0});};});
   document.querySelectorAll('.bottom [data-area]').forEach(b=>b.setAttribute('aria-current',String(b.dataset.area===area)));
@@ -2455,6 +2455,8 @@ function bindAIPromptLinks(root,getPrompt){
     });
   });
 }
+let copyReturnFocus=null;
+function closeCopyFallback(){const dialog=$('#copyFallback');if(dialog.hidden)return;dialog.hidden=true;modalBackground('copy',false);if(copyReturnFocus?.isConnected)copyReturnFocus.focus({preventScroll:true});copyReturnFocus=null;}
 async function copyText(text){
   try{
     if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error('clipboard unsupported');
@@ -2463,7 +2465,7 @@ async function copyText(text){
   }catch(e){
     const dialog=$('#copyFallback');
     const field=$('#copyFallbackText');
-    field.value=text;dialog.hidden=false;field.focus();field.select();
+    copyReturnFocus=document.activeElement;field.value=text;dialog.hidden=false;modalBackground('copy',true);field.focus();field.select();
     toast('下の欄を長押ししてコピーしてください');
   }
 }
@@ -2659,13 +2661,13 @@ function syncSheet(n,first){
 
 /* ---------- 起動 ---------- */
 $('#scrim').onclick=()=>openSheet(false);
-$('#copyFallbackClose').onclick=()=>{$('#copyFallback').hidden=true;};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!treeCtxOpen()){if(S.adding){S.adding=null;renderMain();}else openSheet(false);}});
+$('#copyFallbackClose').onclick=closeCopyFallback;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!treeCtxOpen()){if(!$('#copyFallback').hidden){closeCopyFallback();return;}if(S.adding){S.adding=null;renderMain();}else openSheet(false);}});
 loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=63',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=64',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
