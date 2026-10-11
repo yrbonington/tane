@@ -1,6 +1,6 @@
 // アプリの画面はオンライン時に最新を優先。オフライン時だけ保存済み画面を表示します。
 // 書いた内容はここでは一切扱わず、端末の localStorage にのみ保存します。
-const VERSION = 'tane-v55';
+const VERSION = 'tane-v56';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg', './assets/tree-context.css', './assets/tree-context.js'];
 
 self.addEventListener('install', event => {
@@ -13,6 +13,20 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   const isPage = event.request.mode === 'navigate' || /\/index\.html$/.test(url.pathname);
+  const isTreeAsset = /\/assets\/tree-context\.(?:css|js)$/.test(url.pathname);
+  if (isTreeAsset) {
+    event.respondWith((async () => {
+      const cache = await caches.open(VERSION);
+      try {
+        const fresh = await fetch(event.request, { cache: 'no-store' });
+        if (fresh.ok) { await cache.put(event.request, fresh.clone()); return fresh; }
+        return fresh;
+      } catch (error) {
+        return (await cache.match(event.request, { ignoreSearch: true })) || Response.error();
+      }
+    })());
+    return;
+  }
   if (isPage) {
     event.respondWith((async () => {
       const cache = await caches.open(VERSION);
