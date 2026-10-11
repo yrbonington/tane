@@ -1,23 +1,23 @@
 /* Tane · field notes for emerging markets. Shared tokens and component finishes. */
 :root{
- --paper:#FAFAF7;--surface:#F0F2ED;--frame:#FFFFFF;--panel:#F0F2ED;--panel-line:#E4E8DF;
- --ink:#24332B;--ink-2:#606E64;--line:#DAE1D6;
- --accent:#285C43;--accent-soft:#E8F0E7;--on-accent:#FFFFFF;--blue-button:var(--accent);
- --growth:#24885E;--gold:#8A692A;--graph-line:#738479;
- --seed:#E2EBC8;--seed-soft:#EFF3E4;--seed-ink:#334B20;
+ --paper:#FAFAF8;--surface:#F0F0EE;--frame:#FFFFFF;--panel:#F0F0EE;--panel-line:#E3E3E0;
+ --ink:#292929;--ink-2:#686868;--line:#DCDCD8;
+ --accent:#303030;--accent-soft:#EDEDEB;--on-accent:#FFFFFF;--blue-button:var(--accent);
+ --growth:#626D86;--gold:#8A692A;--graph-line:#7A7A7A;
+ --seed:#E8E6E1;--seed-soft:#F1EFEA;--seed-ink:#48443D;
  --warn:#925B24;--warn-soft:#F4EADB;
  --f-body:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
  --f-mono:ui-monospace,"SF Mono",Menlo,monospace;--r:12px;
  --ui-ease:cubic-bezier(.2,.8,.2,1);--ui-fast:160ms;--ui-medium:240ms;
  --ui-radius-sm:12px;--ui-radius-md:18px;--ui-radius-lg:24px;
- --ui-shadow:0 3px 16px rgba(30,47,35,.035);--ui-shadow-up:0 8px 26px rgba(30,47,35,.08);color-scheme:light;
+ --ui-shadow:0 3px 16px rgba(24,24,24,.035);--ui-shadow-up:0 8px 26px rgba(24,24,24,.08);color-scheme:light;
 }
 @media(prefers-color-scheme:dark){:root{
- --paper:#111713;--surface:#1D2720;--frame:#172019;--panel:#1D2720;--panel-line:#2C382E;
- --ink:#EAF0E6;--ink-2:#ACB9AD;--line:#344137;
- --accent:#A9D8B5;--accent-soft:#293F30;--on-accent:#15291D;
- --growth:#55BB88;--gold:#D8B56B;--graph-line:#829989;
- --seed:#384A29;--seed-soft:#2A3722;--seed-ink:#D7E9B5;
+ --paper:#151515;--surface:#252525;--frame:#1D1D1D;--panel:#252525;--panel-line:#353535;
+ --ink:#EFEFEC;--ink-2:#B5B5B0;--line:#404040;
+ --accent:#E5E5E1;--accent-soft:#333332;--on-accent:#202020;
+ --growth:#AAB6D0;--gold:#D8B56B;--graph-line:#909090;
+ --seed:#3B3832;--seed-soft:#2D2B27;--seed-ink:#EBE5DA;
  --warn:#E2B583;--warn-soft:#3C3023;
  --ui-shadow:0 3px 16px rgba(0,0,0,.13);--ui-shadow-up:0 8px 26px rgba(0,0,0,.25);color-scheme:dark;
 }}
@@ -30,7 +30,7 @@ body.modal-open{overflow:hidden}
 .site-brand-name{letter-spacing:-.065em}
 .bar .subnav{border-radius:var(--ui-radius-sm);gap:3px;padding:4px;margin:0}
 .bar .subnav button{min-height:44px;border-radius:9px;transition:background-color var(--ui-fast),color var(--ui-fast),box-shadow var(--ui-fast)}
-.bar .subnav button[aria-pressed="true"]{background:var(--frame);color:var(--ink);box-shadow:0 1px 5px rgba(23,31,28,.08)}
+.bar .subnav button[aria-pressed="true"]{background:var(--frame);color:var(--ink);box-shadow:0 1px 5px rgba(24,24,24,.08)}
 body:not([data-view="tree"]) .grid{grid-template-columns:minmax(0,1fr)}
 body:not([data-view="tree"]) #main{max-width:900px;width:100%;margin-inline:auto}
 body:is([data-tree-state="entry"],[data-tree-state="empty"]) .grid{grid-template-columns:minmax(0,1fr)}
