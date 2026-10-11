@@ -985,7 +985,7 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/tree-context.css?v=57">
+<link rel="stylesheet" href="assets/tree-context.css?v=58">
 </head>
 <body>
 <div class="wrap">
@@ -1044,7 +1044,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=57"></script>
+<script src="assets/tree-context.js?v=58"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -2694,7 +2694,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=57',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=58',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
