@@ -1,4 +1,13 @@
 /* Tree context menu — iOS-inspired tactile interaction, independent from idea menu. */
+/* Secondary action affordance for keyboard, VoiceOver and precise pointer input. */
+.tree-node-more{width:34px;min-width:34px;height:48px;align-self:center;
+  padding:0;border:0;border-radius:50%;background:transparent;
+  color:var(--ink-2);font-size:22px;font-weight:700;letter-spacing:1px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:.66;transition:background .16s,opacity .16s,transform .16s}
+.tree-node-more:hover,.tree-node-more:focus-visible{background:var(--surface);opacity:1}
+.tree-node-more:active{transform:scale(.93);background:var(--line)}
+@media(pointer:coarse){.tree-node-more{opacity:.75}}
 #main [data-node] {
   touch-action:pan-y;
   -webkit-touch-callout:none;
@@ -85,11 +94,6 @@ body.tree-ctx-open{overflow:hidden}
 .tree-ctx-commands .layer-form{gap:9px}
 .tree-ctx-commands .layer-form label{color:#676771}
 .tree-ctx-commands .inline{flex-wrap:wrap}
-.tree-ctx-cancel{flex:none;min-height:53px;width:100%;font:inherit;
-  border:0;border-radius:15px;color:#007aff;font-size:17px;
-  font-weight:650;background:rgba(250,250,252,.98);
-  box-shadow:0 13px 34px rgba(0,0,0,.15)}
-.tree-ctx-cancel:active,.tree-ctx-cancel.is-hovered{background:rgba(222,222,229,.98)}
 @keyframes tree-ctx-shade{from{opacity:0}to{opacity:1}}
 @keyframes tree-ctx-pop{from{opacity:.4;transform:scale(.935) translateY(9px)}
   to{opacity:1;transform:scale(1) translateY(0)}}
@@ -112,9 +116,7 @@ body.tree-ctx-open{overflow:hidden}
   .tree-ctx-commands .add-mode small,
   .tree-ctx-commands .layer-form label{color:#c6c6cf}
   .tree-ctx-commands input,.tree-ctx-commands select{background:#38383b;color:#f2f2f7}
-  .tree-ctx-back,.tree-ctx-cancel{color:#0a84ff}
-  .tree-ctx-cancel{background:rgba(45,45,49,.985)}
-  .tree-ctx-cancel:active,.tree-ctx-cancel.is-hovered{background:rgba(69,69,74,.985)}
+  .tree-ctx-back{color:#0a84ff}
 }
 @media(prefers-reduced-motion:reduce){
  #main [data-node],.tree-ctx,.tree-ctx-stage{transition:none;animation:none}
