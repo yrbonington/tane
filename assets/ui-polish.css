@@ -1,11 +1,11 @@
 /* Tane · field notes for emerging markets. Shared tokens and component finishes. */
 :root{
- --paper:#FAFAF8;--surface:#F0F0EE;--frame:#FFFFFF;--panel:#F0F0EE;--panel-line:#E3E3E0;
- --ink:#292929;--ink-2:#686868;--line:#DCDCD8;
- --accent:#303030;--accent-soft:#EDEDEB;--on-accent:#FFFFFF;--blue-button:var(--accent);
- --growth:#626D86;--gold:#8A692A;--graph-line:#7A7A7A;
- --seed:#E8E6E1;--seed-soft:#F1EFEA;--seed-ink:#48443D;
- --warn:#925B24;--warn-soft:#F4EADB;
+ --paper:#FFFFFF;--surface:#F3F4F6;--frame:#FFFFFF;--panel:#F3F4F6;--panel-line:#EDEEF1;
+ --ink:#202123;--ink-2:#747680;--line:#E3E4E8;
+ --accent:#3151CB;--accent-soft:#E7EBFC;--on-accent:#FFFFFF;--blue-button:#304CC9;
+ --growth:#24885E;--gold:#8A692A;--graph-line:#738479;
+ --seed:#E4F3E8;--seed-soft:#EFF8F1;--seed-ink:#22623F;
+ --warn:#A45B11;--warn-soft:#FFF1DD;
  --f-body:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
  --f-mono:ui-monospace,"SF Mono",Menlo,monospace;--r:12px;
  --ui-ease:cubic-bezier(.2,.8,.2,1);--ui-fast:160ms;--ui-medium:240ms;
@@ -13,12 +13,12 @@
  --ui-shadow:0 3px 16px rgba(24,24,24,.035);--ui-shadow-up:0 8px 26px rgba(24,24,24,.08);color-scheme:light;
 }
 @media(prefers-color-scheme:dark){:root{
- --paper:#151515;--surface:#252525;--frame:#1D1D1D;--panel:#252525;--panel-line:#353535;
- --ink:#EFEFEC;--ink-2:#B5B5B0;--line:#404040;
- --accent:#E5E5E1;--accent-soft:#333332;--on-accent:#202020;
- --growth:#AAB6D0;--gold:#D8B56B;--graph-line:#909090;
- --seed:#3B3832;--seed-soft:#2D2B27;--seed-ink:#EBE5DA;
- --warn:#E2B583;--warn-soft:#3C3023;
+ --paper:#0B0B0D;--surface:#242426;--frame:#0B0B0D;--panel:#242426;--panel-line:#333336;
+ --ink:#F8F8FA;--ink-2:#B3B4BC;--line:#323236;
+ --accent:#5976EB;--accent-soft:#252B41;--on-accent:#FFFFFF;--blue-button:#304CC9;
+ --growth:#55BB88;--gold:#D8B56B;--graph-line:#829989;
+ --seed:#244734;--seed-soft:#213A2D;--seed-ink:#D1F1DE;
+ --warn:#E8AD72;--warn-soft:#493522;
  --ui-shadow:0 3px 16px rgba(0,0,0,.13);--ui-shadow-up:0 8px 26px rgba(0,0,0,.25);color-scheme:dark;
 }}
 html{scroll-behavior:smooth;scroll-padding-top:130px}
@@ -60,7 +60,7 @@ body:is([data-tree-state="entry"],[data-tree-state="empty"]) #main{max-width:720
 .btn,.act,.entry-option,.add-choice .add-mode,.tagx,.tg,.chip{transition:background-color var(--ui-fast),color var(--ui-fast),border-color var(--ui-fast),transform var(--ui-fast) var(--ui-ease)}
 .btn:active,.act:active,.entry-option:active,.add-choice .add-mode:active,.chip:active{transform:scale(.985)}
 .btn,.act{border-radius:var(--ui-radius-sm);white-space:normal;overflow-wrap:anywhere}
-.btn.pri,.btn.pri.big,.act.main,.entry-option.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650}
+.btn.pri,.btn.pri.big,.act.main,.entry-option.pri{background:var(--blue-button);border-color:var(--blue-button);color:var(--on-accent);font-weight:650}
 .act.main b i,.act.main small{color:var(--on-accent)}
 input,textarea,select{accent-color:var(--accent)}
 ::placeholder{color:var(--ink-2);opacity:1}
@@ -88,7 +88,7 @@ textarea,.inline input,.newtheme input,.layer-form select,.layer-box .layer-form
 .bottom{background:var(--paper)}
 .bottom button{min-height:56px;justify-content:center;transition:color var(--ui-fast),transform var(--ui-fast) var(--ui-ease)}
 .bottom button:active{transform:scale(.96)}
-.bottom button[aria-current="true"]{background:var(--accent-soft);color:var(--ink)}
+.bottom button[aria-current="true"]{background:var(--panel);color:var(--ink)}
 :where(button,input,textarea,select,a):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(min-width:900px){.grid{grid-template-columns:minmax(0,1fr) 400px;gap:32px}.sheet{top:146px;max-height:calc(100dvh - 240px)}.bottom{bottom:16px;border:1px solid var(--line);border-radius:20px;width:480px;box-shadow:var(--ui-shadow-up)}}
 @media(max-width:899px){.sheet{border-radius:24px 24px 0 0;max-height:88dvh;transition:transform .28s var(--ui-ease);box-shadow:0 -12px 42px rgba(0,0,0,.14)}.grab{width:36px;height:5px;border-radius:999px}.bottom{border-top:1px solid var(--line)}}

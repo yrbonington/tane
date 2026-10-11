@@ -133,7 +133,7 @@ test('analysis lenses, idea menus and offline PWA keep saved data',{timeout:6500
   assert.equal(await evaluate('S.nodes.get("child").since'),'生活が変わったときから');
   assert.equal(await evaluate('S.nodes.get("child").actors[0].name'),'借りる人');
   assert.equal(await evaluate('S.ideas.size'),snapshot.ideas.length);
-  assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF8','versioned CSS available offline');
+  assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FFFFFF','versioned CSS available offline');
   await shot('detail-320-offline');assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });

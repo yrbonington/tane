@@ -9,8 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="タネ帳">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#151515" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0B0D" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="assets/icon/tanecho-icon.svg" type="image/svg+xml">
@@ -768,7 +768,7 @@ body.idea-menu-open{overflow:hidden}
 .same-rank-item{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .same-rank-row{display:flex;align-items:center;gap:11px;width:100%;padding:13px 12px;background:none;border:0;color:var(--ink);text-align:left;min-height:66px}
 .same-rank-num{width:33px;height:33px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex:none;background:var(--frame);color:var(--ink-2);font-size:13px;font-weight:800}
-.same-rank-num.is-hub{background:var(--accent);color:var(--on-accent)}
+.same-rank-num.is-hub{background:var(--blue-button);color:var(--on-accent)}
 .same-rank-main{display:flex;flex:1;flex-direction:column;gap:5px;min-width:0}
 .same-rank-main strong{font-size:15px;overflow-wrap:anywhere}
 .same-theme-meter{display:flex;gap:3px;align-items:center;height:6px;border-radius:20px;overflow:hidden;background:var(--line)}
@@ -863,8 +863,8 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/ui-polish.css?v=74">
-<link rel="stylesheet" href="assets/tree-context.css?v=74">
+<link rel="stylesheet" href="assets/ui-polish.css?v=75">
+<link rel="stylesheet" href="assets/tree-context.css?v=75">
 </head>
 <body>
 <div class="wrap">
@@ -923,7 +923,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=74"></script>
+<script src="assets/tree-context.js?v=75"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -2683,7 +2683,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=74',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=75',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>

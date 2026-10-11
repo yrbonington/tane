@@ -224,7 +224,7 @@ test('an installed v61 worker upgrades to the current release and keeps saved da
   writeFileSync(resolve(dir,'upgraded-cache-keys.json'),JSON.stringify(precached,null,2));
   assert.ok(['ui-polish.css','tree-context.css','tree-context.js'].every(f=>precached.some(url=>url.endsWith(f+'?v='+release))),'versioned assets are precached: '+JSON.stringify(precached));
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});await send('Page.reload');await sleep(250);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'upgraded offline app');
-  assert.deepEqual(await evaluate('[...S.nodes.values()]'),before.nodes);assert.deepEqual(await evaluate('[...S.ideas.values()]'),before.ideas);assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF8');
+  assert.deepEqual(await evaluate('[...S.nodes.values()]'),before.nodes);assert.deepEqual(await evaluate('[...S.ideas.values()]'),before.ideas);assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FFFFFF');
   writeFileSync(resolve(dir,'upgraded-offline.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });
