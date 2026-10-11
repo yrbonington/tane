@@ -152,3 +152,14 @@ body.tree-ctx-open{overflow:hidden}
  .tree-ctx-commands{background:rgba(45,45,49,.91);border-color:rgba(255,255,255,.14)}
 }
 @media(prefers-reduced-motion:reduce){.tree-ctx-stage{animation:none}}
+
+/* Continuous gesture feedback: the row responds immediately, then the menu settles. */
+#main [data-node].is-pressing{transform:scale(.985);transition:transform .14s cubic-bezier(.2,.8,.2,1),background-color .14s ease,box-shadow .14s ease}
+.tree-ctx-stage{animation:tree-ctx-smooth-enter .22s cubic-bezier(.18,.82,.2,1) both;transform-origin:top left;will-change:transform,opacity}
+.tree-ctx-stage.above{transform-origin:bottom left}
+.tree-ctx-content-enter>.actions,.tree-ctx-content-enter>.tree-ctx-back,.tree-ctx-content-enter>.addbox{
+ animation:tree-ctx-content-in .17s cubic-bezier(.2,.8,.2,1) both
+}
+@keyframes tree-ctx-smooth-enter{from{opacity:0;transform:translateY(5px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes tree-ctx-content-in{from{opacity:.4;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.tree-ctx-stage,.tree-ctx-content-enter>.actions,.tree-ctx-content-enter>.tree-ctx-back,.tree-ctx-content-enter>.addbox{animation:none}}
