@@ -75,7 +75,8 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   ],ideas:[]};
   await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');'+
    'localStorage.setItem("tane.theme","fixture-root")');
-  await send('Page.reload',{ignoreCache:true});
+  // Reload would trigger the app's pagehide autosave and erase the injected fixture.
+  await evaluate('loadAll();S.theme="fixture-root";render()');
   try{
    await waitFor(()=>evaluate('document.querySelectorAll("[data-node]").length===2'),'seeded tree');
   }catch(error){
