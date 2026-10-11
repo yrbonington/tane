@@ -22,7 +22,7 @@ body.tree-ctx-open{overflow:hidden}
 .tree-ctx-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tree-ctx-commands .actions .act:is(:active,.is-hovered),.tree-ctx-commands .add-mode:is(:active,.is-hovered){background:var(--accent-soft)}
 .tree-ctx-commands.is-submenu .actions{display:none}
-.tree-ctx-back{width:100%;min-height:46px;padding:10px 16px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--accent);text-align:left;font:inherit;font-size:14px}
+.tree-ctx-back{width:100%;min-height:46px;padding:10px 16px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--accent-text);text-align:left;font:inherit;font-size:14px}
 .tree-ctx-commands .addbox{margin:0;padding:14px 16px!important;gap:12px;background:transparent;max-height:65dvh;overflow:auto}
 .tree-ctx-commands .add-mode{width:100%;min-height:60px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:10px 0;gap:4px;color:inherit;background:transparent;border:0;border-radius:0;text-align:left}
 .tree-ctx-commands .add-mode+.add-mode{border-top:1px solid var(--line)}
