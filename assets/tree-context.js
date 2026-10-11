@@ -58,6 +58,10 @@ function treeCtxEnsure(){
     treeCtxMouse=null;if(p.opened)treeCtxClose();
   },true);
   window.addEventListener('resize',()=>{if(treeCtxOpen())treeCtxPosition();});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',()=>{if(treeCtxOpen())treeCtxPosition();});
+    window.visualViewport.addEventListener('scroll',()=>{if(treeCtxOpen())treeCtxPosition();});
+  }
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&treeCtxOpen())treeCtxClose();});
   // After the menu has opened, a fresh touch inside it can slide-select as on iOS.
   let menuTouch=null;
@@ -90,15 +94,18 @@ function treeCtxPosition(){
   const stage=document.querySelector('#treeCtxStage');
   const anchor=document.querySelector('#treeCtx')._anchor;
   if(!anchor)return;
-  const vw=innerWidth,vh=innerHeight;
+  const vv=window.visualViewport;
+  const vw=vv?.width||innerWidth, vh=vv?.height||innerHeight;
+  const ox=vv?.offsetLeft||0, oy=vv?.offsetTop||0;
+  stage.style.maxHeight=Math.max(120,vh-32)+'px';
   const w=stage.getBoundingClientRect().width,h=stage.getBoundingClientRect().height;
-  const left=Math.max(16,Math.min(vw-w-16,anchor.left+anchor.width*.5-w*.5));
-  // The preview stays close to the item; the menu reverses above a low item.
-  const above=(anchor.top>vh*.57 && anchor.top>h*.5);
+  const left=Math.max(ox+16,Math.min(ox+vw-w-16,anchor.left+anchor.width*.5-w*.5));
+  // Keep the lifted preview adjacent to its source whenever screen space allows.
+  const above=(anchor.top>oy+vh*.57 && anchor.top>oy+h*.5);
   stage.classList.toggle('above',above);
   const wantedTop=above?anchor.bottom-h:anchor.top-4;
   stage.style.left=left+'px';
-  stage.style.top=Math.max(16,Math.min(vh-h-16,wantedTop))+'px';
+  stage.style.top=Math.max(oy+16,Math.min(oy+vh-h-16,wantedTop))+'px';
 }
 function treeCtxRender(){
   if(!treeCtxOpen())return;
