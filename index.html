@@ -1838,20 +1838,16 @@ function renderSameList(m){
   const tagCard=untagged.length?`<div class="card ai-flow tag-ai-workflow">
     <h4>本質をまとめて付ける</h4>
     <p class="muted">本質が未設定の行動：${untagged.length}件${untagged.length>80?'（先頭80件から）':''}</p>
-    <div class="ai-flow-step">
-      <strong>① 本質の提案をコピー</strong>
-      <button class="btn pri big" id="tagCopyPrompt" type="button">本質の提案をコピー</button>
+    <div class="ai-flow-choice">
+      <strong>① AIを開く</strong>
+      <div class="ai-provider-links" aria-label="本質を提案するAIを選ぶ">
+        <a class="btn ai-provider" data-ai-provider="chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
+        <a class="btn ai-provider" data-ai-provider="claude" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
+      </div>
       ${untagged.length>80?'<p class="muted">80件ずつ提案してもらいます</p>':''}
     </div>
-    <div class="ai-flow-choice">
-      <strong>② AIを開く</strong>
-      <div class="ai-provider-links" aria-label="本質を提案するAIを選ぶ">
-        <a class="btn ai-provider" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT ↗</a>
-        <a class="btn ai-provider" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Claude ↗</a>
-      </div>
-    </div>
     <div class="ai-flow-step">
-      <strong>③ 提案を取り込む</strong>
+      <strong>② 提案を取り込む</strong>
       <button class="btn ai-secondary" id="tagGoImport" type="button">提案を取り込む →</button>
     </div>
   </div>`:'<div class="card tag-flow-done">すべての行動に本質が付いています</div>';
@@ -1866,11 +1862,7 @@ function renderSameList(m){
     ${single.length?`<p class="h2">1か所だけの本質</p><div class="card">${single.map(g=>`<div class="tags"><span class="b b-tag">${esc(g.t)}</span></div>${g.ns.map(hitBtn).join('')}`).join('')}</div>`:''}
   </div>`;
   bindGo(m);
-  const tagCopy=$('#tagCopyPrompt');
-  if(tagCopy)tagCopy.onclick=async()=>{
-    await copyText(buildTagPrompt());
-    if(untagged.length>80)toast('80件ずつ提案してもらいます');
-  };
+  bindAIPromptLinks(m.querySelector('.tag-ai-workflow'),()=>buildTagPrompt());
   const tagImport=$('#tagGoImport');if(tagImport)tagImport.onclick=()=>openImport();
   m.querySelectorAll('[data-rename]').forEach(b=>b.onclick=()=>{S.renaming=S.renaming===b.dataset.rename?null:b.dataset.rename;renderMain();const i=m.querySelector('[data-renform] input');if(i)i.focus();});
   m.querySelectorAll('[data-renform]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const from=f.dataset.renform;const to=f.querySelector('input').value.trim();S.renaming=null;
@@ -2573,7 +2565,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=48',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=49',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
