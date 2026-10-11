@@ -160,6 +160,12 @@ test('backup preview, cancel, confirmed merge and file export preserve unrelated
   const exported=JSON.parse(readFileSync(resolve(downloads,readdirSync(downloads).find(f=>f.endsWith('.json'))),'utf8'));
   assert.equal(exported.app,'tane');assert.equal(exported.version,2);assert.equal(exported.nodes.length,8);assert.equal(exported.ideas.length,1);
   assert.equal(exported.nodes.find(n=>n.id==='root2').text,JSON.parse(initial).nodes.find(n=>n.id==='root2').text);
+  await send('DOM.enable');const documentNode=(await send('DOM.getDocument')).root.nodeId;
+  const inputNode=(await send('DOM.querySelector',{nodeId:documentNode,selector:'#imFile'})).nodeId;
+  await send('DOM.setFileInputFiles',{nodeId:inputNode,files:[resolve(downloads,readdirSync(downloads).find(f=>f.endsWith('.json')))]});
+  await wait(()=>evaluate('!!document.querySelector("#confirmImport")'),'file import preview');
+  assert.ok(await evaluate('document.querySelector("#imResult").textContent.includes("上書き 8件")'),'downloaded backup is read by the file input');await shot('backup-375-file-review');
+  await evaluate('document.querySelector("#cancelImport").click()');assert.equal(await evaluate('S.nodes.size'),8);assert.equal(await evaluate('S.ideas.size'),1);
   await send('Page.reload');await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'reload');assert.equal(await evaluate('S.nodes.size'),8);assert.equal(await evaluate('S.ideas.size'),1);assert.deepEqual(h.errors,[]);
  }finally{await h.close();}
 });
