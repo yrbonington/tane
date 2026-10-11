@@ -1,7 +1,7 @@
 // アプリの画面はオンライン時に最新を優先。オフライン時だけ保存済み画面を表示します。
 // 書いた内容はここでは一切扱わず、端末の localStorage にのみ保存します。
-const VERSION = 'tane-v60';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg', './assets/tree-context.css', './assets/tree-context.js'];
+const VERSION = 'tane-v61';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './assets/icon/tanecho-icon.svg', './assets/ui-polish.css', './assets/tree-context.css', './assets/tree-context.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(VERSION).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
@@ -13,7 +13,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   const isPage = event.request.mode === 'navigate' || /\/index\.html$/.test(url.pathname);
-  const isTreeAsset = /\/assets\/tree-context\.(?:css|js)$/.test(url.pathname);
+  const isTreeAsset = /\/assets\/(?:tree-context\.(?:css|js)|ui-polish\.css)$/.test(url.pathname);
   if (isTreeAsset) {
     event.respondWith((async () => {
       const cache = await caches.open(VERSION);
