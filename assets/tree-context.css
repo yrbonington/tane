@@ -123,3 +123,17 @@ body.tree-ctx-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
  #main [data-node],.tree-ctx,.tree-ctx-stage{transition:none;animation:none}
 }
+
+/* iOS compact context menu refinement — no separate preview card. */
+.tree-ctx{background:rgba(0,0,0,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.tree-ctx-stage{width:min(320px,calc(100vw - 32px));gap:0;animation:tree-ctx-pop .24s cubic-bezier(.2,1,.28,1) both}
+.tree-ctx-preview{display:none!important}
+.tree-ctx-commands{background:rgba(242,242,247,.78);-webkit-backdrop-filter:blur(38px) saturate(1.8);backdrop-filter:blur(38px) saturate(1.8);border:1px solid rgba(255,255,255,.24);border-radius:22px;box-shadow:0 14px 42px rgba(0,0,0,.19);overflow:hidden}
+.tree-ctx-commands .actions .act{min-height:54px;padding:12px 17px}
+.tree-ctx-commands .actions .act b{font-size:17px;font-weight:450;letter-spacing:-.025em}
+.tree-ctx-commands .actions .act+.act{border-top:1px solid rgba(60,60,67,.18)}
+.tree-ctx-icon,.tree-ctx-icon svg{width:23px;height:23px}
+.tree-ctx-commands .addbox{max-height:65dvh;overflow:auto}
+@media(prefers-color-scheme:dark){
+ .tree-ctx-commands{background:rgba(38,38,43,.8);border-color:rgba(255,255,255,.12);box-shadow:0 16px 45px rgba(0,0,0,.32)}
+}
