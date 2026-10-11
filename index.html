@@ -961,6 +961,21 @@ body.idea-menu-open{overflow:hidden}
 .net-legend-body{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;padding:0 13px 12px}
 .net-legend-body small{width:100%;line-height:1.5}
 @media(prefers-reduced-motion:reduce){.net-legend-toggle span{transition:none}}
+
+/* 行動を追加する → 抽象化・具体化・同じ段。階層の移動は既存行動をつなぎ直す。 */
+.item.sel .add-choice{gap:7px}
+.add-choice .add-mode{display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  width:100%;min-height:57px;border:1px solid var(--line);border-radius:11px;
+  background:var(--frame);color:var(--ink);padding:11px 13px;text-align:left}
+.add-choice .add-mode strong{font-size:14px}
+.add-choice .add-mode small{color:var(--ink-2);font-size:12px;line-height:1.4}
+.add-choice .add-cancel{align-self:flex-end;margin-top:4px}
+.layer-box .hint{margin:0;line-height:1.55}
+.layer-form{display:flex;flex-direction:column;gap:10px}
+.layer-form label{font-size:12px;color:var(--ink-2);font-weight:650}
+.layer-form select{display:block;width:100%;min-height:46px;padding:10px;border:1px solid var(--line);
+  background:var(--paper);color:var(--ink);border-radius:10px;font:inherit;font-size:13px}
+.layer-form .btnrow{margin-top:3px}
 </style>
 </head>
 <body>
@@ -1134,6 +1149,32 @@ function delNode(id){const n=S.nodes.get(id);if(!n)return;const all=[id,...desce
   for(const x of all)remove(x); saveSoon(); render(); toast('削除しました');}
 function move(id,dir){const n=S.nodes.get(id);const sib=kids(n.parent||null);const i=sib.findIndex(s=>s.id===id);const j=i+dir;if(j<0||j>=sib.length)return;
   const r=[...sib];r.splice(i,1);r.splice(j,0,n);r.forEach((x,k)=>x.order=k);saveSoon();render();}
+function layerTargets(id){
+ const n=S.nodes.get(id);
+ if(!n||!n.parent)return [];
+ const root=rootOf(id),blocked=new Set([id,...descendants(id)]);
+ return [root,...descendants(root)].map(x=>S.nodes.get(x)).filter(x=>x&&!blocked.has(x.id));
+}
+function moveLayer(id,parentId){
+ const n=S.nodes.get(id),parent=S.nodes.get(parentId);
+ if(!n||!parent||n.parent==null||id===parentId||rootOf(id)!==rootOf(parentId)||
+    descendants(id).includes(parentId)){
+   toast('同じL0の別の行動を選んでください');return false;
+ }
+ if(n.parent===parentId){toast('すでにその階層にあります');return false;}
+ const beforeParent=n.parent;
+ kids(beforeParent).filter(x=>x.id!==id).forEach((x,i)=>{x.order=i;});
+ const newSiblings=kids(parentId);
+ n.parent=parentId;
+ n.order=newSiblings.length?Math.max(...newSiblings.map(x=>x.order??0))+1:0;
+ S.collapsed.delete(parentId);S.focus=null;S.adding=null;
+ saveSoon();render();toast('階層を移動しました');
+ requestAnimationFrame(()=>{
+   const row=document.querySelector(`[data-item="${CSS.escape(id)}"]`);
+   if(row)row.scrollIntoView({block:'nearest'});
+ });
+ return true;
+}
 function select(id,openDetail){
   if(S.sel!==id){S.adding=null;}
   S.sel=id; if(id){const r=rootOf(id);if(r&&r!==S.theme){S.theme=r;S.focus=null;ls.set(KEY_THEME,r);}}
@@ -1251,36 +1292,77 @@ function renderTree(m){
   m.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>{const id=b.dataset.node;if(S.sel===id)select(null);else select(id,false);});
   m.querySelectorAll('[data-caret]').forEach(b=>b.onclick=()=>{const id=b.dataset.caret;S.collapsed.has(id)?S.collapsed.delete(id):S.collapsed.add(id);renderMain();});
   m.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>{S.focus=b.dataset.zoom||null;render();});
-  const q=$('#quickAdd');if(q)q.onclick=()=>{select(top,false);startAdd(top,'down');};
+  const q=$('#quickAdd');if(q)q.onclick=()=>{select(top,false);startAdd(top,'choose');};
   bindActionBar();
 }
-function actionBar(n){const isRoot=!n.parent;const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;
-  return `<div class="actions">
-    <button class="act ${a==='up'?'main':''}" data-add="up"><b><i>↑</i>抽象化する</b><small>目的を1段上へ</small></button>
-    <button class="act ${a==='down'?'main':''}" data-add="down"><b><i>↓</i>具体化する</b><small>やり方を1段下へ</small></button>
-    ${isRoot?'':`<button class="act ${a==='sib'?'main':''}" data-add="sib"><b><i>→</i>同じ段に追加</b><small>並ぶ行動を追加</small></button>`}
-    <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>なぜを4つの視点で掘る</small></button>
-    ${S.focus===n.id||!kids(n.id).length?'':`<button class="act" id="zoomHere"><b><i>⌕</i>この下だけ表示</b><small>この行動に集中</small></button>`}
-    ${S.focus?'<button class="act" id="zoomAll"><b><i>↖</i>全体表示</b><small>絞り込みを解除</small></button>':''}
-  </div>${a?`<div class="addbox"><span class="hint">${esc(addHint(n,a))}</span>
-    <form class="inline" id="addForm"><input id="addIn" enterkeyhint="done" autocomplete="off" aria-label="${esc(addHint(n,a))}"><button class="btn pri" type="submit">追加</button><button class="btn icon" type="button" id="addX" aria-label="閉じる">✕</button></form></div>`:''}`;}
-function startAdd(id,mode){S.adding={id,mode};renderMain();const i=$('#addIn');if(i)i.focus();}
-function bindActionBar(){if(!S.sel)return;const id=S.sel;
-  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const mode=b.dataset.add;if(S.adding&&S.adding.mode===mode){S.adding=null;renderMain();}else startAdd(id,mode);});
-  const z=$('#zoomHere');if(z)z.onclick=()=>{S.focus=id;render();};
-  const all=$('#zoomAll');if(all)all.onclick=()=>{S.focus=null;render();};
-  const o=$('#openSheet');if(o)o.onclick=()=>{renderSheet();openSheet(true);};
-  const f=$('#addForm');if(!f)return;
-  f.onsubmit=e=>{e.preventDefault();const i=$('#addIn');const v=i.value.trim();const mode=S.adding.mode;
-    if(!v){S.adding=null;renderMain();return;}
-    i.value='';
-    if(mode==='down'){addChild(id,v);const ni=$('#addIn');if(ni){ni.value='';ni.focus();}}
-    else if(mode==='up'){const pid=addParent(id,v);S.adding=null;if(pid)select(pid,false);}
-    else{const nid=addSibling(id,v);S.adding=null;if(nid){select(nid,false);startAdd(nid,'sib');}}};
-  $('#addX').onclick=()=>{S.adding=null;renderMain();};
+function actionBar(n){
+ const isRoot=!n.parent;
+ const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;
+ const options=layerTargets(n.id);
+ const choice=a==='choose'?`<div class="addbox add-choice" id="addChoice">
+   <span class="hint">どの位置に行動を追加しますか？</span>
+   <button class="add-mode" type="button" data-add="up"><strong>↑ 抽象化する</strong><small>この行動の目的を1段上に追加</small></button>
+   <button class="add-mode" type="button" data-add="down"><strong>↓ 具体化する</strong><small>やり方を1段下に追加</small></button>
+   ${isRoot?'':`<button class="add-mode" type="button" data-add="sib"><strong>→ 同じ段に追加</strong><small>この行動と並べて追加</small></button>`}
+   <button class="btn sm add-cancel" type="button" id="addChoiceClose">キャンセル</button>
+ </div>`:'';
+ const layer=a==='layer'?`<div class="addbox layer-box" id="layerBox">
+   <p class="hint">移動先の行動を選ぶと、その1段下に移動します。下の行動も一緒に移動します。</p>
+   <form id="layerForm" class="layer-form">
+     <label for="layerTarget">移動先の親になる行動</label>
+     <select id="layerTarget" required>
+       ${options.map(x=>`<option value="${esc(x.id)}" ${x.id===n.parent?'selected':''}>L${depth(x.id)}　${esc(pathOf(x.id).map(z=>z.text).join(' › '))}</option>`).join('')}
+     </select>
+     <div class="btnrow"><button class="btn pri" type="submit">移動する</button><button class="btn" type="button" id="layerCancel">キャンセル</button></div>
+   </form>
+ </div>`:'';
+ const editing=['up','down','sib'].includes(a)?`<div class="addbox">
+   <span class="hint">${esc(addHint(n,a))}</span>
+   <form class="inline" id="addForm"><input id="addIn" enterkeyhint="done" autocomplete="off" aria-label="${esc(addHint(n,a))}"><button class="btn pri" type="submit">追加</button><button class="btn icon" type="button" id="addX" aria-label="閉じる">✕</button></form>
+ </div>`:'';
+ return `<div class="actions">
+   <button class="act ${a==='choose'||editing?'main':''}" type="button" id="chooseAdd" aria-expanded="${a==='choose'||!!editing}"><b><i>＋</i>行動を追加する</b><small>抽象化・具体化・同じ段</small></button>
+   ${isRoot?'':`<button class="act ${a==='layer'?'main':''}" type="button" id="changeLayer" aria-expanded="${a==='layer'}"><b><i>↕</i>階層を移動</b><small>今ある行動の親を変更</small></button>`}
+   <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>なぜを4つの視点で掘る</small></button>
+   ${S.focus===n.id||!kids(n.id).length?'':`<button class="act" id="zoomHere"><b><i>⌕</i>この下だけ表示</b><small>この行動に集中</small></button>`}
+   ${S.focus?'<button class="act" id="zoomAll"><b><i>↖</i>全体表示</b><small>絞り込みを解除</small></button>':''}
+ </div>${choice}${layer}${editing}`;
 }
-
-/* ---------- つながり ---------- */
+function startAdd(id,mode){
+ S.adding={id,mode};renderMain();
+ const target=mode==='choose'?'[data-add]':mode==='layer'?'#layerTarget':'#addIn';
+ const el=document.querySelector(target);if(el)el.focus();
+}
+function bindActionBar(){
+ if(!S.sel)return;
+ const id=S.sel;
+ const close=()=>{S.adding=null;renderMain();};
+ const current=()=>S.adding?.id===id?S.adding.mode:null;
+ const toggle=mode=>current()===mode?close():startAdd(id,mode);
+ const c=$('#chooseAdd');if(c)c.onclick=()=>toggle('choose');
+ const l=$('#changeLayer');if(l)l.onclick=()=>toggle('layer');
+ const ac=$('#addChoiceClose');if(ac)ac.onclick=close;
+ const lc=$('#layerCancel');if(lc)lc.onclick=close;
+ document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>startAdd(id,b.dataset.add));
+ const layerForm=$('#layerForm');
+ if(layerForm)layerForm.onsubmit=e=>{
+   e.preventDefault();const target=$('#layerTarget')?.value;
+   if(target)moveLayer(id,target);
+ };
+ const z=$('#zoomHere');if(z)z.onclick=()=>{S.focus=id;render();};
+ const all=$('#zoomAll');if(all)all.onclick=()=>{S.focus=null;render();};
+ const o=$('#openSheet');if(o)o.onclick=()=>{renderSheet();openSheet(true);};
+ const f=$('#addForm');if(!f)return;
+ f.onsubmit=e=>{
+   e.preventDefault();const field=$('#addIn'),v=field.value.trim(),mode=S.adding?.mode;
+   if(!v){close();return;}
+   field.value='';
+   if(mode==='down'){addChild(id,v);const next=$('#addIn');if(next){next.value='';next.focus();}}
+   else if(mode==='up'){const pid=addParent(id,v);S.adding=null;if(pid)select(pid,false);}
+   else if(mode==='sib'){const nid=addSibling(id,v);S.adding=null;if(nid){select(nid,false);startAdd(nid,'sib');}}
+ };
+ const cancel=$('#addX');if(cancel)cancel.onclick=close;
+}
 function bigrams(s){const t=s.replace(/\s/g,'');const a=new Set();for(let i=0;i<t.length-1;i++)a.add(t.slice(i,i+2));return a;}
 function sim(a,b){const A=bigrams(a),B=bigrams(b);if(!A.size||!B.size)return 0;let x=0;for(const g of A)if(B.has(g))x++;return x/(A.size+B.size-x);}
 function similarGroups(){const ns=[...S.nodes.values()].filter(n=>n.parent&&(n.text||'').length>=3);
@@ -2565,7 +2647,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=49',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=50',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
