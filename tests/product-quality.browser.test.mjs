@@ -211,6 +211,7 @@ test('150-action graph fits a small screen, filters and details remain usable',{
   await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(dense))+');loadAll();S.tab="same";netGraph=null;window.qaDenseStart=performance.now();render()');
   await wait(()=>evaluate('!netGraph.fitOnSettle&&!netGraph.camTarget'),'dense settle');
   const settleMs=await evaluate('performance.now()-qaDenseStart');assert.equal(await evaluate('netGraph.nodes.size'),150);
+  assert.equal(await evaluate('netLive.labels.filter(b=>netGraph.nodes.get(b.id).depth===0).length'),2,'both starting actions keep a readable label');
   assert.ok(await evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'dense graph fits 320px');
   writeFileSync(resolve(dir,'dense-150-network.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
   await evaluate('netSetFilters(null,"選択肢を比べる");netSelect("action:dense142",true)');assert.ok(await evaluate('!document.querySelector("#netDetail").hidden'));

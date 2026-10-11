@@ -863,8 +863,8 @@ body.idea-menu-open{overflow:hidden}
   background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
-<link rel="stylesheet" href="assets/ui-polish.css?v=71">
-<link rel="stylesheet" href="assets/tree-context.css?v=71">
+<link rel="stylesheet" href="assets/ui-polish.css?v=72">
+<link rel="stylesheet" href="assets/tree-context.css?v=72">
 </head>
 <body>
 <div class="wrap">
@@ -923,7 +923,7 @@ body.idea-menu-open{overflow:hidden}
   </div>
 </div>
 
-<script src="assets/tree-context.js?v=71"></script>
+<script src="assets/tree-context.js?v=72"></script>
 <script>
 'use strict';
 const KEY='tane.v1', KEY_EXPORT='tane.lastExport', KEY_THEME='tane.theme';
@@ -1801,9 +1801,20 @@ function netPaint(){
    }
    const bw=Math.max(...lines.map(s=>ctx.measureText(s).width))+8,bh=lines.length*lineHeight+4;
    const candidates=[{x:p.x-bw/2,y:p.y+r+6},{x:p.x-bw/2,y:p.y-r-bh-6},{x:p.x+r+8,y:p.y-bh/2},{x:p.x-r-bw-8,y:p.y-bh/2}];
-   const box=candidates.map(b=>({...b,w:bw,h:bh,id:n.id})).find(b=>b.x>=6&&b.x+b.w<=w-6&&b.y>=52&&b.y+b.h<=h-62&&!boxes.some(q=>overlap(b,q))&&!live.labels.some(q=>overlap(b,q)));
+   // Keep starting actions legible even when hundreds of points cluster.
+   // Nearby placements remain preferred; only roots and the selected action
+   // can use a leader to a clear label outside the cluster.
+   if(n.depth===0||selected)for(const gap of [36,64,96,136,180]){
+     candidates.push({x:p.x-bw/2,y:p.y-r-bh-gap,leader:true},{x:p.x-bw/2,y:p.y+r+gap,leader:true},
+       {x:p.x+r+gap,y:p.y-bh/2,leader:true},{x:p.x-r-bw-gap,y:p.y-bh/2,leader:true});
+   }
+   const box=candidates.map(b=>({...b,x:b.leader?Math.max(6,Math.min(w-bw-6,b.x)):b.x,y:b.leader?Math.max(52,Math.min(h-bh-62,b.y)):b.y,w:bw,h:bh,id:n.id})).find(b=>b.x>=6&&b.x+b.w<=w-6&&b.y>=52&&b.y+b.h<=h-62&&!boxes.some(q=>overlap(b,q))&&!live.labels.some(q=>overlap(b,q)));
    if(!box)continue;
    live.labels.push(box);ctx.globalAlpha=n.fade*n.labelFade;
+   if(box.leader){
+     const qx=Math.max(box.x,Math.min(box.x+box.w,p.x)),qy=Math.max(box.y,Math.min(box.y+box.h,p.y)),d=Math.max(1,Math.hypot(qx-p.x,qy-p.y));
+     ctx.strokeStyle=c.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x+(qx-p.x)/d*(r+3),p.y+(qy-p.y)/d*(r+3));ctx.lineTo(qx,qy);ctx.stroke();
+   }
    ctx.textAlign='center';ctx.textBaseline='top';ctx.lineJoin='round';ctx.lineWidth=4;
    lines.forEach((line,i)=>{const x=box.x+box.w/2,y=box.y+2+i*lineHeight;ctx.strokeStyle=c.frame;ctx.strokeText(line,x,y);ctx.fillStyle=c.ink;ctx.fillText(line,x,y);});
  }
@@ -2672,7 +2683,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=71',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=72',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
