@@ -1307,7 +1307,7 @@ function renderTree(m){
   const walk=id=>{const n=S.nodes.get(id);const d=depth(id);const rel=d-d0;const ks=kids(id);const shut=S.collapsed.has(id);const sel=S.sel===id;
     rows.push(`<div class="item ${sel?'sel':''}" data-item="${esc(id)}"><div class="row"><span class="indent">${'<i></i>'.repeat(Math.min(rel,6))}</span>
       <button class="caret" data-caret="${esc(id)}" ${ks.length?'':'disabled'} aria-label="${shut?'開く':'閉じる'}">${ks.length?(shut?'▶':'▼'):''}</button>
-      <button class="node ${d===0?'root':''}" data-node="${esc(id)}" aria-haspopup="dialog" aria-label="${esc(n.text)}。タップで分析、長押しで操作"><span class="line1"><span class="lv">L${d}</span><span class="t">${esc(n.text)}${ks.length&&shut?` <span class="muted">（下に${descendants(id).length}件）</span>`:''}</span></span>${badges(n)?`<span class="meta">${badges(n)}</span>`:''}</button>
+      <button class="node ${d===0?'root':''}" data-node="${esc(id)}" aria-haspopup="dialog" aria-label="${esc(n.text)}。タップで分析、長押しで操作"><span class="line1"><span class="lv">L${d}</span><span class="t">${esc(n.text)}${ks.length&&shut?` <span class="muted">（下に${descendants(id).length}件）</span>`:''}</span></span>${badges(n)?`<span class="meta">${badges(n)}</span>`:''}</button><button class="tree-node-more" type="button" data-node-menu="${esc(id)}" aria-haspopup="dialog" aria-label="${esc(n.text)}の操作を表示">···</button>
       </div></div>`);
     if(!shut)for(const k of ks)walk(k.id);};
   walk(top);
