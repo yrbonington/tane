@@ -9,6 +9,10 @@ import {fileURLToPath} from 'node:url';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const logPreview=(name,data)=>{
+ for(let i=0;i<data.length;i+=20000)
+  console.log('TANE_VISUAL_'+name+'_PART_'+i+':'+data.slice(i,i+20000));
+};
 const chrome=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser']
  .find(x=>x&&existsSync(x))||spawnSync('which',['google-chrome'],{encoding:'utf8'}).stdout.trim();
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
@@ -88,7 +92,7 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   mkdirSync(join(root,'test-artifacts'),{recursive:true});
   writeFileSync(join(root,'test-artifacts','tree-default-mobile.png'),
    Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
-  console.log('TANE_VISUAL_TREE_JPEG:'+(
+  logPreview('TREE',(
    await send('Page.captureScreenshot',{format:'jpeg',quality:48})
   ).data);
   await evaluate('document.querySelector("[data-node]").click()');
@@ -128,7 +132,7 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   assert.equal(await evaluate('document.querySelector("#treeCtxCommands").classList.contains("is-submenu")'),true);
   writeFileSync(join(dir,'tree-add-submenu.png'),
    Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
-  console.log('TANE_VISUAL_SUBMENU_JPEG:'+(
+  logPreview('SUBMENU',(
    await send('Page.captureScreenshot',{format:'jpeg',quality:48})
   ).data);
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
