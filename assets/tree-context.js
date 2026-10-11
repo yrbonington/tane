@@ -19,7 +19,7 @@ function treeCtxEnsure(){
   el.id='treeCtx';el.className='tree-ctx';el.hidden=true;
   el.innerHTML='<div id="treeCtxStage" class="tree-ctx-stage" role="dialog" aria-modal="true" aria-labelledby="treeCtxHeading" tabindex="-1">'+
     '<div class="tree-ctx-preview" id="treeCtxPreview"><div id="treeCtxHeading"></div></div>'+
-    '<div class="tree-ctx-commands" id="treeCtxCommands"></div></div>'+    '<div class="tree-ctx-source" id="treeCtxSource" aria-hidden="true"></div>';
+    '<div class="tree-ctx-commands" id="treeCtxCommands"></div></div>';
   document.body.appendChild(el);
   el.addEventListener('click',e=>{
     if(e.target===el && performance.now()-treeCtxOpenedAt>250)treeCtxClose();
@@ -100,15 +100,15 @@ function treeCtxPosition(){
   stage.style.maxHeight=Math.max(120,vh-32)+'px';
   // Layout dimensions remain stable during the spring-scale entrance animation.
   const w=stage.offsetWidth,h=stage.offsetHeight;
-  const left=Math.max(ox+16,Math.min(ox+vw-w-16,anchor.left+anchor.width*.5-w*.5));
-  // iOS-like compact menu: float adjacent to the pressed row, not over it.
+  const left=Math.max(ox+12,Math.min(ox+vw-w-12,anchor.left+Math.min(anchor.width*.28,36)));
+  // Small fixed-size context surface anchored to the pressed row.
   const belowSpace=oy+vh-anchor.bottom;
   const aboveSpace=anchor.top-oy;
   const above=belowSpace<h+18 && aboveSpace>belowSpace;
   stage.classList.toggle('above',above);
-  const wantedTop=above?anchor.top-h-8:anchor.bottom+8;
+  const wantedTop=above?anchor.top-h-6:anchor.bottom+6;
   stage.style.left=left+'px';
-  stage.style.top=Math.max(oy+16,Math.min(oy+vh-h-16,wantedTop))+'px';
+  stage.style.top=Math.max(oy+12,Math.min(oy+vh-h-12,wantedTop))+'px';
 }
 function treeCtxRender(){
   if(!treeCtxOpen())return;
@@ -140,12 +140,6 @@ function treeCtxShow(id,opener){
   const row=opener?.matches?.('[data-node]')?opener:document.querySelector('[data-node="'+CSS.escape(id)+'"]');
   const rect=row?.getBoundingClientRect()||{left:innerWidth*.1,top:innerHeight*.3,bottom:innerHeight*.3+52,width:innerWidth*.8};
   menu._anchor={left:rect.left,top:rect.top,bottom:rect.bottom,width:rect.width};
-  const source=document.querySelector('#treeCtxSource');
-  source.textContent=n.text;
-  source.style.left=Math.max(12,rect.left)+'px';
-  source.style.top=rect.top+'px';
-  source.style.width=Math.min(rect.width,innerWidth-24)+'px';
-  source.style.height=rect.height+'px';
   treeCtxPreviousFocus=document.activeElement;
   treeCtxOrigin=id;treeCtxOpenedAt=performance.now();
   S.sel=id;S.adding=null;
@@ -169,7 +163,6 @@ function treeCtxClose(restoreFocus=true){
   document.documentElement.style.overflow='';
   document.querySelector('#treeCtxCommands').replaceChildren();
   document.querySelector('#treeCtxPreview').replaceChildren();
-  document.querySelector('#treeCtxSource').textContent='';
   S.adding=null;
   const last=treeCtxPreviousFocus,origin=treeCtxOrigin;
   treeCtxPreviousFocus=null;treeCtxOrigin=null;
