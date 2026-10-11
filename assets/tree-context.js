@@ -119,6 +119,9 @@ function treeCtxRender(){
   const mode=S.adding?.id===n.id?S.adding.mode:null;
   panel.innerHTML=actionBar(n);
   panel.classList.toggle('is-submenu',!!mode);
+  panel.classList.remove('tree-ctx-content-enter');
+  void panel.offsetWidth;
+  panel.classList.add('tree-ctx-content-enter');
   if(mode){
     panel.insertAdjacentHTML('afterbegin','<button class="tree-ctx-back" id="treeCtxBack" type="button">‹ 戻る</button>');
     document.querySelector('#treeCtxBack').onclick=()=>{S.adding=null;treeCtxRender();};
@@ -143,8 +146,9 @@ function treeCtxShow(id,opener){
   treeCtxPreviousFocus=document.activeElement;
   treeCtxOrigin=id;treeCtxOpenedAt=performance.now();
   S.sel=id;S.adding=null;
-  // Keep the analysis panel in sync, without replacing the pressed tree row.
-  renderSheet();openSheet(false);
+  // Opening the menu must not synchronously rebuild the analysis sheet.
+  // Defer sheet work until the user explicitly opens it.
+  openSheet(false);
   document.querySelector('#treeCtxPreview').innerHTML='<span class="tree-ctx-level">L'+depth(id)+'</span>'+
     '<div class="tree-ctx-name" id="treeCtxHeading">'+esc(n.text)+'</div>'+
     (badges(n)?'<div class="meta">'+badges(n)+'</div>':'');
@@ -206,7 +210,7 @@ function bindTreeNodePress(m){
         if(touchId===null||treeCtxOpen())return;
         touchOpened=true;ignoreClickUntil=performance.now()+1300;
         clear();treeCtxShow(b.dataset.node,b);
-      },520);
+      },420);
     },{passive:true});
     b.addEventListener('touchmove',e=>{
       const t=[...e.touches].find(t=>t.identifier===touchId);
@@ -243,7 +247,7 @@ function bindTreeNodePress(m){
         if(treeCtxMouse!==press||treeCtxOpen())return;
         press.opened=true;ignoreClickUntil=performance.now()+1300;
         b.classList.remove('is-pressing');treeCtxShow(b.dataset.node,b);
-      },520);
+      },420);
     });
     b.addEventListener('contextmenu',e=>{
       e.preventDefault();clear();
