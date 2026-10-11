@@ -976,6 +976,14 @@ body.idea-menu-open{overflow:hidden}
 .layer-form select{display:block;width:100%;min-height:46px;padding:10px;border:1px solid var(--line);
   background:var(--paper);color:var(--ink);border-radius:10px;font:inherit;font-size:13px}
 .layer-form .btnrow{margin-top:3px}
+
+/* 下の階層へ移動するときは、上の階層にまとめる親の行動を置く。 */
+.layer-box .layer-section{display:flex;flex-direction:column;gap:9px}
+.layer-box .layer-section + .layer-section{border-top:1px solid var(--line);padding-top:15px;margin-top:3px}
+.layer-box .layer-section>strong{font-size:13px;color:var(--ink);line-height:1.5}
+.layer-box .layer-form input{display:block;width:100%;min-height:46px;border:1px solid var(--line);
+  background:var(--paper);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
+.layer-box .layer-form .btn{white-space:normal;min-height:44px}
 </style>
 </head>
 <body>
@@ -1155,6 +1163,21 @@ function layerTargets(id){
  const root=rootOf(id),blocked=new Set([id,...descendants(id)]);
  return [root,...descendants(root)].map(x=>S.nodes.get(x)).filter(x=>x&&!blocked.has(x.id));
 }
+function wrapAtNewLayer(id,text){
+ const n=S.nodes.get(id),title=String(text||'').trim();
+ if(!n||n.parent==null||!title){toast('まとめる行動の名前を入力してください');return false;}
+ const oldParent=n.parent,oldDepth=depth(id);
+ const wrapper=addParent(id,title);
+ if(!wrapper)return false;
+ S.collapsed.delete(oldParent);S.focus=null;S.adding=null;
+ render();
+ toast(`L${oldDepth}にまとめる行動を作り、L${oldDepth+1}へ下げました`);
+ requestAnimationFrame(()=>{
+  const row=document.querySelector(`[data-item="${CSS.escape(id)}"]`);
+  if(row)row.scrollIntoView({block:'nearest'});
+ });
+ return true;
+}
 function moveLayer(id,parentId){
  const n=S.nodes.get(id),parent=S.nodes.get(parentId);
  if(!n||!parent||n.parent==null||id===parentId||rootOf(id)!==rootOf(parentId)||
@@ -1298,23 +1321,37 @@ function renderTree(m){
 function actionBar(n){
  const isRoot=!n.parent;
  const a=S.adding&&S.adding.id===n.id?S.adding.mode:null;
- const options=layerTargets(n.id);
+ const elsewhere=layerTargets(n.id).filter(x=>x.id!==n.parent);
  const choice=a==='choose'?`<div class="addbox add-choice" id="addChoice">
-   <span class="hint">どの位置に行動を追加しますか？</span>
-   <button class="add-mode" type="button" data-add="up"><strong>↑ 抽象化する</strong><small>この行動の目的を1段上に追加</small></button>
-   <button class="add-mode" type="button" data-add="down"><strong>↓ 具体化する</strong><small>やり方を1段下に追加</small></button>
-   ${isRoot?'':`<button class="add-mode" type="button" data-add="sib"><strong>→ 同じ段に追加</strong><small>この行動と並べて追加</small></button>`}
-   <button class="btn sm add-cancel" type="button" id="addChoiceClose">キャンセル</button>
+  <span class="hint">どの位置に行動を追加しますか？</span>
+  <button class="add-mode" type="button" data-add="up"><strong>↑ 抽象化する</strong><small>この行動の目的を1段上に追加</small></button>
+  <button class="add-mode" type="button" data-add="down"><strong>↓ 具体化する</strong><small>やり方を1段下に追加</small></button>
+  ${isRoot?'':`<button class="add-mode" type="button" data-add="sib"><strong>→ 同じ段に追加</strong><small>この行動と並べて追加</small></button>`}
+  <button class="btn sm add-cancel" type="button" id="addChoiceClose">キャンセル</button>
  </div>`:'';
  const layer=a==='layer'?`<div class="addbox layer-box" id="layerBox">
-   <p class="hint">移動先の行動を選ぶと、その1段下に移動します。下の行動も一緒に移動します。</p>
-   <form id="layerForm" class="layer-form">
-     <label for="layerTarget">移動先の親になる行動</label>
-     <select id="layerTarget" required>
-       ${options.map(x=>`<option value="${esc(x.id)}" ${x.id===n.parent?'selected':''}>L${depth(x.id)}　${esc(pathOf(x.id).map(z=>z.text).join(' › '))}</option>`).join('')}
-     </select>
-     <div class="btnrow"><button class="btn pri" type="submit">移動する</button><button class="btn" type="button" id="layerCancel">キャンセル</button></div>
-   </form>
+   <div class="layer-section">
+     <strong>1段下げる（まとめる行動を作る）</strong>
+     <p class="hint">今のL${depth(n.id)}に、目的や工程をまとめる親の行動を作ります。この行動とその下の行動は1段下がります。</p>
+     <form id="layerWrapForm" class="layer-form">
+       <label for="layerWrapText">上の段に作る行動</label>
+       <input id="layerWrapText" autocomplete="off" maxlength="150" placeholder="例：入居手続きを進める" required>
+       <button class="btn pri" type="submit">親の行動を作って1段下げる</button>
+     </form>
+   </div>
+   <div class="layer-section">
+     <strong>既存の行動の下へ移す</strong>
+     <p class="hint">親になる行動を選びます。下の行動もまとめて移動します。</p>
+     ${elsewhere.length?`<form id="layerForm" class="layer-form">
+       <label for="layerTarget">新しい親になる行動</label>
+       <select id="layerTarget" required>
+         <option value="" selected disabled>親になる行動を選ぶ</option>
+         ${elsewhere.map(x=>`<option value="${esc(x.id)}">L${depth(x.id)}　${esc(pathOf(x.id).map(z=>z.text).join(' › '))}</option>`).join('')}
+       </select>
+       <button class="btn" type="submit">この行動の下へ移す</button>
+     </form>`:'<p class="hint">同じL0の中に、ほかの移動先はまだありません。</p>'}
+   </div>
+   <button class="btn sm" type="button" id="layerCancel">キャンセル</button>
  </div>`:'';
  const editing=['up','down','sib'].includes(a)?`<div class="addbox">
    <span class="hint">${esc(addHint(n,a))}</span>
@@ -1322,7 +1359,7 @@ function actionBar(n){
  </div>`:'';
  return `<div class="actions">
    <button class="act ${a==='choose'||editing?'main':''}" type="button" id="chooseAdd" aria-expanded="${a==='choose'||!!editing}"><b><i>＋</i>行動を追加する</b><small>抽象化・具体化・同じ段</small></button>
-   ${isRoot?'':`<button class="act ${a==='layer'?'main':''}" type="button" id="changeLayer" aria-expanded="${a==='layer'}"><b><i>↕</i>階層を移動</b><small>今ある行動の親を変更</small></button>`}
+   ${isRoot?'':`<button class="act ${a==='layer'?'main':''}" type="button" id="changeLayer" aria-expanded="${a==='layer'}"><b><i>↕</i>階層を変更</b><small>まとめる行動を作る・親を変える</small></button>`}
    <button class="act" id="openSheet"><b><i>◎</i>分析する</b><small>なぜを4つの視点で掘る</small></button>
    ${S.focus===n.id||!kids(n.id).length?'':`<button class="act" id="zoomHere"><b><i>⌕</i>この下だけ表示</b><small>この行動に集中</small></button>`}
    ${S.focus?'<button class="act" id="zoomAll"><b><i>↖</i>全体表示</b><small>絞り込みを解除</small></button>':''}
@@ -1330,7 +1367,7 @@ function actionBar(n){
 }
 function startAdd(id,mode){
  S.adding={id,mode};renderMain();
- const target=mode==='choose'?'[data-add]':mode==='layer'?'#layerTarget':'#addIn';
+ const target=mode==='choose'?'[data-add]':mode==='layer'?'#layerWrapText':'#addIn';
  const el=document.querySelector(target);if(el)el.focus();
 }
 function bindActionBar(){
@@ -1344,6 +1381,11 @@ function bindActionBar(){
  const ac=$('#addChoiceClose');if(ac)ac.onclick=close;
  const lc=$('#layerCancel');if(lc)lc.onclick=close;
  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>startAdd(id,b.dataset.add));
+ const wrapForm=$('#layerWrapForm');
+ if(wrapForm)wrapForm.onsubmit=e=>{
+   e.preventDefault();const title=$('#layerWrapText')?.value.trim();
+   if(title)wrapAtNewLayer(id,title);
+ };
  const layerForm=$('#layerForm');
  if(layerForm)layerForm.onsubmit=e=>{
    e.preventDefault();const target=$('#layerTarget')?.value;
@@ -2647,7 +2689,7 @@ loadAll();
 if(!S.nodes.size) S.tab='tree';
 render();
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=50',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js?v=51',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{});
 </script>
 </body>
 </html>
