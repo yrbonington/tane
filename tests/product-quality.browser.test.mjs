@@ -188,6 +188,26 @@ test('press, lift, menu and return form one continuous anchored motion',{timeout
  }finally{await h.close();}
 });
 
+test('detached context preview retains narrow-screen text geometry',{timeout:30000},async()=>{
+ const h=await browserHarness(root),{send,evaluate,wait}=h,dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});const results=[];
+ try{
+  for(const phase of ['before','after']){
+   h.setRootRevision(phase==='before'?'935d0cd2d0b00a89de92b477632c8fea9e32bc9f':null);
+   await send('Page.navigate',{url:h.url+'/index.html'});await sleep(100);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'load');
+   await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+   for(const width of [320,375,390,430,768,1440]){
+    await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<900});
+    await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');loadAll();S.theme="root";S.sel=null;render();document.querySelector(\'[data-node-menu="child"]\').click()');
+    const geometry=await evaluate('(()=>{const a=document.querySelector(\'[data-node="child"]\'),b=document.querySelector("#treeCtxLift"),ar=a.getBoundingClientRect(),br=b.getBoundingClientRect(),at=a.querySelector(".t").getBoundingClientRect(),bt=b.querySelector(".t").getBoundingClientRect();return {leftError:Math.abs((at.left-ar.left)/ar.width-(bt.left-br.left)/br.width)*a.offsetWidth,widthError:Math.abs(at.width/ar.width-bt.width/br.width)*a.offsetWidth,sourcePadding:getComputedStyle(a).padding,previewPadding:getComputedStyle(b.firstElementChild).padding}})()');results.push({phase,width,...geometry});
+    if(width===375)writeFileSync(resolve(dir,'preview-text-'+phase+'-375.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+    if(phase==='after'){assert.ok(geometry.leftError<1&&geometry.widthError<1,'preview text reflows at '+width+': '+JSON.stringify(geometry));}
+    await evaluate('treeCtxClose(false)');
+   }
+  }
+  assert.deepEqual(h.errors,[]);
+ }finally{writeFileSync(resolve(dir,'preview-text-geometry.json'),JSON.stringify(results,null,2));await h.close();}
+});
+
 test('an installed v61 worker upgrades to the current release and keeps saved data offline',{timeout:40000},async()=>{
  const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
  try{

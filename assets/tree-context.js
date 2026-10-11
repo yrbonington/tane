@@ -150,7 +150,8 @@ function treeCtxShow(id,opener){
   const menu=document.querySelector('#treeCtx');
   const row=opener?.matches?.('[data-node]')?opener:document.querySelector('[data-node="'+CSS.escape(id)+'"]');
   const rect=row?.getBoundingClientRect()||{left:innerWidth*.1,top:innerHeight*.3,bottom:innerHeight*.3+52,width:innerWidth*.8};
-  const sourceTransform=row?getComputedStyle(row).transform:'none';
+  const sourceStyle=row?getComputedStyle(row):null;
+  const sourceTransform=sourceStyle?.transform||'none';
   menu._anchor={left:rect.left,top:rect.top,bottom:rect.bottom,width:rect.width};
   const lift=document.querySelector('#treeCtxLift');
   if(treeCtxLiftedRow)treeCtxLiftedRow.classList.remove('tree-ctx-original');
@@ -162,6 +163,15 @@ function treeCtxShow(id,opener){
     clone.tabIndex=-1;clone.removeAttribute('aria-haspopup');
     clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
     clone.classList.remove('is-pressing');clone.classList.add('tree-ctx-lifted-content');
+    // The row has tighter padding and gaps on small screens. Keep its text
+    // geometry rather than allowing the detached preview's defaults to reflow.
+    if(sourceStyle){
+      for(const property of ['padding','gap','fontFamily','fontSize','fontWeight','lineHeight','letterSpacing'])clone.style[property]=sourceStyle[property];
+      for(const selector of ['.line1','.meta']){
+        const source=row.querySelector(selector),target=clone.querySelector(selector);
+        if(source&&target)target.style.gap=getComputedStyle(source).gap;
+      }
+    }
     lift.appendChild(clone);
     const width=row.offsetWidth,height=row.offsetHeight;
     const matrix=new DOMMatrix(sourceTransform);
