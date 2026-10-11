@@ -85,6 +85,12 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
    throw error;
   }
   assert.equal(await evaluate('document.querySelectorAll(".node-stack .actions").length'),0);
+  mkdirSync(join(root,'test-artifacts'),{recursive:true});
+  writeFileSync(join(root,'test-artifacts','tree-default-mobile.png'),
+   Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+  console.log('TANE_VISUAL_TREE_JPEG:'+(
+   await send('Page.captureScreenshot',{format:'jpeg',quality:48})
+  ).data);
   await evaluate('document.querySelector("[data-node]").click()');
   assert.equal(await evaluate('treeCtxOpen()'),false);
   assert.equal(await evaluate('document.querySelector("#sheet").classList.contains("open")'),true);
@@ -120,6 +126,11 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   await sleep(80);await finish();await sleep(80);
   assert.equal(await evaluate('S.adding?.mode'),'choose','drag release selects an action');
   assert.equal(await evaluate('document.querySelector("#treeCtxCommands").classList.contains("is-submenu")'),true);
+  writeFileSync(join(dir,'tree-add-submenu.png'),
+   Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+  console.log('TANE_VISUAL_SUBMENU_JPEG:'+(
+   await send('Page.captureScreenshot',{format:'jpeg',quality:48})
+  ).data);
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   assert.equal(await evaluate('treeCtxOpen()'),false);
