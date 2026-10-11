@@ -19,13 +19,11 @@ function treeCtxEnsure(){
   el.id='treeCtx';el.className='tree-ctx';el.hidden=true;
   el.innerHTML='<div id="treeCtxStage" class="tree-ctx-stage" role="dialog" aria-modal="true" aria-labelledby="treeCtxHeading" tabindex="-1">'+
     '<div class="tree-ctx-preview" id="treeCtxPreview"><div id="treeCtxHeading"></div></div>'+
-    '<div class="tree-ctx-commands" id="treeCtxCommands"></div>'+
-    '<button class="tree-ctx-cancel" id="treeCtxCancel" type="button">キャンセル</button></div>';
+    '<div class="tree-ctx-commands" id="treeCtxCommands"></div></div>';
   document.body.appendChild(el);
   el.addEventListener('click',e=>{
     if(e.target===el && performance.now()-treeCtxOpenedAt>250)treeCtxClose();
   });
-  document.querySelector('#treeCtxCancel').onclick=()=>treeCtxClose();
   document.addEventListener('keydown',e=>{
     if(!treeCtxOpen())return;
     if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();treeCtxClose();return;}
@@ -66,7 +64,7 @@ function treeCtxEnsure(){
   el.addEventListener('touchstart',e=>{
     if(e.touches.length!==1||!treeCtxOpen())return;
     const t=e.touches[0];
-    if(!t.target.closest('#treeCtxCommands button,#treeCtxCancel'))return;
+    if(!t.target.closest('#treeCtxCommands button'))return;
     menuTouch={id:t.identifier,x:t.clientX,y:t.clientY,moved:false};
   },{passive:true});
   el.addEventListener('touchmove',e=>{
@@ -165,7 +163,7 @@ function treeCtxHit(x,y){
   if(!treeCtxOpen())return null;
   const b=document.elementFromPoint(x,y)?.closest?.('button');
   if(!b||!document.querySelector('#treeCtx').contains(b)||b.disabled)return null;
-  if(b.matches('.act,.add-mode,.tree-ctx-cancel,.tree-ctx-back'))return b;
+  if(b.matches('.act,.add-mode,.tree-ctx-back'))return b;
   return null;
 }
 function treeCtxClearHover(){
@@ -182,6 +180,7 @@ function treeCtxEndGesture(x,y,moved){
 }
 function bindTreeNodePress(m){
   treeCtxEnsure();
+  m.querySelectorAll('[data-node-menu]').forEach(b=>b.onclick=()=>treeCtxShow(b.dataset.nodeMenu,b));
   m.querySelectorAll('[data-node]').forEach(b=>{
     let timer=null,touchId=null,touchStart=null,touchOpened=false,touchMoved=false,ignoreClickUntil=0;
     const clear=()=>{clearTimeout(timer);timer=null;b.classList.remove('is-pressing');};
