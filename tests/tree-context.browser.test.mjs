@@ -76,7 +76,13 @@ test('real-browser iOS-like menu gestures and responsive layout',{timeout:85000}
   await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(fixture))+');'+
    'localStorage.setItem("tane.theme","fixture-root")');
   await send('Page.reload',{ignoreCache:true});
-  await waitFor(()=>evaluate('document.querySelectorAll("[data-node]").length===2'),'seeded tree');
+  try{
+   await waitFor(()=>evaluate('document.querySelectorAll("[data-node]").length===2'),'seeded tree');
+  }catch(error){
+   const diagnostic=await evaluate('({url:location.href,count:document.querySelectorAll("[data-node]").length,main:document.querySelector("#main")?.innerText.slice(0,600),nodes:typeof S==="undefined"?"undefined":S.nodes.size,theme:typeof S==="undefined"?"undefined":S.theme,local:localStorage.getItem("tane.v1")?.slice(0,300)})').catch(e=>String(e));
+   console.error('SEED DIAGNOSTIC:',JSON.stringify({diagnostic,exceptions}));
+   throw error;
+  }
   assert.equal(await evaluate('document.querySelectorAll(".node-stack .actions").length'),0);
   await evaluate('document.querySelector("[data-node]").click()');
   assert.equal(await evaluate('treeCtxOpen()'),false);
