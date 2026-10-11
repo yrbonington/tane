@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync,readFileSync,readdirSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {browserHarness,sleep} from './browser-harness.mjs';
+import {browserHarness,sleep,release} from './browser-harness.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)).replace(/\/$/,'');
 const fixture={version:2,nodes:[
  {id:'root',text:'家を借りる',parent:null,order:0},
@@ -176,7 +176,7 @@ test('press, lift, menu and return form one continuous anchored motion',{timeout
  }finally{await h.close();}
 });
 
-test('an installed v61 worker upgrades to v69 and keeps saved data offline',{timeout:40000},async()=>{
+test('an installed v61 worker upgrades to the current release and keeps saved data offline',{timeout:40000},async()=>{
  const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});
  try{
   h.setRootRevision('429845bdd3c91526e505a6f5b30760cb9bc6550d');
@@ -185,10 +185,12 @@ test('an installed v61 worker upgrades to v69 and keeps saved data offline',{tim
   await wait(()=>evaluate('!!navigator.serviceWorker.controller'),'old worker controls page');assert.ok(await evaluate('caches.has("tane-v61")'));
   const before=await evaluate('JSON.parse(localStorage.getItem("tane.v1"))');
   h.setRootRevision(null);await send('Page.reload');await sleep(150);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"'),'new app through old worker');
-  await evaluate('navigator.serviceWorker.register("/sw.js?v=67",{updateViaCache:"none"}).then(r=>r.update())');
-  await wait(()=>evaluate('navigator.serviceWorker.controller?.scriptURL.endsWith("v=67")'),'new worker controller');
-  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v69")&&!k.includes("tane-v61"))'),'old cache retired');
-  assert.ok(await evaluate('caches.open("tane-v69").then(c=>c.keys()).then(k=>["ui-polish.css","tree-context.css","tree-context.js"].every(f=>k.some(r=>r.url.endsWith(f+"?v=69"))))'),'versioned assets are precached');
+  await evaluate('navigator.serviceWorker.register("/sw.js?v='+release+'",{updateViaCache:"none"}).then(r=>r.update())');
+  await wait(()=>evaluate('navigator.serviceWorker.controller?.scriptURL.endsWith("v='+release+'")'),'new worker controller');
+  await wait(()=>evaluate('caches.keys().then(k=>k.includes("tane-v'+release+'")&&!k.includes("tane-v61"))'),'old cache retired');
+  const precached=await evaluate('caches.open("tane-v'+release+'").then(c=>c.keys()).then(k=>k.map(r=>r.url))');
+  writeFileSync(resolve(dir,'upgraded-cache-keys.json'),JSON.stringify(precached,null,2));
+  assert.ok(['ui-polish.css','tree-context.css','tree-context.js'].every(f=>precached.some(url=>url.endsWith(f+'?v='+release))),'versioned assets are precached: '+JSON.stringify(precached));
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});await send('Page.reload');await sleep(250);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'upgraded offline app');
   assert.deepEqual(await evaluate('[...S.nodes.values()]'),before.nodes);assert.deepEqual(await evaluate('[...S.ideas.values()]'),before.ideas);assert.equal(await evaluate('getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()'),'#FAFAF7');
   writeFileSync(resolve(dir,'upgraded-offline.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));assert.deepEqual(h.errors,[]);

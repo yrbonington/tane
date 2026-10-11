@@ -50,11 +50,12 @@ test('accessibility, small screens, dark mode and reduced motion',()=>{
 });
 
 test('PWA caches its newly split interface assets',()=>{
-  assert.match(html,/href="assets\/tree-context\.css\?v=65"/);
-  assert.match(html,/href="assets\/ui-polish\.css\?v=65"/);
-  assert.match(html,/src="assets\/tree-context\.js\?v=65"/);
-  assert.match(worker,/tane-v69/);
-  assert.match(html,/sw\.js\?v=65/);
-  assert.match(worker,/\.\/assets\/tree-context\.css/);
-  assert.match(worker,/\.\/assets\/tree-context\.js/);
+  const release=worker.match(/const VERSION = 'tane-v(\d+)'/)[1];
+  for(const asset of ['tree-context.css','ui-polish.css','tree-context.js']){
+    assert.ok(html.includes('assets/'+asset+'?v='+release+'"'),'asset URL agrees with cache version: '+asset);
+    assert.ok(worker.includes("'"+asset+"'"),'asset is in precache list: '+asset);
+  }
+  assert.ok(html.includes('sw.js?v='+release+"'"),'worker URL agrees with release');
+  assert.match(worker,/VERSION\.slice\(6\)/);
+  assert.match(worker,/cache: 'reload'/);
 });

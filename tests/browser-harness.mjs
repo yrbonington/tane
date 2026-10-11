@@ -4,6 +4,7 @@ import {existsSync,mkdtempSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {extname,join,resolve} from 'node:path';
 export const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+export const release=readFileSync(new URL('../sw.js',import.meta.url),'utf8').match(/tane-v(\d+)/)[1];
 export async function browserHarness(root){
  const chrome=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(x=>x&&existsSync(x))||spawnSync('which',['google-chrome'],{encoding:'utf8'}).stdout.trim();
  if(!chrome)throw Error('Chrome/Chromium is required; this is not a skipped test');

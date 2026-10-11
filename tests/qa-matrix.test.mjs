@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {browserHarness,sleep} from './browser-harness.mjs';
+import {browserHarness,sleep,release} from './browser-harness.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)).replace(/\/$/,'');
 const fixture={version:2,nodes:[
  {id:'root',text:'家を借りる',parent:null,order:0},
@@ -18,7 +18,7 @@ const fixture={version:2,nodes:[
 test('six widths × two themes × empty, populated, dense, context and analysis; before/after evidence',{timeout:240000},async()=>{
  const h=await browserHarness(root),{send,evaluate,wait}=h;const dir=resolve(root,'test-artifacts');mkdirSync(dir,{recursive:true});const results=[],failures=[];
  const shot=async name=>writeFileSync(resolve(dir,name+'.png'),Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
- const seed=async dense=>{const f=structuredClone(fixture);if(dense)for(let i=0;i<35;i++)f.nodes.push({id:'dense'+i,parent:i<7?'child':'dense'+(i-7),order:i,text:'候補の情報を集め、暮らしの条件に合わせて比較しながら次の行動を考える '+i,tags:['選択肢を比べる','暮らしの条件を整理する','情報を集める'],seed:i%3===0});await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(f))+');loadAll();S.theme="root";S.sel=null;S.detailFor=null;S.tab="tree";render()');};
+ const seed=async dense=>{const f=structuredClone(fixture);if(dense)for(let i=0;i<35;i++)f.nodes.push({id:'dense'+i,parent:i<7?'child':'dense'+(i-7),order:i,text:'候補の情報を集め、暮らしの条件に合わせて比較しながら次の行動を考える '+i,tags:['選択肢を比べる','暮らしの条件を整理する','情報を集める'],seed:i%3===0});await evaluate('localStorage.setItem("tane.v1",'+JSON.stringify(JSON.stringify(f))+');loadAll();S.theme="root";S.sel=null;S.detailFor=null;S.tab="tree";render();window.scrollTo({top:0})');};
  const overflow=()=>evaluate('({width:innerWidth,document:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll("#main>*")].filter(e=>e.getBoundingClientRect().right>document.documentElement.clientWidth+1).map(e=>({class:e.className,right:e.getBoundingClientRect().right}))})');
  try{for(const phase of ['before','after']){
   await send('Page.navigate',{url:h.url+(phase==='before'?'/before/index.html':'/index.html')});await wait(()=>evaluate("document.readyState==='complete'&&typeof S!=='undefined'"),'app load');
@@ -26,14 +26,23 @@ test('six widths × two themes × empty, populated, dense, context and analysis;
    const height=width===1440?1000:width===768?1024:844;
    await send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:width<900});
    await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:theme}]});
-   await evaluate('openSheet(false);S.nodes.clear();S.ideas.clear();S.sel=null;S.theme=null;S.detailFor=null;S.tab="tree";render()');
+   await evaluate('openSheet(false);S.nodes.clear();S.ideas.clear();S.sel=null;S.theme=null;S.detailFor=null;S.tab="tree";render();window.scrollTo({top:0})');
    await sleep(300);const prefix=phase+'-'+width+'-'+theme;
-   await shot(prefix+'-empty');await seed(false);await shot(prefix+'-tree');
+   await shot(prefix+'-empty');
+   await evaluate('S.themeStart=true;renderMain()');await shot(prefix+'-first-input');
+   await evaluate('document.querySelector("#themeStartAI").click()');await shot(prefix+'-first-ai');
+   await evaluate('S.themeStart=false;renderMain()');await seed(false);await shot(prefix+'-tree');
    await evaluate('document.querySelector(\'[data-node-menu="child"]\').click()');await sleep(620);await shot(prefix+'-menu');
    const box=await evaluate('(()=>{const r=document.querySelector("#treeCtxStage").getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom}})()');
    if(phase==='after'&&!(box.left>=0&&box.top>=0&&box.right<=width+1&&box.bottom<=height+1))failures.push('menu fits '+prefix);
    await evaluate('treeCtxClose()');await sleep(220);
-   await evaluate('document.querySelector(\'[data-node="child"]\').click()');await sleep(330);await shot(prefix+'-sheet');await evaluate('openSheet(false)');await sleep(330);
+   await evaluate('S.sheetTab="res";S.lens="depth";document.querySelector(\'[data-node="child"]\').click()');await sleep(330);await shot(prefix+'-sheet');
+   for(const lens of ['depth','breadth','struct','time']){
+    await evaluate('document.querySelector(\'[data-lens="'+lens+'"]\').click();document.querySelector("#sheet").scrollTop=0');await shot(prefix+'-lens-'+lens);
+    if(phase==='after'&&!(await evaluate('document.querySelector("#sheet").scrollWidth<=document.querySelector("#sheet").clientWidth+1')))failures.push('analysis lens overflows '+prefix+' '+lens);
+   }
+   for(const tab of ['tag','seed','etc']){await evaluate('document.querySelector(\'[data-st="'+tab+'"]\').click();document.querySelector("#sheet").scrollTop=0');await shot(prefix+'-analysis-'+tab);if(phase==='after'&&!(await evaluate('document.querySelector("#sheet").scrollWidth<=document.querySelector("#sheet").clientWidth+1')))failures.push('analysis tab overflows '+prefix+' '+tab);}
+   await evaluate('openSheet(false)');await sleep(330);
    for(const tab of ['same','seed','idea','data']){await evaluate('S.tab='+JSON.stringify(tab)+';render()');if(tab==='same')await wait(()=>evaluate('!netGraph||!netGraph.fitOnSettle&&!netGraph.camTarget'),'network settle');else await sleep(30);await shot(prefix+'-'+tab);if(phase==='after'){const o=await overflow();if(o.document>width+1)failures.push('overflow in '+tab+' '+prefix+' '+JSON.stringify(o));}}
    await seed(true);await shot(prefix+'-dense');const layout=await overflow();results.push({phase,width,theme,layout,box});
    if(phase==='after'&&layout.document>width+1)failures.push('dense tree fits '+prefix+' '+JSON.stringify(layout));
@@ -115,9 +124,9 @@ test('analysis lenses, idea menus and offline PWA keep saved data',{timeout:6500
   await wait(()=>evaluate('!document.querySelector("#copyFallback").hidden'),'fallback');await shot('detail-320-copy-fallback');
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});
   assert.equal(await evaluate('document.querySelector("#copyFallback").hidden'),true);assert.equal(await evaluate('document.querySelector("#main").inert'),false);
-  await evaluate('saveNow();navigator.serviceWorker.register("/sw.js?v=65",{updateViaCache:"none"})');
+  await evaluate('saveNow();navigator.serviceWorker.register("/sw.js?v='+release+'",{updateViaCache:"none"})');
   await wait(()=>evaluate('!!navigator.serviceWorker.controller'),'worker active');
-  assert.ok(await evaluate('caches.has("tane-v69")'),'current cache installed');
+  assert.ok(await evaluate('caches.has("tane-v'+release+'")'),'current cache installed');
   const snapshot=await evaluate('JSON.parse(localStorage.getItem("tane.v1"))');
   await send('Network.enable');await send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
   await send('Page.reload');await sleep(350);await wait(()=>evaluate('document.readyState==="complete"&&typeof S!=="undefined"&&S.nodes.size===7'),'offline app');
