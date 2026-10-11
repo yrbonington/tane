@@ -5,6 +5,7 @@ let treeCtxMouse = null;
 let treeCtxPreviousFocus = null;
 let treeCtxOrigin = null;
 let treeCtxOpenedAt = 0;
+let treeCtxLiftedRow = null;
 const treeCtxOpen = () => !!document.querySelector('#treeCtx:not([hidden])');
 const treeCtxIcons = {
   chooseAdd:'<path d="M12 5v14M5 12h14"/>',
@@ -19,7 +20,8 @@ function treeCtxEnsure(){
   el.id='treeCtx';el.className='tree-ctx';el.hidden=true;
   el.innerHTML='<div id="treeCtxStage" class="tree-ctx-stage" role="dialog" aria-modal="true" aria-labelledby="treeCtxHeading" tabindex="-1">'+
     '<div class="tree-ctx-preview" id="treeCtxPreview"><div id="treeCtxHeading"></div></div>'+
-    '<div class="tree-ctx-commands" id="treeCtxCommands"></div></div>';
+    '<div class="tree-ctx-commands" id="treeCtxCommands"></div></div>'+ 
+    '<div class="tree-ctx-lift" id="treeCtxLift" aria-hidden="true"></div>';
   document.body.appendChild(el);
   el.addEventListener('click',e=>{
     if(e.target===el && performance.now()-treeCtxOpenedAt>250)treeCtxClose();
@@ -143,6 +145,22 @@ function treeCtxShow(id,opener){
   const row=opener?.matches?.('[data-node]')?opener:document.querySelector('[data-node="'+CSS.escape(id)+'"]');
   const rect=row?.getBoundingClientRect()||{left:innerWidth*.1,top:innerHeight*.3,bottom:innerHeight*.3+52,width:innerWidth*.8};
   menu._anchor={left:rect.left,top:rect.top,bottom:rect.bottom,width:rect.width};
+  const lift=document.querySelector('#treeCtxLift');
+  if(treeCtxLiftedRow)treeCtxLiftedRow.classList.remove('tree-ctx-original');
+  treeCtxLiftedRow=row?.matches?.('[data-node]')?row:null;
+  lift.replaceChildren();
+  if(treeCtxLiftedRow){
+    const clone=treeCtxLiftedRow.cloneNode(true);
+    clone.removeAttribute('id');clone.removeAttribute('data-node');
+    clone.removeAttribute('tabindex');clone.removeAttribute('aria-haspopup');
+    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    clone.classList.remove('is-pressing');clone.classList.add('tree-ctx-lifted-content');
+    lift.appendChild(clone);
+    lift.style.left=rect.left+'px';lift.style.top=rect.top+'px';
+    lift.style.width=rect.width+'px';lift.style.height=(rect.bottom-rect.top)+'px';
+    treeCtxLiftedRow.classList.add('tree-ctx-original');
+  }
+  lift.hidden=!treeCtxLiftedRow;
   treeCtxPreviousFocus=document.activeElement;
   treeCtxOrigin=id;treeCtxOpenedAt=performance.now();
   S.sel=id;S.adding=null;
@@ -163,6 +181,8 @@ function treeCtxClose(restoreFocus=true){
   if(!treeCtxOpen())return;
   const menu=document.querySelector('#treeCtx');
   menu.hidden=true;delete menu.dataset.node;menu._anchor=null;
+  if(treeCtxLiftedRow){treeCtxLiftedRow.classList.remove('tree-ctx-original');treeCtxLiftedRow=null;}
+  const lift=document.querySelector('#treeCtxLift');lift.hidden=true;lift.replaceChildren();
   document.body.classList.remove('tree-ctx-open');
   document.documentElement.style.overflow='';
   document.querySelector('#treeCtxCommands').replaceChildren();
